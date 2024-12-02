@@ -120,8 +120,8 @@ void sendMQTTPayload() {
 
     // Build JSON payload
     doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = "Mystery Puzzle";
-    doc["designer"] = "Jane Doe";
+    doc["puzzleName"] = "Tarot Card Puzzle";
+    doc["designer"] = "Paul Hopkins";
     doc["ipAddress"] = WiFi.localIP().toString();
     doc["timestamp"] = millis(); // Replace with dynamic timestamp if needed
     doc["tab"] = "Presidents Big Mistake";
