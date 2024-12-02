@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-#include <HTTPClient.h>
-#include <Update.h>
+#include <HTTPClient.h>  // Missing HTTPClient library
+#include <Update.h>      // Missing Update library
 #include <Preferences.h>
 
 // Replace with your network credentials
@@ -120,7 +120,7 @@ void sendMQTTPayload() {
 
     // Build JSON payload
     doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = "Tarot Card Puzzle";
+    doc["puzzleName"] = "Tarot Card by The Witchatarian";
     doc["designer"] = "Paul Hopkins";
     doc["ipAddress"] = WiFi.localIP().toString();
     doc["timestamp"] = millis(); // Replace with dynamic timestamp if needed
