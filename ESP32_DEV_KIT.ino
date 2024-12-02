@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <Update.h>
 
 // Replace with your network credentials
 const char* ssid = "TELUSDE0875_2.4G";
@@ -11,6 +13,12 @@ const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;
 const char* mqttUserName = "pro1polaris";
 const char* mqttPassword = "CVr819P*!";
+
+// GitHub repository details
+const char* githubUser = "consciousvisionaries";
+const char* githubRepo = "ESP32_DEV_KIT";
+const char* firmwareFile = "firmware.bin";
+const char* branch = "main"; // Branch where the firmware file is located
 
 // MQTT and Wi-Fi clients
 WiFiClient espClient;
@@ -23,6 +31,8 @@ String clientId = "";
 void connectWiFi();
 void connectMQTT();
 void sendMQTTPayload();
+void checkForUpdates();
+String getFirmwareURL();
 
 void setup() {
     Serial.begin(115200);
@@ -38,6 +48,10 @@ void setup() {
 
     // Connect to MQTT
     connectMQTT();
+
+    delay(3000);
+    checkForUpdates();
+
 }
 
 void loop() {
@@ -52,6 +66,13 @@ void loop() {
     if (millis() - lastSend > 60000) { // Every 60 seconds
         lastSend = millis();
         sendMQTTPayload();
+    }
+
+    // Periodically check for firmware updates
+    static unsigned long lastOTA = 0;
+    if (millis() - lastOTA > 3600000) { // Every hour
+        lastOTA = millis();
+        checkForUpdates();
     }
 }
 
@@ -75,7 +96,6 @@ void connectMQTT() {
         if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
             Serial.println("Connected to MQTT.");
             sendMQTTPayload();
-
             client.subscribe("/topic"); // Subscribe to a topic if needed
         } else {
             Serial.print("Failed (state=");
@@ -95,10 +115,9 @@ void sendMQTTPayload() {
     doc["puzzleName"] = "Mystery Puzzle";
     doc["designer"] = "Jane Doe";
     doc["ipAddress"] = WiFi.localIP().toString();
-    doc["timestamp"] = DateTime(); // Replace with dynamic timestamp if needed
+    doc["timestamp"] = millis(); // Replace with dynamic timestamp if needed
     doc["tab"] = "Presidents Big Mistake";
     doc["group"] = "Stage 3";
-
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
@@ -110,4 +129,59 @@ void sendMQTTPayload() {
     } else {
         Serial.println("Failed to send payload.");
     }
+}
+
+// Function to construct the firmware URL
+String getFirmwareURL() {
+    String url = "https://raw.githubusercontent.com/";
+    url += githubUser;
+    url += "/";
+    url += githubRepo;
+    url += "/";
+    url += branch;
+    url += "/";
+    url += firmwareFile;
+    return url;
+}
+
+// Function to check for OTA updates
+void checkForUpdates() {
+    Serial.println("Checking for firmware updates...");
+    HTTPClient http;
+    String firmwareURL = getFirmwareURL();
+    http.begin(firmwareURL);
+
+    int httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK) { // File found
+        int contentLength = http.getSize();
+        bool canBegin = Update.begin(contentLength);
+
+        if (canBegin) {
+            WiFiClient& updateClient = http.getStream();
+            Serial.println("Starting OTA update...");
+            size_t written = Update.writeStream(updateClient);
+
+            if (written == contentLength) {
+                Serial.println("Firmware written successfully. Rebooting...");
+                if (Update.end()) {
+                    if (Update.isFinished()) {
+                        Serial.println("OTA update finished successfully!");
+                        ESP.restart();
+                    } else {
+                        Serial.println("OTA update failed!");
+                    }
+                } else {
+                    Serial.printf("OTA Error: %s\n", Update.errorString());
+                }
+            } else {
+                Serial.println("Firmware write failed.");
+            }
+        } else {
+            Serial.println("Not enough space for OTA update.");
+        }
+    } else {
+        Serial.printf("HTTP error: %d\n", httpCode);
+    }
+
+    http.end();
 }
