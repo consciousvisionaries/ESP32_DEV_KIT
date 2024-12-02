@@ -20,6 +20,9 @@ const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "firmware.bin";
 const char* branch = "main"; // Branch where the firmware file is located
 
+// Firmware version
+#define CURRENT_VERSION "1.0.0" // Change this whenever you upload new firmware
+
 // MQTT and Wi-Fi clients
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -51,7 +54,6 @@ void setup() {
 
     delay(3000);
     checkForUpdates();
-
 }
 
 void loop() {
@@ -147,40 +149,63 @@ String getFirmwareURL() {
 // Function to check for OTA updates
 void checkForUpdates() {
     Serial.println("Checking for firmware updates...");
+    
     HTTPClient http;
-    String firmwareURL = getFirmwareURL();
-    http.begin(firmwareURL);
+    String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
+    http.begin(versionURL);
 
     int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) { // File found
-        int contentLength = http.getSize();
-        bool canBegin = Update.begin(contentLength);
+    if (httpCode == HTTP_CODE_OK) {
+        String newVersion = http.getString();
+        newVersion.trim(); // Remove any trailing newline or spaces
+        Serial.print("Current firmware version: ");
+        Serial.println(CURRENT_VERSION);
+        Serial.print("Available firmware version: ");
+        Serial.println(newVersion);
 
-        if (canBegin) {
-            WiFiClient& updateClient = http.getStream();
-            Serial.println("Starting OTA update...");
-            size_t written = Update.writeStream(updateClient);
+        if (newVersion != CURRENT_VERSION) {
+            Serial.println("New firmware available. Starting OTA...");
+            http.end();
 
-            if (written == contentLength) {
-                Serial.println("Firmware written successfully. Rebooting...");
-                if (Update.end()) {
-                    if (Update.isFinished()) {
-                        Serial.println("OTA update finished successfully!");
-                        ESP.restart();
+            // Begin firmware update
+            String firmwareURL = getFirmwareURL();
+            http.begin(firmwareURL);
+
+            int firmwareCode = http.GET();
+            if (firmwareCode == HTTP_CODE_OK) {
+                int contentLength = http.getSize();
+                bool canBegin = Update.begin(contentLength);
+
+                if (canBegin) {
+                    WiFiClient& updateClient = http.getStream();
+                    size_t written = Update.writeStream(updateClient);
+
+                    if (written == contentLength) {
+                        Serial.println("Firmware written successfully. Rebooting...");
+                        if (Update.end()) {
+                            if (Update.isFinished()) {
+                                Serial.println("OTA update finished successfully!");
+                                ESP.restart();
+                            } else {
+                                Serial.println("OTA update failed!");
+                            }
+                        } else {
+                            Serial.printf("OTA Error: %s\n", Update.errorString());
+                        }
                     } else {
-                        Serial.println("OTA update failed!");
+                        Serial.println("Firmware write failed.");
                     }
                 } else {
-                    Serial.printf("OTA Error: %s\n", Update.errorString());
+                    Serial.println("Not enough space for OTA update.");
                 }
             } else {
-                Serial.println("Firmware write failed.");
+                Serial.printf("Firmware HTTP error: %d\n", firmwareCode);
             }
         } else {
-            Serial.println("Not enough space for OTA update.");
+            Serial.println("Firmware is up to date.");
         }
     } else {
-        Serial.printf("HTTP error: %d\n", httpCode);
+        Serial.printf("Version file HTTP error: %d\n", httpCode);
     }
 
     http.end();
