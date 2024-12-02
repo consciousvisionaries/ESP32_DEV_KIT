@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-#include <HTTPClient.h>  // Missing HTTPClient library
-#include <Update.h>      // Missing Update library
+#include <HTTPClient.h>
+#include <Update.h>
 #include <Preferences.h>
 
 // Replace with your network credentials
@@ -116,26 +116,30 @@ void connectMQTT() {
 
 // Function to send JSON payload
 void sendMQTTPayload() {
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<512> doc;  // Increase the size of the document for more data
 
     // Build JSON payload
     doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = "Tarot Card by The Witchatarian";
+    doc["puzzleName"] = "Tarot Card";  // You can update the puzzle name dynamically
     doc["designer"] = "Paul Hopkins";
     doc["ipAddress"] = WiFi.localIP().toString();
-    doc["timestamp"] = millis(); // Replace with dynamic timestamp if needed
-    doc["tab"] = "Presidents Big Mistake";
-    doc["group"] = "Stage 3";
+    doc["timestamp"] = millis();  // Replace with dynamic timestamp if needed
+    doc["tab"] = "Presidents Big Mistake"; // You can update this as well
+    doc["group"] = "Stage 3";  // Update based on your group or phase details
+
+    // Add any puzzle-specific data here
+    doc["puzzleDetails"]["currentCard"] = "The Fool";  // Example: current card
+    doc["puzzleDetails"]["progress"] = 45;  // Example: puzzle progress (as a percentage)
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
 
     // Publish payload
-    if (client.publish("/topic", jsonPayload.c_str())) {
-        Serial.println("Payload sent:");
+    if (client.publish("/topic/puzzleDetails", jsonPayload.c_str())) {  // Use specific topic for puzzle details
+        Serial.println("Puzzle details sent:");
         Serial.println(jsonPayload);
     } else {
-        Serial.println("Failed to send payload.");
+        Serial.println("Failed to send puzzle details.");
     }
 }
 
@@ -164,6 +168,7 @@ void storeVersion(String version) {
 }
 
 // Function to check for OTA updates
+/// Function to check for OTA updates
 void checkForUpdates() {
     Serial.println("Checking for firmware updates...");
     
@@ -172,6 +177,9 @@ void checkForUpdates() {
     http.begin(versionURL);
 
     int httpCode = http.GET();
+    Serial.print("HTTP Code: ");
+    Serial.println(httpCode);
+
     if (httpCode == HTTP_CODE_OK) {
         String newVersion = http.getString();
         newVersion.trim(); // Remove any trailing newline or spaces
@@ -184,48 +192,47 @@ void checkForUpdates() {
 
         if (newVersion != currentVersion) {
             Serial.println("New firmware available. Starting OTA...");
-            http.end();
 
-            // Begin firmware update
+            // URL of the firmware bin file
             String firmwareURL = getFirmwareURL();
+            Serial.println("Downloading firmware...");
+
+            // Start the HTTP connection to download the firmware
             http.begin(firmwareURL);
-
             int firmwareCode = http.GET();
+
             if (firmwareCode == HTTP_CODE_OK) {
-                int contentLength = http.getSize();
-                bool canBegin = Update.begin(contentLength);
-
-                if (canBegin) {
-                    WiFiClient& updateClient = http.getStream();
-                    size_t written = Update.writeStream(updateClient);
-
-                    if (written == contentLength) {
-                        Serial.println("Firmware written successfully. Rebooting...");
+                WiFiClient* client = http.getStreamPtr();
+                uint32_t firmwareSize = http.getSize();
+                if (Update.begin(firmwareSize)) {
+                    Serial.println("Starting OTA update...");
+                    size_t written = Update.writeStream(*client);
+                    if (written == firmwareSize) {
+                        Serial.println("OTA update completed. Rebooting...");
                         if (Update.end()) {
-                            if (Update.isFinished()) {
-                                Serial.println("OTA update finished successfully!");
-                                storeVersion(newVersion);  // Save the new version after successful update
-                                ESP.restart();
-                            } else {
-                                Serial.println("OTA update failed!");
-                            }
+                            ESP.restart(); // Reboot after the update
                         } else {
-                            Serial.printf("OTA Error: %s\n", Update.errorString());
+                            Serial.println("Failed to end the update.");
                         }
                     } else {
-                        Serial.println("Firmware write failed.");
+                        Serial.println("Failed to write all data to flash.");
                     }
                 } else {
                     Serial.println("Not enough space for OTA update.");
                 }
             } else {
-                Serial.printf("Firmware HTTP error: %d\n", firmwareCode);
+                Serial.println("Failed to download the firmware.");
             }
+            http.end();
         } else {
             Serial.println("Firmware is up to date.");
         }
     } else {
-        Serial.printf("Version file HTTP error: %d\n", httpCode);
+        // Log the error response
+        Serial.printf("HTTP request failed with error code: %d\n", httpCode);
+        String errorResponse = http.getString();
+        Serial.println("Error response: ");
+        Serial.println(errorResponse);
     }
 
     http.end();
