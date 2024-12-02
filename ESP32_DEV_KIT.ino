@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Update.h>
+#include <Preferences.h>
 
 // Replace with your network credentials
 const char* ssid = "TELUSDE0875_2.4G";
@@ -17,11 +18,8 @@ const char* mqttPassword = "CVr819P*!";
 // GitHub repository details
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
-const char* firmwareFile = "firmware.bin";
+const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* branch = "main"; // Branch where the firmware file is located
-
-// Firmware version
-#define CURRENT_VERSION "1.0.0" // Change this whenever you upload new firmware
 
 // MQTT and Wi-Fi clients
 WiFiClient espClient;
@@ -30,12 +28,17 @@ PubSubClient client(espClient);
 // MQTT Client ID
 String clientId = "";
 
+// Preferences object to store the current version
+Preferences preferences;
+
 // Function prototypes
 void connectWiFi();
 void connectMQTT();
 void sendMQTTPayload();
 void checkForUpdates();
 String getFirmwareURL();
+String getStoredVersion();
+void storeVersion(String version);
 
 void setup() {
     Serial.begin(115200);
@@ -51,6 +54,9 @@ void setup() {
 
     // Connect to MQTT
     connectMQTT();
+
+    // Open the preferences for reading and writing
+    preferences.begin("firmware", false);
 
     delay(3000);
     checkForUpdates();
@@ -146,6 +152,17 @@ String getFirmwareURL() {
     return url;
 }
 
+// Function to get the stored version from preferences
+String getStoredVersion() {
+    String storedVersion = preferences.getString("version", "");
+    return storedVersion;
+}
+
+// Function to store the version in preferences
+void storeVersion(String version) {
+    preferences.putString("version", version);
+}
+
 // Function to check for OTA updates
 void checkForUpdates() {
     Serial.println("Checking for firmware updates...");
@@ -158,12 +175,14 @@ void checkForUpdates() {
     if (httpCode == HTTP_CODE_OK) {
         String newVersion = http.getString();
         newVersion.trim(); // Remove any trailing newline or spaces
-        Serial.print("Current firmware version: ");
-        Serial.println(CURRENT_VERSION);
+        String currentVersion = getStoredVersion();
+
+        Serial.print("Stored firmware version: ");
+        Serial.println(currentVersion);
         Serial.print("Available firmware version: ");
         Serial.println(newVersion);
 
-        if (newVersion != CURRENT_VERSION) {
+        if (newVersion != currentVersion) {
             Serial.println("New firmware available. Starting OTA...");
             http.end();
 
@@ -185,6 +204,7 @@ void checkForUpdates() {
                         if (Update.end()) {
                             if (Update.isFinished()) {
                                 Serial.println("OTA update finished successfully!");
+                                storeVersion(newVersion);  // Save the new version after successful update
                                 ESP.restart();
                             } else {
                                 Serial.println("OTA update failed!");
