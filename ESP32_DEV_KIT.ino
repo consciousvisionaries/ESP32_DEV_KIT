@@ -51,7 +51,6 @@ void loop() {
 }
 
 void connectWiFi() {
-  Serial.println("Connecting to WiFi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -64,7 +63,6 @@ void connectWiFi() {
 
 void connectMQTT() {
   while (!client.connected()) {
-    Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
       sendMQTTPayload();  // Send MQTT message when connected
@@ -81,18 +79,18 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Tarot Puzzle with The Witchatarian";
+  doc["puzzleName"] = "Tarot Card Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 3";
 
-  doc["puzzleDetails"]["currentCard"] = "The Fool";
-  doc["puzzleDetails"]["progress"] = 45;
-
   String jsonPayload;
   serializeJson(doc, jsonPayload);
+
+  // Debugging payload size
+  Serial.println("Payload size: " + String(jsonPayload.length()));
 
   if (client.publish("/topic", jsonPayload.c_str())) {
     Serial.println("Puzzle details sent:");
@@ -108,9 +106,8 @@ void sendMQTTPayload() {
   String firmwareStatus;
   serializeJson(firmwareDoc, firmwareStatus);
   
-  if (client.publish("/topic/firmwareStatus", firmwareStatus.c_str())) {
-    Serial.println("Firmware update status sent.");
-  } else {
+  if (!client.publish("/topic", firmwareStatus.c_str())) {
+ 
     Serial.println("Failed to send firmware status.");
   }
 }
@@ -137,7 +134,6 @@ void storeVersion(String version) {
 }
 
 void checkForUpdates() {
-  Serial.println("Checking for firmware updates...");
 
   HTTPClient http;
   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
@@ -160,18 +156,7 @@ void checkForUpdates() {
     if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
       
-      // Send MQTT message about new firmware
-      StaticJsonDocument<256> updateDoc;
-      updateDoc["mac"] = WiFi.macAddress();
-      updateDoc["firmwareStatus"] = "New firmware available. Starting OTA...";
-      String updateStatus;
-      serializeJson(updateDoc, updateStatus);
-      
-      if (client.publish("/topic/firmwareStatus", updateStatus.c_str())) {
-        Serial.println("Firmware update status sent over MQTT.");
-      }
-
-      String firmwareURL = getFirmwareURL();
+     String firmwareURL = getFirmwareURL();
       Serial.println("Downloading firmware...");
       http.begin(firmwareURL);
       int firmwareCode = http.GET();
@@ -208,16 +193,6 @@ void checkForUpdates() {
       http.end();
     } else {
       Serial.println("Firmware is up to date.");
-      // Send MQTT message indicating firmware is up to date
-      StaticJsonDocument<256> upToDateDoc;
-      upToDateDoc["mac"] = WiFi.macAddress();
-      upToDateDoc["firmwareStatus"] = "Firmware is up to date.";
-      String upToDateStatus;
-      serializeJson(upToDateDoc, upToDateStatus);
-
-      if (client.publish("/topic/firmwareStatus", upToDateStatus.c_str())) {
-        Serial.println("Firmware up-to-date status sent over MQTT.");
-      }
     }
   } else {
     Serial.printf("HTTP request failed with error code: %d\n", httpCode);
