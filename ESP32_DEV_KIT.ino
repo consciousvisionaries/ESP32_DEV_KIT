@@ -56,7 +56,7 @@ void loop() {
   }
 
 //  Flash the onboard LED 5 times per second until all services are active
-  if (!allServicesActive) {
+  if (allServicesActive) {
    digitalWrite(ledPin, HIGH);
    delay(100);  // LED ON for 100ms
    digitalWrite(ledPin, LOW);
@@ -105,7 +105,7 @@ void sendMQTTPayload() {
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
-  doc["group"] = "Stage 3";
+  doc["group"] = "Stage 2";
 
   
 
