@@ -25,8 +25,18 @@ Preferences preferences;
 
 bool allServicesActive = false;
 
-// Define the LED pin
+// Define the pins
 const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boards
+
+// Define the lever pins as a macro holding the values
+#define LEVER_PINS 12, 14, 27, 26, 33, 32, 34, 35  // Values, not an array definition
+
+// Define the lever pins array based on the macro
+int leverPins[] = { LEVER_PINS };  // Using the macro to initialize the array
+
+// Define the lever states based on the number of pins
+const int NUM_LEVER_PINS = 8; // Define NUM_LEVER_PINS as a constant
+bool previousLeverStates[NUM_LEVER_PINS]; // Array size is now known at compile time
 
 void setup() {
   Serial.begin(115200);
@@ -44,32 +54,73 @@ void setup() {
   
   sendMQTTPayload();  // Send MQTT message when connected
 
+  // Set all lever pins as input with pull-up resistors
+  for (int i = 0; i < NUM_LEVER_PINS; i++) {
+    pinMode(leverPins[i], INPUT_PULLUP);  // Enable pull-up resistors
+    previousLeverStates[i] = digitalRead(leverPins[i]) == LOW;  // Initialize previous state
+  }
 }
 
 void loop() {
+  bool leverStatusChanged = false;
+
+  // Check the lever states and detect if there has been any change
+  for (int i = 0; i < NUM_LEVER_PINS; i++) {
+    bool currentState = digitalRead(leverPins[i]) == LOW;  // Lever is considered active when LOW
+    if (currentState != previousLeverStates[i]) {  // Check if state has changed
+      Serial.print("Lever ");
+      Serial.print(i);
+      Serial.print(" changed. New state: ");
+      Serial.println(currentState ? "ACTIVE" : "INACTIVE");
+
+      previousLeverStates[i] = currentState;  // Update previous state
+      leverStatusChanged = true;  // Mark that a change occurred
+    }
+  }
+
+  // Only send MQTT payload if any lever status changed
+  if (leverStatusChanged) {
+    // Create JSON payload for lever pin statuses
+    StaticJsonDocument<512> leverDoc;
+    for (int i = 0; i < NUM_LEVER_PINS; i++) {
+      leverDoc["lever" + String(i)] = previousLeverStates[i] ? "ACTIVE" : "INACTIVE"; // Store pin status as "ACTIVE" or "INACTIVE"
+    }
+
+    // Convert JSON object to string
+    String jsonLeverPinStatus;
+    serializeJson(leverDoc, jsonLeverPinStatus);
+
+    // Publish lever status to MQTT
+    if (client.publish("/topic", jsonLeverPinStatus.c_str())) {
+      Serial.println("Puzzle details sent:");
+      Serial.println(jsonLeverPinStatus); // Print the JSON payload to Serial Monitor for debugging
+    } else {
+      Serial.println("Failed to send puzzle details.");
+    }
+  }
+
   if (!client.connected()) {
     connectMQTT();
   }
-  //client.loop();
 
   static unsigned long lastOTA = 0;
+  
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     lastOTA = millis();
     checkForUpdates();
   }
 
-
-//  Flash the onboard LED 5 times per second until all services are active
+  // Flash the onboard LED 5 times per second until all services are active
   if (allServicesActive) {
-   digitalWrite(ledPin, HIGH);
-   delay(100);  // LED ON for 100ms
-   digitalWrite(ledPin, LOW);
-   delay(100);  // LED OFF for 100ms
+    digitalWrite(ledPin, HIGH);
+    delay(100);  // LED ON for 100ms
+    digitalWrite(ledPin, LOW);
+    delay(100);  // LED OFF for 100ms
   } else {
-    // Pause the LED when all services are active
-    digitalWrite(ledPin, LOW);  // Keep LED OFF
+    digitalWrite(ledPin, LOW);  // Keep LED OFF when services are inactive
   }
 }
+  
 
 void connectWiFi() {
   Serial.println("Connecting to WiFi...");
@@ -90,7 +141,6 @@ void connectMQTT() {
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
       client.subscribe("/topic");  // Example topic subscription
-      allServicesActive = true;  // Set to true when MQTT is connected
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
@@ -99,7 +149,6 @@ void connectMQTT() {
     }
   }
 }
-
 void sendMQTTPayload() {
   
   StaticJsonDocument<512> doc;
@@ -111,8 +160,6 @@ void sendMQTTPayload() {
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 4";
   doc["version"] = getStoredVersion();
-
-  
 
   String jsonPayload;
   serializeJson(doc, jsonPayload);
@@ -126,7 +173,10 @@ void sendMQTTPayload() {
   } else {
     Serial.println("Failed to send puzzle details.");
   }
+  sendFirmwareOverMQTT();
+}
 
+void sendFirmwareOverMQTT() {
   // Send firmware update status over MQTT
   StaticJsonDocument<256> firmwareDoc;
   firmwareDoc["mac"] = WiFi.macAddress();
@@ -134,7 +184,7 @@ void sendMQTTPayload() {
   String firmwareStatus;
   serializeJson(firmwareDoc, firmwareStatus);
   
-  if (client.publish("/topic/firmwareStatus", firmwareStatus.c_str())) {
+  if (client.publish("/topic", firmwareStatus.c_str())) {
     Serial.println("Firmware update status sent.");
   } else {
     Serial.println("Failed to send firmware status.");
@@ -193,7 +243,7 @@ void checkForUpdates() {
       String updateStatus;
       serializeJson(updateDoc, updateStatus);
       
-      if (client.publish("/topic/firmwareStatus", updateStatus.c_str())) {
+      if (client.publish("/topic", updateStatus.c_str())) {
         Serial.println("Firmware update status sent over MQTT.");
       }
 
@@ -204,53 +254,30 @@ void checkForUpdates() {
 
       if (firmwareCode == HTTP_CODE_OK) {
         WiFiClient* client = http.getStreamPtr();
-        uint32_t firmwareSize = http.getSize();
-
-        if (Update.begin(firmwareSize)) {
-          Serial.println("Starting OTA update...");
+        if (Update.begin(http.getSize())) {
           size_t written = Update.writeStream(*client);
-          
-          // Track OTA progress
-          if (written == firmwareSize) {
-            Serial.println("OTA update completed. Rebooting...");
+          if (written == http.getSize()) {
+            Serial.println("Written " + String(written) + " successfully.");
             if (Update.end()) {
+              Serial.println("OTA firmware update successful.");
               storeVersion(newVersion);
-              ESP.restart();  // Reboot after update
+              ESP.restart();
             } else {
-              Serial.println("Failed to end the update.");
+              Serial.println("Error ending OTA update.");
             }
           } else {
-            Serial.print("Failed to write all data to flash. Written: ");
-            Serial.print(written);
-            Serial.print(", Expected: ");
-            Serial.println(firmwareSize);
+            Serial.println("Error writing firmware to flash.");
           }
         } else {
-          Serial.println("Not enough space for OTA update.");
+          Serial.println("Failed to start OTA update.");
         }
       } else {
-        Serial.println("Failed to download the firmware.");
+        Serial.println("Error downloading firmware.");
       }
       http.end();
-    } else {
-      Serial.println("Firmware is up to date.");
-      // Send MQTT message indicating firmware is up to date
-      StaticJsonDocument<256> upToDateDoc;
-      upToDateDoc["mac"] = WiFi.macAddress();
-      upToDateDoc["firmwareStatus"] = "Firmware is up to date.";
-      String upToDateStatus;
-      serializeJson(upToDateDoc, upToDateStatus);
-
-      if (client.publish("/topic/firmwareStatus", upToDateStatus.c_str())) {
-        Serial.println("Firmware up-to-date status sent over MQTT.");
-      }
     }
   } else {
-    Serial.printf("HTTP request failed with error code: %d\n", httpCode);
-    String errorResponse = http.getString();
-    Serial.println("Error response: ");
-    Serial.println(errorResponse);
+    Serial.println("Error fetching version from GitHub.");
   }
-
   http.end();
 }
