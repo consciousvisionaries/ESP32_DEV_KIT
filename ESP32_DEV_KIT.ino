@@ -6,11 +6,10 @@
 #include <Preferences.h>
 #include <FS.h>
 #include <SPIFFS.h>
-#include <FastLED.h>
 
-// WiFi and MQTT Configuration
 const char* ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 const char* password = "3X3K22832E";     // Replace with your WiFi password
+
 const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;
 const char* mqttUserName = "pro1polaris";
@@ -21,24 +20,18 @@ const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* branch = "ESP32_WROVER1";
 
-String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/firmware.bin";
+String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch)  + "/firmware.bin";
 
-// Puzzle LED Setup
-#define NUM_LEDS 8
-#define LED_PIN 4        // Pin connected to the data input of the LED strip
-#define LEVER_PINS {12, 14, 27, 26, 33, 32, 34, 35} // Selected available pins
 
-// Array to store the lever states
-int leverPins[] = LEVER_PINS;
-bool leverStates[NUM_LEDS];
-CRGB leds[NUM_LEDS];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+String clientId = "";
 Preferences preferences;
 
-String clientId = "";
 bool allServicesActive = false;
+
+// Define the LED pin
 const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boards
 
 void setup() {
@@ -51,8 +44,9 @@ void setup() {
     Serial.println("SPIFFS mount failed!");
     return;
   }
-
+  
   connectWiFi();
+  
   client.setServer(mqttServer, mqttPort);
   connectMQTT();
 
@@ -62,10 +56,14 @@ void setup() {
   checkForUpdates();
 
   sendMQTTPayload();  // Send MQTT message when connected
-  setup_Puzzle();  // Initialize puzzle setup
+
+
+  setup_Puzzle();
 }
 
 void loop() {
+ 
+
   static unsigned long lastOTA = 0;
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     lastOTA = millis();
@@ -74,17 +72,18 @@ void loop() {
 
   // Flash the onboard LED 5 times per second until all services are active
   if (allServicesActive) {
-    digitalWrite(ledPin, HIGH);
-    delay(100);  // LED ON for 100ms
-    digitalWrite(ledPin, LOW);
-    delay(100);  // LED OFF for 100ms
+   digitalWrite(ledPin, HIGH);
+   delay(100);  // LED ON for 100ms
+   digitalWrite(ledPin, LOW);
+   delay(100);  // LED OFF for 100ms
   } else {
+    // Pause the LED when all services are active
     digitalWrite(ledPin, LOW);  // Keep LED OFF
   }
 
-  loop_Puzzle();  // Maintain the puzzle functionality
+  loop_Puzzle();
 
-  if (!client.connected()) {
+   if (!client.connected()) {
     connectMQTT();
   }
 }
@@ -117,6 +116,7 @@ void connectMQTT() {
   }
 }
 
+
 void sendMQTTPayload() {
   // Using DynamicJsonDocument to allocate from PSRAM
   DynamicJsonDocument doc(2048);  // Allocate memory dynamically
@@ -140,6 +140,13 @@ void sendMQTTPayload() {
   } else {
     Serial.println("Failed to send puzzle details.");
   }
+
+  // Send firmware update status over MQTT
+  DynamicJsonDocument firmwareDoc(256);
+  firmwareDoc["mac"] = WiFi.macAddress();
+  firmwareDoc["firmwareStatus"] = "Checking for updates...";
+  String firmwareStatus;
+  serializeJson(firmwareDoc, firmwareStatus);
 }
 
 String getFirmwareURL() {
@@ -172,9 +179,10 @@ void storeVersion(String versionUpdate) {
   Serial.println(success ? "' succeeded." : "' failed.");
 }
 
+
 void checkForUpdates() {
   HTTPClient http;
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/firmware.bin";
+   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo)  + "/" + String(branch) + "/firmware.bin";
 
   http.begin(versionURL);
 
@@ -251,27 +259,46 @@ void checkForUpdates() {
   http.end();
 }
 
-// FastLED Setup for Puzzle LEDs
+#include <FastLED.h>
+
+// Number of LEDs (8 bits)
+#define NUM_LEDS 8
+#define LED_PIN 4        // Pin connected to the data input of the LED strip
+
+// Define pins for the levers (input ports)
+#define LEVER_PINS {12, 14, 27, 26, 33, 32, 34, 35} // Selected available pins
+
+// Array to store the lever states
+int leverPins[] = LEVER_PINS;
+bool leverStates[NUM_LEDS];
+
+// FastLED setup
+CRGB leds[NUM_LEDS];
+
 void setup_Puzzle() {
-  Serial.begin(9600);  // Initialize serial communication
-  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS); // Initialize LED strip
-  
+  // Initialize serial communication for debugging
+  Serial.begin(9600);
+
+  // Initialize LED strip
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+
   // Set all lever pins as input
   for (int i = 0; i < NUM_LEDS; i++) {
-    pinMode(leverPins[i], INPUT);
-    leverStates[i] = false;
+    pinMode(leverPins[i], INPUT_PULLUP);
   }
 }
 
 void loop_Puzzle() {
-  // Read lever states
+  // Read the state of the levers
   for (int i = 0; i < NUM_LEDS; i++) {
-    leverStates[i] = digitalRead(leverPins[i]) == HIGH;
+    leverStates[i] = digitalRead(leverPins[i]) == LOW; // Assuming LOW is "on" for the lever
     if (leverStates[i]) {
-      leds[i] = CRGB::Green;  // LED turns green when lever is engaged
+      leds[i] = CRGB::Red; // If the lever is engaged, set LED to red
     } else {
-      leds[i] = CRGB::Red;  // LED turns red when lever is not engaged
+      leds[i] = CRGB::Black; // If not engaged, turn off the LED
     }
   }
-  FastLED.show();  // Update LED strip
+
+  // Update LED strip
+  FastLED.show();
 }
