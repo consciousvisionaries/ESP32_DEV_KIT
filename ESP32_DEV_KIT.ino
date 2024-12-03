@@ -71,7 +71,7 @@ void loop() {
       Serial.print("Lever ");
       Serial.print(i);
       Serial.print(" changed. New state: ");
-      Serial.println(currentState ? "ACTIVE" : "INACTIVE");
+      Serial.println(currentState ? "LOW" : "HIGH");
 
       previousLeverStates[i] = currentState;  // Update previous state
       leverStatusChanged = true;  // Mark that a change occurred
@@ -82,8 +82,14 @@ void loop() {
   if (leverStatusChanged) {
     // Create JSON payload for lever pin statuses
     StaticJsonDocument<512> leverDoc;
+
+  leverDoc["puzzleName"] = "Levers Puzzle";
+  leverDoc["tab"] = "Presidents Big Mistake";
+  leverDoc["group"] = "Stage 2";
+  leverDoc["version"] = getStoredVersion();
+  
     for (int i = 0; i < NUM_LEVER_PINS; i++) {
-      leverDoc["lever" + String(i)] = previousLeverStates[i] ? "ACTIVE" : "INACTIVE"; // Store pin status as "ACTIVE" or "INACTIVE"
+      leverDoc["lever" + String(i)] = previousLeverStates[i] ? "LOW" : "HIGH"; 
     }
 
     // Convert JSON object to string
@@ -91,11 +97,11 @@ void loop() {
     serializeJson(leverDoc, jsonLeverPinStatus);
 
     // Publish lever status to MQTT
-    if (client.publish("/topic", jsonLeverPinStatus.c_str())) {
-      Serial.println("Puzzle details sent:");
-      Serial.println(jsonLeverPinStatus); // Print the JSON payload to Serial Monitor for debugging
+    if (client.publish("/input", jsonLeverPinStatus.c_str())) {
+      Serial.println(jsonLeverPinStatus);
+
     } else {
-      Serial.println("Failed to send puzzle details.");
+      Serial.println("Failed to send output details.");
     }
   }
 
@@ -158,7 +164,7 @@ void sendMQTTPayload() {
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
-  doc["group"] = "Stage 4";
+  doc["group"] = "Stage 2";
   doc["version"] = getStoredVersion();
 
   String jsonPayload;
