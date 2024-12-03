@@ -40,7 +40,7 @@ const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boa
 int leverPins[] = { LEVER_PINS };  // Using the macro to initialize the array
 
 // Define the lever states based on the number of pins
-const int NUM_LEVER_PINS = 8; // Define NUM_LEVER_PINS as a constant
+const int NUM_LEVER_PINS = 10; // Define NUM_LEVER_PINS as a constant
 bool previousLeverStates[NUM_LEVER_PINS]; // Array size is now known at compile time
 
 void setup() {
