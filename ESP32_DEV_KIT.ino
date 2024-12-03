@@ -18,7 +18,10 @@ const char* mqttPassword = "CVr819P*!";
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* branch = "WROVER1_Puzzle_Dev"; // Branch where the firmware file is located
+const char* branch = "ESP32_WROVER1";
+
+String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(subDir) + "/firmware.bin";
+
 
 String version = "";
 
@@ -171,7 +174,8 @@ void storeVersion(String version) {
 
 void checkForUpdates() {
   HTTPClient http;
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
+   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo)  + "/" + String(branch) + "/firmware.bin";
+
   http.begin(versionURL);
 
   int httpCode = http.GET();
@@ -183,7 +187,7 @@ void checkForUpdates() {
     newVersion.trim();
     String currentVersion = getStoredVersion();
     version = currentVersion;
-
+    Serial.println("Current Version: " + version);
     if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
 
