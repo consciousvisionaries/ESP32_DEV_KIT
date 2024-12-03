@@ -94,7 +94,7 @@ void sendMQTTPayload() {
   String jsonPayload;
   serializeJson(doc, jsonPayload);
 
-  if (client.publish("/topic/puzzleDetails", jsonPayload.c_str())) {
+  if (client.publish("/topic", jsonPayload.c_str())) {
     Serial.println("Puzzle details sent:");
     Serial.println(jsonPayload);
   } else {
