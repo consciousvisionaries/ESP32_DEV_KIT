@@ -16,7 +16,7 @@ const char* mqttPassword = "CVr819P*!";
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* branch = "main"; // Branch where the firmware file is located
+const char* branch = "ESP32_WROVER1"; // Branch where the firmware file is located
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -100,12 +100,12 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Tarot Puzzle";
+  doc["puzzleName"] = "CAM Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
-  doc["group"] = "Stage 3";
+  doc["group"] = "Stage 1";
 
   
 
