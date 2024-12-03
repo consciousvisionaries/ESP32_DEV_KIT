@@ -17,6 +17,8 @@ const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* branch = "ESP32_WROVER2"; // Branch where the firmware file is located
+const char* topicData = "/lever";
+const int NUM_OUTPUTS = 10;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -25,11 +27,14 @@ Preferences preferences;
 
 bool allServicesActive = false;
 
+bool leverStatusChanged = true;
+
+
 // Define the pins
 const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boards
 
 // Define the lever pins as a macro holding the values
-#define LEVER_PINS 12, 14, 27, 26, 33, 32, 34, 35  // Values, not an array definition
+#define LEVER_PINS 12, 14, 27, 26, 33, 32, 5, 18,19,21  // Values, not an array definition
 
 // Define the lever pins array based on the macro
 int leverPins[] = { LEVER_PINS };  // Using the macro to initialize the array
@@ -59,10 +64,11 @@ void setup() {
     pinMode(leverPins[i], INPUT_PULLUP);  // Enable pull-up resistors
     previousLeverStates[i] = digitalRead(leverPins[i]) == LOW;  // Initialize previous state
   }
+
+
 }
 
 void loop() {
-  bool leverStatusChanged = false;
 
   // Check the lever states and detect if there has been any change
   for (int i = 0; i < NUM_LEVER_PINS; i++) {
@@ -87,6 +93,7 @@ void loop() {
   leverDoc["tab"] = "Presidents Big Mistake";
   leverDoc["group"] = "Stage 2";
   leverDoc["version"] = getStoredVersion();
+  leverDoc["num_outputs"] = NUM_OUTPUTS;
   
     for (int i = 0; i < NUM_LEVER_PINS; i++) {
       leverDoc["lever" + String(i)] = previousLeverStates[i] ? "LOW" : "HIGH"; 
@@ -97,13 +104,16 @@ void loop() {
     serializeJson(leverDoc, jsonLeverPinStatus);
 
     // Publish lever status to MQTT
-    if (client.publish("/input", jsonLeverPinStatus.c_str())) {
+    if (client.publish(topicData, jsonLeverPinStatus.c_str())) {
       Serial.println(jsonLeverPinStatus);
+      leverStatusChanged = false;
 
     } else {
       Serial.println("Failed to send output details.");
     }
   }
+
+
 
   if (!client.connected()) {
     connectMQTT();
@@ -125,6 +135,7 @@ void loop() {
   } else {
     digitalWrite(ledPin, LOW);  // Keep LED OFF when services are inactive
   }
+    
 }
   
 
@@ -166,6 +177,7 @@ void sendMQTTPayload() {
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 2";
   doc["version"] = getStoredVersion();
+  doc["num_outputs"] = NUM_OUTPUTS;
 
   String jsonPayload;
   serializeJson(doc, jsonPayload);
