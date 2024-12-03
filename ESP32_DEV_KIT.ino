@@ -81,7 +81,7 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Tarot Card";
+  doc["puzzleName"] = "Tarot Puzzle with The Witchatarian";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
