@@ -23,6 +23,7 @@ const char* branch = "ESP32_WROVER1";
 String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch)  + "/firmware.bin";
 
 
+String version = "";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -127,7 +128,8 @@ void sendMQTTPayload() {
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 1";
-  doc["version"] = preferences.getString("version", "");
+  doc["version"] = version;
+
   String jsonPayload;
   serializeJson(doc, jsonPayload);
 
@@ -162,23 +164,13 @@ String getFirmwareURL() {
 }
 
 String getStoredVersion() {
-  preferences.begin("firmware", true); // Open in read-only mode
-  String storedVersion = preferences.getString("version", "not_set");
-  preferences.end(); // Close preferences
+  String storedVersion = preferences.getString("version", "");
   return storedVersion;
 }
 
-void storeVersion(String versionUpdate) {
-  preferences.begin("firmware", false); // Open in read-write mode
-  bool success = preferences.putString("version", versionUpdate); // Save version
-  preferences.end(); // Close preferences
-  
-  // Debugging output
-  Serial.print("Storing version '");
-  Serial.print(versionUpdate);
-  Serial.println(success ? "' succeeded." : "' failed.");
+void storeVersion(String version) {
+  preferences.putString("version", version);
 }
-
 
 void checkForUpdates() {
   HTTPClient http;
@@ -194,8 +186,8 @@ void checkForUpdates() {
     String newVersion = http.getString();
     newVersion.trim();
     String currentVersion = getStoredVersion();
-    
-    Serial.println("Current Version: " + currentVersion);
+    version = currentVersion;
+    Serial.println("Current Version: " + version);
     if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
 
