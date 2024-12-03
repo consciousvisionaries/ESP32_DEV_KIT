@@ -168,6 +168,7 @@ void storeVersion(String version) {
 }
 
 // Function to check for OTA updates
+/// Function to check for OTA updates
 void checkForUpdates() {
     Serial.println("Checking for firmware updates...");
     
@@ -191,7 +192,38 @@ void checkForUpdates() {
 
         if (newVersion != currentVersion) {
             Serial.println("New firmware available. Starting OTA...");
-            // Proceed with OTA update logic
+
+            // URL of the firmware bin file
+            String firmwareURL = getFirmwareURL();
+            Serial.println("Downloading firmware...");
+
+            // Start the HTTP connection to download the firmware
+            http.begin(firmwareURL);
+            int firmwareCode = http.GET();
+
+            if (firmwareCode == HTTP_CODE_OK) {
+                WiFiClient* client = http.getStreamPtr();
+                uint32_t firmwareSize = http.getSize();
+                if (Update.begin(firmwareSize)) {
+                    Serial.println("Starting OTA update...");
+                    size_t written = Update.writeStream(*client);
+                    if (written == firmwareSize) {
+                        Serial.println("OTA update completed. Rebooting...");
+                        if (Update.end()) {
+                            ESP.restart(); // Reboot after the update
+                        } else {
+                            Serial.println("Failed to end the update.");
+                        }
+                    } else {
+                        Serial.println("Failed to write all data to flash.");
+                    }
+                } else {
+                    Serial.println("Not enough space for OTA update.");
+                }
+            } else {
+                Serial.println("Failed to download the firmware.");
+            }
+            http.end();
         } else {
             Serial.println("Firmware is up to date.");
         }
