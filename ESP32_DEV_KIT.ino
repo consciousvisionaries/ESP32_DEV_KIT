@@ -73,7 +73,6 @@ void loop() {
 }
 
 void connectWiFi() {
-  Serial.println("Connecting to WiFi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -87,15 +86,12 @@ void connectWiFi() {
 
 void connectMQTT() {
   while (!client.connected()) {
-    Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
       sendMQTTPayload();  // Send MQTT message when connected
       client.subscribe("/topic");  // Example topic subscription
       allServicesActive = true;  // Set to true when MQTT is connected
     } else {
-      Serial.print("Failed (state=");
-      Serial.print(client.state());
       Serial.println("). Retrying in 5 seconds...");
       delay(5000);
     }
@@ -134,11 +130,7 @@ void sendMQTTPayload() {
   String firmwareStatus;
   serializeJson(firmwareDoc, firmwareStatus);
   
-  if (client.publish("/topic/firmwareStatus", firmwareStatus.c_str())) {
-    Serial.println("Firmware update status sent.");
-  } else {
-    Serial.println("Failed to send firmware status.");
-  }
+ 
 }
 
 String getFirmwareURL() {
@@ -163,7 +155,6 @@ void storeVersion(String version) {
 }
 
 void checkForUpdates() {
-  Serial.println("Checking for firmware updates...");
 
   HTTPClient http;
   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
@@ -178,12 +169,7 @@ void checkForUpdates() {
     newVersion.trim();
     String currentVersion = getStoredVersion();
 
-    Serial.print("Stored firmware version: ");
-    Serial.println(currentVersion);
-    Serial.print("Available firmware version: ");
-    Serial.println(newVersion);
-
-    if (newVersion != currentVersion) {
+      if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
       
       // Send MQTT message about new firmware
@@ -193,10 +179,6 @@ void checkForUpdates() {
       String updateStatus;
       serializeJson(updateDoc, updateStatus);
       
-      if (client.publish("/topic/firmwareStatus", updateStatus.c_str())) {
-        Serial.println("Firmware update status sent over MQTT.");
-      }
-
       String firmwareURL = getFirmwareURL();
       Serial.println("Downloading firmware...");
       http.begin(firmwareURL);
@@ -212,7 +194,6 @@ void checkForUpdates() {
           
           // Track OTA progress
           if (written == firmwareSize) {
-            Serial.println("OTA update completed. Rebooting...");
             if (Update.end()) {
               storeVersion(newVersion);
               ESP.restart();  // Reboot after update
@@ -241,9 +222,6 @@ void checkForUpdates() {
       String upToDateStatus;
       serializeJson(upToDateDoc, upToDateStatus);
 
-      if (client.publish("/topic/firmwareStatus", upToDateStatus.c_str())) {
-        Serial.println("Firmware up-to-date status sent over MQTT.");
-      }
     }
   } else {
     Serial.printf("HTTP request failed with error code: %d\n", httpCode);
