@@ -41,6 +41,9 @@ void setup() {
 
   delay(3000);
   checkForUpdates();
+  
+  sendMQTTPayload();  // Send MQTT message when connected
+
 }
 
 void loop() {
@@ -54,6 +57,7 @@ void loop() {
     lastOTA = millis();
     checkForUpdates();
   }
+
 
 //  Flash the onboard LED 5 times per second until all services are active
   if (allServicesActive) {
@@ -85,7 +89,6 @@ void connectMQTT() {
     Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
-      sendMQTTPayload();  // Send MQTT message when connected
       client.subscribe("/topic");  // Example topic subscription
       allServicesActive = true;  // Set to true when MQTT is connected
     } else {
@@ -98,14 +101,16 @@ void connectMQTT() {
 }
 
 void sendMQTTPayload() {
+  
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Tarot Puzzle";
+  doc["puzzleName"] = "Levers Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
-  doc["group"] = "Stage 2";
+  doc["group"] = "Stage 4";
+  doc["version"] = getStoredVersion();
 
   
 
