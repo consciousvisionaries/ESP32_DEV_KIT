@@ -4,8 +4,6 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <Preferences.h>
-#include <FS.h>
-#include <SPIFFS.h>
 
 const char* ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 const char* password = "3X3K22832E";     // Replace with your WiFi password
@@ -18,12 +16,7 @@ const char* mqttPassword = "CVr819P*!";
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* branch = "ESP32_WROVER1";
-
-String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(subDir) + "/firmware.bin";
-
-
-String version = "";
+const char* branch = "ESP32_WROVER1"; // Branch where the firmware file is located
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -40,14 +33,7 @@ void setup() {
   pinMode(ledPin, OUTPUT);  // Set onboard LED as output
   clientId = "ESP32_" + String(WiFi.macAddress());
 
-  // Initialize SPIFFS
-  if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS mount failed!");
-    return;
-  }
-  
   connectWiFi();
-  
   client.setServer(mqttServer, mqttPort);
   connectMQTT();
 
@@ -55,15 +41,13 @@ void setup() {
 
   delay(3000);
   checkForUpdates();
-
-  sendMQTTPayload();  // Send MQTT message when connected
-
-
-  setup_Puzzle();
 }
 
 void loop() {
- 
+  if (!client.connected()) {
+    connectMQTT();
+  }
+  //client.loop();
 
   static unsigned long lastOTA = 0;
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
@@ -71,7 +55,7 @@ void loop() {
     checkForUpdates();
   }
 
-  // Flash the onboard LED 5 times per second until all services are active
+//  Flash the onboard LED 5 times per second until all services are active
   if (allServicesActive) {
    digitalWrite(ledPin, HIGH);
    delay(100);  // LED ON for 100ms
@@ -81,15 +65,10 @@ void loop() {
     // Pause the LED when all services are active
     digitalWrite(ledPin, LOW);  // Keep LED OFF
   }
-
-  loop_Puzzle();
-
-   if (!client.connected()) {
-    connectMQTT();
-  }
 }
 
 void connectWiFi() {
+  Serial.println("Connecting to WiFi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -103,32 +82,32 @@ void connectWiFi() {
 
 void connectMQTT() {
   while (!client.connected()) {
-    Serial.println("Attempting to connect to MQTT broker...");
+    Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
+      sendMQTTPayload();  // Send MQTT message when connected
       client.subscribe("/topic");  // Example topic subscription
       allServicesActive = true;  // Set to true when MQTT is connected
     } else {
-      Serial.print("Failed to connect to MQTT, rc=");
-      Serial.println(client.state());
-      Serial.println("Retrying in 5 seconds...");
+      Serial.print("Failed (state=");
+      Serial.print(client.state());
+      Serial.println("). Retrying in 5 seconds...");
       delay(5000);
     }
   }
 }
 
-
 void sendMQTTPayload() {
-  // Using DynamicJsonDocument to allocate from PSRAM
-  DynamicJsonDocument doc(2048);  // Allocate memory dynamically
+  StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Levers Puzzle";
+  doc["puzzleName"] = "CAM Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 1";
-  doc["version"] = version;
+
+  
 
   String jsonPayload;
   serializeJson(doc, jsonPayload);
@@ -144,11 +123,17 @@ void sendMQTTPayload() {
   }
 
   // Send firmware update status over MQTT
-  DynamicJsonDocument firmwareDoc(256);
+  StaticJsonDocument<256> firmwareDoc;
   firmwareDoc["mac"] = WiFi.macAddress();
   firmwareDoc["firmwareStatus"] = "Checking for updates...";
   String firmwareStatus;
   serializeJson(firmwareDoc, firmwareStatus);
+  
+  if (client.publish("/topic/firmwareStatus", firmwareStatus.c_str())) {
+    Serial.println("Firmware update status sent.");
+  } else {
+    Serial.println("Failed to send firmware status.");
+  }
 }
 
 String getFirmwareURL() {
@@ -173,9 +158,10 @@ void storeVersion(String version) {
 }
 
 void checkForUpdates() {
-  HTTPClient http;
-   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo)  + "/" + String(branch) + "/firmware.bin";
+  Serial.println("Checking for firmware updates...");
 
+  HTTPClient http;
+  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
   http.begin(versionURL);
 
   int httpCode = http.GET();
@@ -186,17 +172,25 @@ void checkForUpdates() {
     String newVersion = http.getString();
     newVersion.trim();
     String currentVersion = getStoredVersion();
-    version = currentVersion;
-    Serial.println("Current Version: " + version);
+
+    Serial.print("Stored firmware version: ");
+    Serial.println(currentVersion);
+    Serial.print("Available firmware version: ");
+    Serial.println(newVersion);
+
     if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
-
+      
       // Send MQTT message about new firmware
-      DynamicJsonDocument updateDoc(256);
+      StaticJsonDocument<256> updateDoc;
       updateDoc["mac"] = WiFi.macAddress();
       updateDoc["firmwareStatus"] = "New firmware available. Starting OTA...";
       String updateStatus;
       serializeJson(updateDoc, updateStatus);
+      
+      if (client.publish("/topic/firmwareStatus", updateStatus.c_str())) {
+        Serial.println("Firmware update status sent over MQTT.");
+      }
 
       String firmwareURL = getFirmwareURL();
       Serial.println("Downloading firmware...");
@@ -210,9 +204,10 @@ void checkForUpdates() {
         if (Update.begin(firmwareSize)) {
           Serial.println("Starting OTA update...");
           size_t written = Update.writeStream(*client);
-
+          
           // Track OTA progress
           if (written == firmwareSize) {
+            Serial.println("OTA update completed. Rebooting...");
             if (Update.end()) {
               storeVersion(newVersion);
               ESP.restart();  // Reboot after update
@@ -235,11 +230,15 @@ void checkForUpdates() {
     } else {
       Serial.println("Firmware is up to date.");
       // Send MQTT message indicating firmware is up to date
-      DynamicJsonDocument upToDateDoc(256);
+      StaticJsonDocument<256> upToDateDoc;
       upToDateDoc["mac"] = WiFi.macAddress();
       upToDateDoc["firmwareStatus"] = "Firmware is up to date.";
       String upToDateStatus;
       serializeJson(upToDateDoc, upToDateStatus);
+
+      if (client.publish("/topic/firmwareStatus", upToDateStatus.c_str())) {
+        Serial.println("Firmware up-to-date status sent over MQTT.");
+      }
     }
   } else {
     Serial.printf("HTTP request failed with error code: %d\n", httpCode);
@@ -249,48 +248,4 @@ void checkForUpdates() {
   }
 
   http.end();
-}
-
-#include <FastLED.h>
-
-// Number of LEDs (8 bits)
-#define NUM_LEDS 8
-#define LED_PIN 4        // Pin connected to the data input of the LED strip
-
-// Define pins for the levers (input ports)
-#define LEVER_PINS {12, 14, 27, 26, 33, 32, 34, 35} // Selected available pins
-
-// Array to store the lever states
-int leverPins[] = LEVER_PINS;
-bool leverStates[NUM_LEDS];
-
-// FastLED setup
-CRGB leds[NUM_LEDS];
-
-void setup_Puzzle() {
-  // Initialize serial communication for debugging
-  Serial.begin(9600);
-
-  // Initialize LED strip
-  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
-
-  // Set all lever pins as input
-  for (int i = 0; i < NUM_LEDS; i++) {
-    pinMode(leverPins[i], INPUT_PULLUP);
-  }
-}
-
-void loop_Puzzle() {
-  // Read the state of the levers
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leverStates[i] = digitalRead(leverPins[i]) == LOW; // Assuming LOW is "on" for the lever
-    if (leverStates[i]) {
-      leds[i] = CRGB::Red; // If the lever is engaged, set LED to red
-    } else {
-      leds[i] = CRGB::Black; // If not engaged, turn off the LED
-    }
-  }
-
-  // Update LED strip
-  FastLED.show();
 }
