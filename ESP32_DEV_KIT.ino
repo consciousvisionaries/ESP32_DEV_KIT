@@ -65,6 +65,7 @@ void setup() {
 void loop() {
     // Ensure MQTT connection is alive
     if (!client.connected()) {
+        Serial.println("MQTT disconnected, attempting to reconnect...");
         connectMQTT();
     }
     client.loop();
@@ -103,7 +104,7 @@ void connectMQTT() {
         Serial.print("Connecting to MQTT...");
         if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
             Serial.println("Connected to MQTT.");
-            sendMQTTPayload();
+            sendMQTTPayload();  // Send payload immediately upon connection
             client.subscribe("/topic"); // Subscribe to a topic if needed
         } else {
             Serial.print("Failed (state=");
@@ -120,7 +121,7 @@ void sendMQTTPayload() {
 
     // Build JSON payload
     doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = "Tarot Card";  // You can update the puzzle name dynamically
+    doc["puzzleName"] = "Tarot Card V5";  // You can update the puzzle name dynamically
     doc["designer"] = "Paul Hopkins";
     doc["ipAddress"] = WiFi.localIP().toString();
     doc["timestamp"] = millis();  // Replace with dynamic timestamp if needed
@@ -134,12 +135,16 @@ void sendMQTTPayload() {
     String jsonPayload;
     serializeJson(doc, jsonPayload);
 
-    // Publish payload
-    if (client.publish("/topic/puzzleDetails", jsonPayload.c_str())) {  // Use specific topic for puzzle details
-        Serial.println("Puzzle details sent:");
-        Serial.println(jsonPayload);
+    // Publish payload only if MQTT is connected
+    if (client.connected()) {
+        if (client.publish("/topic/puzzleDetails", jsonPayload.c_str())) {  // Use specific topic for puzzle details
+            Serial.println("Puzzle details sent:");
+            Serial.println(jsonPayload);
+        } else {
+            Serial.println("Failed to send puzzle details.");
+        }
     } else {
-        Serial.println("Failed to send puzzle details.");
+        Serial.println("MQTT not connected, skipping publish.");
     }
 }
 
@@ -168,7 +173,6 @@ void storeVersion(String version) {
 }
 
 // Function to check for OTA updates
-/// Function to check for OTA updates
 void checkForUpdates() {
     Serial.println("Checking for firmware updates...");
     
