@@ -34,6 +34,7 @@ void setup() {
   clientId = "ESP32_" + String(WiFi.macAddress());
 
   connectWiFi();
+  
   client.setServer(mqttServer, mqttPort);
   connectMQTT();
 
@@ -41,6 +42,8 @@ void setup() {
 
   delay(3000);
   checkForUpdates();
+
+  setup_Puzzle();
 }
 
 void loop() {
@@ -65,6 +68,8 @@ void loop() {
     // Pause the LED when all services are active
     digitalWrite(ledPin, LOW);  // Keep LED OFF
   }
+
+  loop_Puzzle();
 }
 
 void connectWiFi() {
@@ -100,7 +105,7 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "CAM Puzzle";
+  doc["puzzleName"] = "Levers Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
@@ -248,4 +253,60 @@ void checkForUpdates() {
   }
 
   http.end();
+}
+
+#include <FastLED.h>
+
+// Number of LEDs (8 bits)
+#define NUM_LEDS 8
+#define LED_PIN 4        // Pin connected to the data input of the LED strip
+
+// Define pins for the levers (input ports)
+#define LEVER_PINS {12, 14, 27, 26, 33, 32, 34, 35} // Selected available pins
+
+// Array to store the lever states
+int leverPins[] = LEVER_PINS;
+bool leverStates[NUM_LEDS];
+
+// FastLED setup
+CRGB leds[NUM_LEDS];
+
+void setup_Puzzle() {
+  // Initialize serial communication for debugging
+  Serial.begin(9600);
+
+  // Initialize LED strip
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+  
+  // Set all lever pins as input
+  for (int i = 0; i < NUM_LEDS; i++) {
+    pinMode(leverPins[i], INPUT_PULLUP);
+  }
+
+  // Initialize lever states to false (lever is not pressed)
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leverStates[i] = false;
+  }
+
+  // Turn off LEDs at the start
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB::Black;
+  }
+  FastLED.show();
+}
+
+void loop_Puzzle() {
+  // Check for lever states and update LEDs accordingly
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leverStates[i] = digitalRead(leverPins[i]);
+
+    if (leverStates[i]) {
+      leds[i] = CRGB::Green;  // Turn on LED when lever is pressed
+    } else {
+      leds[i] = CRGB::Black;  // Turn off LED when lever is not pressed
+    }
+  }
+
+  // Update the LED strip
+  FastLED.show();
 }
