@@ -47,7 +47,7 @@ void loop() {
   if (!client.connected()) {
     connectMQTT();
   }
-  client.loop();
+  //client.loop();
 
   static unsigned long lastOTA = 0;
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
@@ -55,12 +55,12 @@ void loop() {
     checkForUpdates();
   }
 
-  // Flash the onboard LED 5 times per second until all services are active
+//  Flash the onboard LED 5 times per second until all services are active
   if (!allServicesActive) {
-    digitalWrite(ledPin, HIGH);
-    delay(100);  // LED ON for 100ms
-    digitalWrite(ledPin, LOW);
-    delay(100);  // LED OFF for 100ms
+   digitalWrite(ledPin, HIGH);
+   delay(100);  // LED ON for 100ms
+   digitalWrite(ledPin, LOW);
+   delay(100);  // LED OFF for 100ms
   } else {
     // Pause the LED when all services are active
     digitalWrite(ledPin, LOW);  // Keep LED OFF
