@@ -20,7 +20,7 @@ const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* branch = "ESP32_WROVER1";
 
-String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch)  + "/firmware.bin";
+String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(subDir) + "/firmware.bin";
 
 
 String version = "";
