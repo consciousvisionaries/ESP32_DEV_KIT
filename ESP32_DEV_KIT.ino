@@ -23,8 +23,14 @@ PubSubClient client(espClient);
 String clientId = "";
 Preferences preferences;
 
+bool allServicesActive = false;
+
+// Define the LED pin
+const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boards
+
 void setup() {
   Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);  // Set onboard LED as output
   clientId = "ESP32_" + String(WiFi.macAddress());
 
   connectWiFi();
@@ -48,9 +54,21 @@ void loop() {
     lastOTA = millis();
     checkForUpdates();
   }
+
+  // Flash the onboard LED 5 times per second until all services are active
+  if (!allServicesActive) {
+    digitalWrite(ledPin, HIGH);
+    delay(100);  // LED ON for 100ms
+    digitalWrite(ledPin, LOW);
+    delay(100);  // LED OFF for 100ms
+  } else {
+    // Pause the LED when all services are active
+    digitalWrite(ledPin, LOW);  // Keep LED OFF
+  }
 }
 
 void connectWiFi() {
+  Serial.println("Connecting to WiFi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -59,14 +77,17 @@ void connectWiFi() {
   Serial.println("\nWiFi connected.");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+  allServicesActive = true;  // Set to true when WiFi is connected
 }
 
 void connectMQTT() {
   while (!client.connected()) {
+    Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
       sendMQTTPayload();  // Send MQTT message when connected
       client.subscribe("/topic");  // Example topic subscription
+      allServicesActive = true;  // Set to true when MQTT is connected
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
@@ -79,12 +100,14 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Tarot Card Puzzle";
+  doc["puzzleName"] = "Tarot Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
   doc["tab"] = "Presidents Big Mistake";
   doc["group"] = "Stage 3";
+
+  
 
   String jsonPayload;
   serializeJson(doc, jsonPayload);
@@ -106,8 +129,9 @@ void sendMQTTPayload() {
   String firmwareStatus;
   serializeJson(firmwareDoc, firmwareStatus);
   
-  if (!client.publish("/topic", firmwareStatus.c_str())) {
- 
+  if (client.publish("/topic/firmwareStatus", firmwareStatus.c_str())) {
+    Serial.println("Firmware update status sent.");
+  } else {
     Serial.println("Failed to send firmware status.");
   }
 }
@@ -134,6 +158,7 @@ void storeVersion(String version) {
 }
 
 void checkForUpdates() {
+  Serial.println("Checking for firmware updates...");
 
   HTTPClient http;
   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
@@ -156,7 +181,18 @@ void checkForUpdates() {
     if (newVersion != currentVersion) {
       Serial.println("New firmware available. Starting OTA...");
       
-     String firmwareURL = getFirmwareURL();
+      // Send MQTT message about new firmware
+      StaticJsonDocument<256> updateDoc;
+      updateDoc["mac"] = WiFi.macAddress();
+      updateDoc["firmwareStatus"] = "New firmware available. Starting OTA...";
+      String updateStatus;
+      serializeJson(updateDoc, updateStatus);
+      
+      if (client.publish("/topic/firmwareStatus", updateStatus.c_str())) {
+        Serial.println("Firmware update status sent over MQTT.");
+      }
+
+      String firmwareURL = getFirmwareURL();
       Serial.println("Downloading firmware...");
       http.begin(firmwareURL);
       int firmwareCode = http.GET();
@@ -193,6 +229,16 @@ void checkForUpdates() {
       http.end();
     } else {
       Serial.println("Firmware is up to date.");
+      // Send MQTT message indicating firmware is up to date
+      StaticJsonDocument<256> upToDateDoc;
+      upToDateDoc["mac"] = WiFi.macAddress();
+      upToDateDoc["firmwareStatus"] = "Firmware is up to date.";
+      String upToDateStatus;
+      serializeJson(upToDateDoc, upToDateStatus);
+
+      if (client.publish("/topic/firmwareStatus", upToDateStatus.c_str())) {
+        Serial.println("Firmware up-to-date status sent over MQTT.");
+      }
     }
   } else {
     Serial.printf("HTTP request failed with error code: %d\n", httpCode);
