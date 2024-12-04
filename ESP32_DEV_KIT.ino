@@ -18,6 +18,8 @@ const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* branch = "Levers_Puzzle"; // Branch where the firmware file is located
 const char* topicData = "/lever";
+const char* UIgroup = "Stage 3";
+const char* UItab = "Presidents Big Mistake";
 const int NUM_OUTPUTS = 8;
 
 WiFiClient espClient;
@@ -90,8 +92,8 @@ void loop() {
     StaticJsonDocument<512> leverDoc;
 
   leverDoc["puzzleName"] = "Levers Puzzle";
-  leverDoc["tab"] = "Presidents Big Mistake";
-  leverDoc["group"] = "Stage 3";
+  leverDoc["tab"] = UItab;
+  leverDoc["group"] = UIgroup;
   leverDoc["version"] = getStoredVersion();
   leverDoc["num_outputs"] = NUM_OUTPUTS;
   
@@ -174,8 +176,8 @@ void sendMQTTPayload() {
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
-  doc["tab"] = "Presidents Big Mistake";
-  doc["group"] = "Stage 2";
+  doc["tab"] = UItab;
+  doc["group"] = UIgroup;
   doc["version"] = getStoredVersion();
   doc["num_outputs"] = NUM_OUTPUTS;
 
