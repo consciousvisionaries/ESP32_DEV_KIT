@@ -16,9 +16,9 @@ const char* mqttPassword = "CVr819P*!";
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
 const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* branch = "ESP32_WROVER2"; // Branch where the firmware file is located
+const char* branch = "Levers_Puzzle"; // Branch where the firmware file is located
 const char* topicData = "/lever";
-const int NUM_OUTPUTS = 10;
+const int NUM_OUTPUTS = 8;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -91,7 +91,7 @@ void loop() {
 
   leverDoc["puzzleName"] = "Levers Puzzle";
   leverDoc["tab"] = "Presidents Big Mistake";
-  leverDoc["group"] = "Stage 2";
+  leverDoc["group"] = "Stage 3";
   leverDoc["version"] = getStoredVersion();
   leverDoc["num_outputs"] = NUM_OUTPUTS;
   
