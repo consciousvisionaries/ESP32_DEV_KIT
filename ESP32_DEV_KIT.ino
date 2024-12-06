@@ -15,11 +15,12 @@ const char* mqttPassword = "CVr819P*!";
 
 const char* githubUser = "consciousvisionaries";
 const char* githubRepo = "ESP32_DEV_KIT";
-const char* firmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* branch = "Levers_Puzzle"; // Branch where the firmware file is located
-const char* topicData = "/lever";
-const char* UIgroup = "Stage 3";
-const char* UItab = "Presidents Big Mistake";
+const char* espfirmwareFile = "ESP32_DEV_KIT.ino.esp32.bin";
+const char* versionFile = "version.txt";
+const char* espbranch = "Levers_Puzzle"; // Branch where the firmware file is located
+const char* esptopic = "/lever";
+const char* espUIgroup = "Stage 3";
+const char* espUItab = "Presidents Big Mistake";
 const int NUM_OUTPUTS = 8;
 
 WiFiClient espClient;
@@ -57,7 +58,7 @@ void setup() {
   preferences.begin("firmware", false);
 
   delay(3000);
-  checkForUpdates();
+  checkForUpdates(githubUser, githubRepo, espbranch, espfirmwareFile, esptopic);
   
   sendMQTTPayload();  // Send MQTT message when connected
 
@@ -92,8 +93,8 @@ void loop() {
     StaticJsonDocument<512> leverDoc;
 
   leverDoc["puzzleName"] = "Levers Puzzle";
-  leverDoc["tab"] = UItab;
-  leverDoc["group"] = UIgroup;
+  leverDoc["tab"] = espUItab;
+  leverDoc["group"] = espUIgroup;
   leverDoc["version"] = getStoredVersion();
   leverDoc["num_outputs"] = NUM_OUTPUTS;
   
@@ -106,7 +107,7 @@ void loop() {
     serializeJson(leverDoc, jsonLeverPinStatus);
 
     // Publish lever status to MQTT
-    if (client.publish(topicData, jsonLeverPinStatus.c_str())) {
+    if (client.publish(esptopic, jsonLeverPinStatus.c_str())) {
       Serial.println(jsonLeverPinStatus);
       leverStatusChanged = false;
 
@@ -125,7 +126,7 @@ void loop() {
   
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     lastOTA = millis();
-    checkForUpdates();
+    checkForUpdates(githubUser, githubRepo, espbranch, espfirmwareFile, esptopic);
   }
 
   // Flash the onboard LED 5 times per second until all services are active
@@ -176,8 +177,8 @@ void sendMQTTPayload() {
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
-  doc["tab"] = UItab;
-  doc["group"] = UIgroup;
+  doc["tab"] = espUItab;
+  doc["group"] = espUIgroup;
   doc["version"] = getStoredVersion();
   doc["num_outputs"] = NUM_OUTPUTS;
 
@@ -211,17 +212,11 @@ void sendFirmwareOverMQTT() {
   }
 }
 
-String getFirmwareURL() {
-  String url = "https://raw.githubusercontent.com/";
-  url += githubUser;
-  url += "/";
-  url += githubRepo;
-  url += "/";
-  url += branch;
-  url += "/";
-  url += firmwareFile;
-  return url;
+String getGitHubFileURL(const char* user, const char* repo, const char* bran, const char* file) {
+    String baseURL = "https://raw.githubusercontent.com/";
+    return baseURL + user + "/" + repo + "/" + bran + "/" + file;
 }
+
 
 String getStoredVersion() {
   String storedVersion = preferences.getString("version", "");
@@ -232,11 +227,11 @@ void storeVersion(String version) {
   preferences.putString("version", version);
 }
 
-void checkForUpdates() {
+void checkForUpdates(const char* user, const char* repo, String bran, String file, String topic) {
   Serial.println("Checking for firmware updates...");
 
   HTTPClient http;
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
+  String versionURL = getGitHubFileURL(user, repo, bran.c_str(), versionFile);
   http.begin(versionURL);
 
   int httpCode = http.GET();
@@ -263,11 +258,11 @@ void checkForUpdates() {
       String updateStatus;
       serializeJson(updateDoc, updateStatus);
       
-      if (client.publish("/topic", updateStatus.c_str())) {
+      if (client.publish(topic.c_str(), updateStatus.c_str())) {
         Serial.println("Firmware update status sent over MQTT.");
       }
 
-      String firmwareURL = getFirmwareURL();
+      String firmwareURL = getGitHubFileURL(user, repo, bran.c_str(), file.c_str());
       Serial.println("Downloading firmware...");
       http.begin(firmwareURL);
       int firmwareCode = http.GET();
@@ -278,6 +273,9 @@ void checkForUpdates() {
           size_t written = Update.writeStream(*client);
           if (written == http.getSize()) {
             Serial.println("Written " + String(written) + " successfully.");
+            
+            
+            
             if (Update.end()) {
               Serial.println("OTA firmware update successful.");
               storeVersion(newVersion);
