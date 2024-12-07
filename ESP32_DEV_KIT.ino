@@ -32,6 +32,12 @@ const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boa
 int outputPins[] = {12, 14, 27, 26, 33, 32, 5, 18};  // Define the GPIO pins for the 8 outputs
 bool outputStates[NUM_OUTPUTS] = {false};  // Track the state of each output
 
+// Pattern variables
+String currentPattern = "off";  // Default pattern
+unsigned long patternLastTime = 0;
+int chaseIndex = 0;
+int reverseChaseIndex = NUM_OUTPUTS - 1;
+
 void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
@@ -75,6 +81,53 @@ void loop() {
     delay(100);  // LED OFF for 100ms
   } else {
     digitalWrite(ledPin, LOW);  // Keep LED OFF when services are inactive
+  }
+
+  // Handle pattern
+  handlePattern(millis());
+}
+
+void handlePattern(unsigned long currentTime) {
+  if (currentPattern == "static") {
+    setAllOutputs(HIGH);  // Turn all outputs ON
+  } else if (currentPattern == "off") {
+    setAllOutputs(LOW);  // Turn all outputs OFF
+  } else if (currentPattern == "blink") {
+    if (currentTime - patternLastTime >= 500) {  // 500ms interval
+      patternLastTime = currentTime;
+      toggleAllOutputs();
+    }
+  } else if (currentPattern == "chase") {
+    if (currentTime - patternLastTime >= 200) {  // 200ms interval
+      patternLastTime = currentTime;
+      setAllOutputs(LOW);  // Turn off all outputs
+      digitalWrite(outputPins[chaseIndex], HIGH);  // Light up one output
+      chaseIndex = (chaseIndex + 1) % NUM_OUTPUTS;  // Move to the next output
+    }
+  } else if (currentPattern == "reverseChase") {
+    if (currentTime - patternLastTime >= 200) {  // 200ms interval
+      patternLastTime = currentTime;
+      setAllOutputs(LOW);  // Turn off all outputs
+      digitalWrite(outputPins[reverseChaseIndex], HIGH);  // Light up one output in reverse
+      reverseChaseIndex = (reverseChaseIndex - 1 + NUM_OUTPUTS) % NUM_OUTPUTS;  // Move to the previous output
+    }
+  } else if (currentPattern == "randomBlink") {
+    if (currentTime - patternLastTime >= 200) {  // 200ms interval
+      patternLastTime = currentTime;
+      int randomPin = random(0, NUM_OUTPUTS);
+      digitalWrite(outputPins[randomPin], !digitalRead(outputPins[randomPin]));  // Toggle a random output
+    }
+  } else if (currentPattern == "wave") {
+    if (currentTime - patternLastTime >= 300) {  // 300ms interval
+      patternLastTime = currentTime;
+      for (int i = 0; i < NUM_OUTPUTS; i++) {
+        if (i % 2 == 0) {
+          digitalWrite(outputPins[i], HIGH);  // Turn ON alternating outputs
+        } else {
+          digitalWrite(outputPins[i], LOW);  // Turn OFF alternating outputs
+        }
+      }
+    }
   }
 }
 
@@ -134,6 +187,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.println(topic);
 
   if (strcmp(topic, topicData) == 0) {  // Check if the message is for the correct topic
+    
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, payload, length);
 
@@ -141,6 +195,12 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       Serial.print("JSON parse error: ");
       Serial.println(error.c_str());
       return;
+    }
+
+    // Check for the pattern name and update the currentPattern variable
+    if (doc.containsKey("pattern")) {
+      currentPattern = doc["pattern"].as<String>();
+      Serial.printf("Pattern set to: %s\n", currentPattern.c_str());
     }
 
     // Update output states based on JSON
@@ -206,4 +266,16 @@ void checkForUpdates() {
     }
   }
   http.end();
+}
+
+void setAllOutputs(int state) {
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    digitalWrite(outputPins[i], state);
+  }
+}
+
+void toggleAllOutputs() {
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    digitalWrite(outputPins[i], !digitalRead(outputPins[i]));  // Toggle each output
+  }
 }
