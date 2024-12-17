@@ -4,6 +4,9 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <Preferences.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 const char* ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 const char* password = "3X3K22832E";     // Replace with your WiFi password
@@ -38,8 +41,20 @@ unsigned long patternLastTime = 0;
 int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
 
+// OLED Display Setup
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define I2C_ADDRESS 0x3C  // OLED I2C address, common for many displays
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 void setup() {
   Serial.begin(115200);
+
+  // Initialize I2C for OLED display with custom SDA and SCL pins
+    Wire.begin(21, 22); // SDA = 21, SCL = 22
+    
   pinMode(ledPin, OUTPUT);
   for (int i = 0; i < NUM_OUTPUTS; i++) {
     pinMode(outputPins[i], OUTPUT);
@@ -47,6 +62,15 @@ void setup() {
   }
 
   clientId = "ESP32_" + String(WiFi.macAddress());
+
+  // Initialize OLED display
+  if (!display.begin(I2C_ADDRESS, OLED_RESET)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Infinite loop if OLED fails to initialize
+  }
+  display.display();
+  delay(2000);
+  display.clearDisplay();
 
   connectWiFi();
   client.setServer(mqttServer, mqttPort);
@@ -85,6 +109,9 @@ void loop() {
 
   // Handle pattern
   handlePattern(millis());
+
+  // Update OLED with status info
+  updateOLED();
 }
 
 void handlePattern(unsigned long currentTime) {
@@ -162,11 +189,11 @@ void connectMQTT() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Levers Puzzle";
+  doc["puzzleName"] = "Outputs Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
-  doc["tab"] = "Presidents Big Mistake";
+  doc["tab"] = "Christmas Lights";
   doc["group"] = "Stage 2";
   doc["version"] = getStoredVersion();
   doc["num_outputs"] = NUM_OUTPUTS;
@@ -207,75 +234,115 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     for (int i = 0; i < NUM_OUTPUTS; i++) {
       String key = "XmasOutput" + String(i + 1);
       if (doc.containsKey(key)) {
-        outputStates[i] = doc[key];
+        outputStates[i] = doc[key].as<bool>();
         digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
-        Serial.printf("Output %d set to %s\n", i + 1, outputStates[i] ? "HIGH" : "LOW");
       }
     }
   }
 }
 
-String getFirmwareURL() {
-  String url = "https://raw.githubusercontent.com/";
-  url += githubUser;
-  url += "/";
-  url += githubRepo;
-  url += "/";
-  url += branch;
-  url += "/";
-  url += firmwareFile;
-  return url;
-}
-
-String getStoredVersion() {
-  return preferences.getString("version", "");
-}
-
-void storeVersion(String version) {
-  preferences.putString("version", version);
-}
-
-void checkForUpdates() {
-  Serial.println("Checking for firmware updates...");
-
-  HTTPClient http;
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
-  http.begin(versionURL);
-
-  int httpCode = http.GET();
-  if (httpCode == HTTP_CODE_OK) {
-    String newVersion = http.getString();
-    newVersion.trim();
-    String currentVersion = getStoredVersion();
-
-    if (newVersion != currentVersion) {
-      String firmwareURL = getFirmwareURL();
-      http.begin(firmwareURL);
-      int firmwareCode = http.GET();
-      if (firmwareCode == HTTP_CODE_OK) {
-        WiFiClient* client = http.getStreamPtr();
-        if (Update.begin(http.getSize())) {
-          size_t written = Update.writeStream(*client);
-          if (written == http.getSize() && Update.end()) {
-            storeVersion(newVersion);
-            ESP.restart();
-          }
-        }
-      }
-      http.end();
-    }
-  }
-  http.end();
-}
-
-void setAllOutputs(int state) {
+void setAllOutputs(bool state) {
   for (int i = 0; i < NUM_OUTPUTS; i++) {
-    digitalWrite(outputPins[i], state);
+    digitalWrite(outputPins[i], state ? HIGH : LOW);
+    outputStates[i] = state;  // Update the tracked states
   }
 }
 
 void toggleAllOutputs() {
   for (int i = 0; i < NUM_OUTPUTS; i++) {
-    digitalWrite(outputPins[i], !digitalRead(outputPins[i]));  // Toggle each output
+    bool currentState = digitalRead(outputPins[i]);  // Read the current state of the pin
+    digitalWrite(outputPins[i], !currentState);     // Write the opposite state
+    outputStates[i] = !currentState;                // Update the tracked state
   }
+}
+
+
+
+void checkForUpdates() {
+  HTTPClient http;
+  String url = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
+  
+  http.begin(url);
+  int httpCode = http.GET();
+  
+  if (httpCode == HTTP_CODE_OK) {
+    String payload = http.getString();
+    String newVersion = extractVersionFromPayload(payload);
+    
+    String storedVersion = preferences.getString("version", "");
+    
+    if (newVersion != storedVersion) {
+      Serial.println("New version available: " + newVersion);
+      performFirmwareUpdate(url);
+      preferences.putString("version", newVersion);  // Store the new version
+    } else {
+      Serial.println("No updates available.");
+    }
+  } else {
+    Serial.println("Failed to fetch update information.");
+  }
+  
+  http.end();
+}
+
+String extractVersionFromPayload(String payload) {
+  int startIndex = payload.indexOf("version\": \"");
+  int endIndex = payload.indexOf("\"", startIndex + 11);
+  return payload.substring(startIndex + 11, endIndex);
+}
+
+void performFirmwareUpdate(String firmwareUrl) {
+  HTTPClient http;
+  http.begin(firmwareUrl);
+  int httpCode = http.GET();
+  
+  if (httpCode == HTTP_CODE_OK) {
+    int contentLength = http.getSize();
+    
+    if (Update.begin(contentLength)) {
+      WiFiClient *client = http.getStreamPtr();
+      size_t written = Update.writeStream(*client);
+      
+      if (written == contentLength) {
+        Serial.println("Update complete. Rebooting...");
+        Update.end();
+        ESP.restart();
+      } else {
+        Serial.println("Update failed.");
+        Update.end();
+      }
+    } else {
+      Serial.println("Not enough space for update.");
+    }
+  } else {
+    Serial.println("Failed to fetch firmware update.");
+  }
+  http.end();
+}
+
+String getStoredVersion() {
+  return preferences.getString("version", "0.0.0");  // Default version if not found
+}
+
+void updateOLED() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.print("Wi-Fi: ");
+  display.print(WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected");
+
+  display.setCursor(0, 10);
+  display.print("Pattern: ");
+  display.print(currentPattern);
+
+  display.setCursor(0, 20);
+  display.print("Version: ");
+  display.print(getStoredVersion());
+
+  display.setCursor(0, 30);
+  display.print("MQTT: ");
+  display.print(client.connected() ? "Connected" : "Disconnected");
+
+  display.display();
 }
