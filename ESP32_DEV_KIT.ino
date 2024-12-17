@@ -8,9 +8,27 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <ESPAsyncWebServer.h>
+#include <EEPROM.h>
 
-const char* ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
-const char* password = "3X3K22832E";     // Replace with your WiFi password
+#define EEPROM_SIZE 80
+#define VERSION_ADDRESS 0
+#define SSID_ADDRESS 16
+#define PASSWORD_ADDRESS 48
+
+String version = "1.3.3";  // Default version
+
+void saveVersion(const String& newVersion) {
+  Serial.println("Saving version to EEPROM...");
+  EEPROM.writeString(VERSION_ADDRESS, newVersion);
+  EEPROM.commit();
+}
+
+String loadVersion() {
+  return EEPROM.readString(VERSION_ADDRESS);
+}
+
+String ssid = "";   // Replace with your WiFi SSID
+String password = "";     // Replace with your WiFi password
 
 const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;
@@ -58,49 +76,101 @@ int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was th
 // Set up the server on port 80
 AsyncWebServer server(80);
 
-void setup() {
-  Serial.begin(115200);
 
-  // Initialize I2C for OLED display with custom SDA and SCL pins
-    Wire.begin(21, 22); // SDA = 21, SCL = 22
-    
-  pinMode(ledPin, OUTPUT);
-  for (int i = 0; i < NUM_OUTPUTS; i++) {
-    pinMode(outputPins[i], OUTPUT);
-    digitalWrite(outputPins[i], LOW);  // Ensure all outputs start LOW
+void saveWiFiCredentials(const String& newSSID, const String& newPassword) {
+    preferences.begin("wifi-config", false);
+    preferences.putString("ssid", newSSID);
+    preferences.putString("password", newPassword);
+    preferences.end();
+}
+
+void loadWiFiCredentials() {
+    preferences.begin("wifi-config", true);
+    ssid = preferences.getString("ssid", "");
+    password = preferences.getString("password", "");
+    preferences.end();
+}
+
+
+void connectWiFi() {
+  
+  Serial.printf("Connecting to WiFi: %s\n", ssid);
+    Serial.printf(" WiFi Password: %s\n", password);
+
+  WiFi.begin(ssid, password);
+
+  unsigned long startAttemptTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+    delay(500);
+    Serial.print(".");
   }
 
-  clientId = "ESP32_" + String(WiFi.macAddress());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi connected.");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+    setupDashboard();
+  } else {
+    Serial.println("\nWiFi connection failed. Starting Access Point...");
+    WiFi.softAP("ESP32_AccessPoint", "12345678");
+    Serial.print("Access Point IP Address: ");
+    Serial.println(WiFi.softAPIP());
+    setupServer();  
 
-  // Initialize OLED display
-  if (!display.begin(SSD1306_SWITCHCAPVCC, I2C_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;); // Infinite loop if OLED fails to initialize
   }
-  display.setCursor(0,0);
-  display.print("Ready");
-  display.display();
-  delay(3000);
-  display.clearDisplay();
+}
 
-  connectWiFi();
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(mqttCallback);  // Set MQTT callback function
-  connectMQTT();
+void setupServer() {
+  
+  server.on("/admin", HTTP_GET, [](AsyncWebServerRequest* request) {
+    String html = R"rawliteral(
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>WiFi Config</title>
+      </head>
+      <body>
+        <h2>WiFi Configuration</h2>
+        <form action="/setWiFi" method="POST">
+          <label for="ssid">SSID:</label><br>
+          <input type="text" id="ssid" name="ssid" value=""><br><br>
+          <label for="password">Password:</label><br>
+          <input type="text" id="password" name="password" value=""><br><br>
+          <input type="submit" value="Save">
+        </form>
+      </body>
+      </html>
+    )rawliteral";
+    request->send(200, "text/html", html);
+  });
 
-  // Initialize Preferences
-  preferences.begin("firmware", false);
+  server.on("/setWiFi", HTTP_POST, [](AsyncWebServerRequest* request) {
+    String newSSID;
+    String newPassword;
+   
 
-  // Set the version during initial setup (only if necessary)
-  if (!preferences.isKey("version")) {
-    preferences.putString("version", "0.0.1");  // Set the initial firmware version
-  }
+    if (request->hasParam("ssid", true)) {
+      newSSID = request->getParam("ssid", true)->value();
+    }
+    if (request->hasParam("password", true)) {
+      newPassword = request->getParam("password", true)->value();
+    }
 
-  delay(3000);
-  checkForUpdates();
+    if (!newSSID.isEmpty() && !newPassword.isEmpty()) {
+     
+      saveWiFiCredentials(newSSID, newPassword);
+      request->send(200, "text/html", "<p>WiFi credentials saved! Restarting...</p>");
+      delay(2000);
+      ESP.restart();
+    } else {
+      request->send(200, "text/html", "<p>Invalid input. Please try again.</p>");
+    }
+  });
 
-  sendMQTTPayload();  // Send initial MQTT message when connected
+  server.begin();
+}
 
+void setupDashboard() {
 server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
   String page = "<html><head>";
   page += "<style> body { background-color: black; color: white; text-align: center; } ";
@@ -177,6 +247,9 @@ server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
   page += "<button id='randomBlink' onclick=\"setPattern('randomBlink')\">Random Blink</button>";
   page += "<button id='wave' onclick=\"setPattern('wave')\">Wave</button>";
   page += "</div>";
+  
+  page += "<br><br><label for='version'>Version:</label><br>";
+  page += "<input type='text' id='version' name='version' value=''><br><br>";
 
   page += "</body></html>";
   request->send(200, "text/html", page);
@@ -224,14 +297,68 @@ server.on("/toggleOutput", HTTP_GET, [](AsyncWebServerRequest *request){
   request->send(200, "text/html", "<h1>Output " + String(outputIndex + 1) + " Toggled</h1>");
 });
 
-
-
-
-  // Start the web server
   server.begin();
+
+  
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(mqttCallback);  // Set MQTT callback function
+  connectMQTT();
+
+  // Initialize Preferences
+  preferences.begin("firmware", false);
+    
+  // Load and print the stored version
+  String storedVersion = loadVersion();
+  if (storedVersion.isEmpty()) {
+    Serial.println("No version stored. Saving default version...");
+    saveVersion(version);
+    storedVersion = version;
+  }
+  Serial.print("Stored version: ");
+  Serial.println(storedVersion);
+ 
+  delay(3000);
+  checkForUpdates();
+
+  sendMQTTPayload();  // Send initial MQTT message when connected
+  
 
 
 }
+
+void setup() {
+  Serial.begin(115200);
+
+  // Initialize I2C for OLED display with custom SDA and SCL pins
+    Wire.begin(21, 22); // SDA = 21, SCL = 22
+    
+  pinMode(ledPin, OUTPUT);
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    pinMode(outputPins[i], OUTPUT);
+    digitalWrite(outputPins[i], LOW);  // Ensure all outputs start LOW
+  }
+
+  clientId = "ESP32_" + String(WiFi.macAddress());
+
+  // Initialize OLED display
+  if (!display.begin(SSD1306_SWITCHCAPVCC, I2C_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Infinite loop if OLED fails to initialize
+  }
+  display.setCursor(0,0);
+  display.print("Ready");
+  display.display();
+  delay(3000);
+  display.clearDisplay();
+
+  EEPROM.begin(EEPROM_SIZE);
+  
+  loadWiFiCredentials();
+  connectWiFi();
+  
+
+}
+
 
 void getOutputStates() {
 
@@ -345,19 +472,6 @@ void handlePattern(unsigned long currentTime) {
 
   }
 
-}
-
-void connectWiFi() {
-  Serial.println("Connecting to WiFi...");
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi connected.");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-  allServicesActive = true;  // Set to true when WiFi is connected
 }
 
 void connectMQTT() {
