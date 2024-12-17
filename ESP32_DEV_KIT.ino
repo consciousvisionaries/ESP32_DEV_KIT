@@ -36,7 +36,7 @@ int outputPins[] = {12, 14, 27, 26, 33, 32, 5, 18};  // Define the GPIO pins for
 bool outputStates[NUM_OUTPUTS] = {false};  // Track the state of each output
 
 // Pattern variables
-String currentPattern = "off";  // Default pattern
+String currentPattern = "chase";  // Default pattern
 unsigned long patternLastTime = 0;
 int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
@@ -64,12 +64,14 @@ void setup() {
   clientId = "ESP32_" + String(WiFi.macAddress());
 
   // Initialize OLED display
-  if (!display.begin(I2C_ADDRESS, OLED_RESET)) {
+  if (!display.begin(SSD1306_SWITCHCAPVCC, I2C_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;); // Infinite loop if OLED fails to initialize
   }
+  display.setCursor(0,0);
+  display.print("Ready");
   display.display();
-  delay(2000);
+  delay(3000);
   display.clearDisplay();
 
   connectWiFi();
@@ -77,7 +79,13 @@ void setup() {
   client.setCallback(mqttCallback);  // Set MQTT callback function
   connectMQTT();
 
+  // Initialize Preferences
   preferences.begin("firmware", false);
+
+  // Set the version during initial setup (only if necessary)
+  if (!preferences.isKey("version")) {
+    preferences.putString("version", "1.3.3");  // Set the initial firmware version
+  }
 
   delay(3000);
   checkForUpdates();
@@ -115,6 +123,7 @@ void loop() {
 }
 
 void handlePattern(unsigned long currentTime) {
+   
   if (currentPattern == "static") {
     setAllOutputs(HIGH);  // Turn all outputs ON
   } else if (currentPattern == "off") {
@@ -125,6 +134,8 @@ void handlePattern(unsigned long currentTime) {
       toggleAllOutputs();
     }
   } else if (currentPattern == "chase") {
+     
+
     if (currentTime - patternLastTime >= 200) {  // 200ms interval
       patternLastTime = currentTime;
       setAllOutputs(LOW);  // Turn off all outputs
@@ -256,41 +267,44 @@ void toggleAllOutputs() {
   }
 }
 
-
-
 void checkForUpdates() {
   HTTPClient http;
   String url = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
-  
+
   http.begin(url);
   int httpCode = http.GET();
-  
+
   if (httpCode == HTTP_CODE_OK) {
     String payload = http.getString();
     String newVersion = extractVersionFromPayload(payload);
     
-    String storedVersion = preferences.getString("version", "");
-    
+    // Get stored version from Preferences
+    String storedVersion = preferences.getString("version", "0.0.0");  // Default to "0.0.0" if no version is stored
+
+    Serial.print("Current stored version: ");
+    Serial.println(storedVersion);
+    Serial.print("New version available: ");
+    Serial.println(newVersion);
+
     if (newVersion != storedVersion) {
-      Serial.println("New version available: " + newVersion);
-      performFirmwareUpdate(url);
-      preferences.putString("version", newVersion);  // Store the new version
+      Serial.println("New firmware update found. Updating...");
+      performFirmwareUpdate(url);  // Perform the update
     } else {
-      Serial.println("No updates available.");
+      Serial.println("Firmware is up to date.");
     }
   } else {
     Serial.println("Failed to fetch update information.");
   }
-  
+
   http.end();
 }
+
 
 String extractVersionFromPayload(String payload) {
   int startIndex = payload.indexOf("version\": \"");
   int endIndex = payload.indexOf("\"", startIndex + 11);
   return payload.substring(startIndex + 11, endIndex);
 }
-
 void performFirmwareUpdate(String firmwareUrl) {
   HTTPClient http;
   http.begin(firmwareUrl);
@@ -306,6 +320,11 @@ void performFirmwareUpdate(String firmwareUrl) {
       if (written == contentLength) {
         Serial.println("Update complete. Rebooting...");
         Update.end();
+
+        // Store the new version in Preferences
+        String newVersion = extractVersionFromPayload(http.getString());
+        preferences.putString("version", newVersion);  // Save version to Preferences
+        
         ESP.restart();
       } else {
         Serial.println("Update failed.");
@@ -319,6 +338,7 @@ void performFirmwareUpdate(String firmwareUrl) {
   }
   http.end();
 }
+
 
 String getStoredVersion() {
   return preferences.getString("version", "0.0.0");  // Default version if not found
