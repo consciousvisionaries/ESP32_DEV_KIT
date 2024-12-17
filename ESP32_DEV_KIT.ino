@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ESPAsyncWebServer.h>
 
 const char* ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 const char* password = "3X3K22832E";     // Replace with your WiFi password
@@ -38,6 +39,8 @@ bool outputStates[NUM_OUTPUTS] = {false};  // Track the state of each output
 // Pattern variables
 String currentPattern = "chase";  // Default pattern
 unsigned long patternLastTime = 0;
+unsigned long lastUpdateTime = 0;
+unsigned long blinkInterval = 500; 
 int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
 
@@ -48,6 +51,12 @@ int reverseChaseIndex = NUM_OUTPUTS - 1;
 #define I2C_ADDRESS 0x3C  // OLED I2C address, common for many displays
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// Example output states
+int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was the intention)
+
+// Set up the server on port 80
+AsyncWebServer server(80);
 
 void setup() {
   Serial.begin(115200);
@@ -84,14 +93,161 @@ void setup() {
 
   // Set the version during initial setup (only if necessary)
   if (!preferences.isKey("version")) {
-    preferences.putString("version", "1.3.3");  // Set the initial firmware version
+    preferences.putString("version", "0.0.1");  // Set the initial firmware version
   }
 
   delay(3000);
   checkForUpdates();
 
   sendMQTTPayload();  // Send initial MQTT message when connected
+
+server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  String page = "<html><head>";
+  page += "<style> body { background-color: black; color: white; text-align: center; } ";
+  page += ".dot { display: inline-block; width: 60px; height: 60px; margin: 5px; border-radius: 50%; background-color: grey; } ";
+  page += ".on { background-color: green; } .off { background-color: red; } ";
+  page += "button { padding: 10px 20px; margin: 10px; font-size: 16px; background-color: #333; color: white; border: none; cursor: pointer; } ";
+  page += "button:hover { background-color: #555; } ";
+  page += "</style>";
+  
+  // AJAX for automatic updates
+  page += "<script>";
+  page += "function refreshOutputStates() {";
+  page += "  fetch('/getOutputStates').then(response => response.text()).then(data => {";
+  page += "    document.getElementById('outputStates').innerHTML = data;";
+  page += "  });";
+  page += "  setTimeout(refreshOutputStates, 10);"; // Update output every second
+  page += "}";
+  
+  // Update pattern status and buttons dynamically
+  page += "function setPattern(pattern) {";
+  page += "  fetch('/setPattern?pattern=' + pattern).then(response => response.text()).then(data => {";
+  page += "    document.getElementById('patternStatus').innerHTML = data;";
+  page += "    refreshPatternButtons();";  // Update pattern buttons
+  page += "  });";
+  page += "  setTimeout(refreshPatternButtons, 1000);";  // Ensure button refresh
+  page += "}";
+  
+  page += "function refreshPatternButtons() {";
+  page += "  const patterns = ['static', 'off', 'blink', 'chase', 'reverseChase', 'randomBlink', 'wave'];";
+  page += "  patterns.forEach(pattern => {";
+  page += "    const btn = document.getElementById(pattern);";
+  page += "    if (pattern === '" + currentPattern + "') {";
+  page += "      btn.classList.add('on');";
+  page += "    } else {";
+  page += "      btn.classList.remove('on');";
+  page += "    }";
+  page += "  });";
+  page += "}";
+  
+  page += "window.onload = function() { refreshOutputStates(); refreshPatternButtons(); };";  // Initial load
+  page += "</script>";
+  
+  page += "</head><body>";
+  page += "<h1>Output Status</h1>";
+  
+  // Container for output states that will be updated with AJAX
+  page += "<div id='outputStates'>";
+  page += "<div style='display: flex; justify-content: center;'>";
+  
+  // Loop through the outputs and display dots with pin numbers
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    page += "<div style='text-align: center; margin: 10px;'>";
+    page += "<div class=\"dot " + String(outputStates[i] ? "on" : "off") + "\">Pin " + String(i+1)+"</div>";  // Dot based on output state
+    page += "</div>";
+  }
+
+  page += "</div>";
+  page += "</div>";
+
+  // Buttons to toggle outputs
+  page += "<br><br>";
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    page += "<button onclick=\"toggleOutput(" + String(i) + ")\">Toggle Output " + String(i + 1) + "</button>";
+  }
+
+  // Pattern control section
+  page += "<h2>Pattern Control</h2>";
+  page += "<div id='patternStatus'>";
+  page += "<button id='static' onclick=\"setPattern('static')\">Static</button>";
+  page += "<button id='off' onclick=\"setPattern('off')\">Off</button>";
+  page += "<button id='blink' onclick=\"setPattern('blink')\">Blink</button>";
+  page += "<button id='chase' onclick=\"setPattern('chase')\">Chase</button>";
+  page += "<button id='reverseChase' onclick=\"setPattern('reverseChase')\">Reverse Chase</button>";
+  page += "<button id='randomBlink' onclick=\"setPattern('randomBlink')\">Random Blink</button>";
+  page += "<button id='wave' onclick=\"setPattern('wave')\">Wave</button>";
+  page += "</div>";
+
+  page += "</body></html>";
+  request->send(200, "text/html", page);
+});
+
+
+server.on("/setPattern", HTTP_GET, [](AsyncWebServerRequest *request){
+    String pattern = request->getParam("pattern")->value();
+    currentPattern = pattern;  // Update the pattern
+
+    // Send response with JavaScript to update the pattern buttons dynamically
+    String page = "<html><head>";
+    page += "<script>";
+    page += "function refreshPatternButtons() {";
+    page += "  const patterns = ['static', 'off', 'blink', 'chase', 'reverseChase', 'randomBlink', 'wave'];";
+    page += "  patterns.forEach(pattern => {";
+    page += "    const btn = document.getElementById(pattern);";
+    page += "    if (pattern === '" + currentPattern + "') {";
+    page += "      btn.classList.add('on');";
+    page += "    } else {";
+    page += "      btn.classList.remove('on');";
+    page += "    }";
+    page += "  });";
+    page += "  setTimeout(function() { window.location.href = '/'; }, 2000);";
+    page += "}";
+    page += "refreshPatternButtons();"; // Call the function to refresh the buttons
+    page += "</script>"; // JavaScript to update buttons dynamically
+    page += "</head><body><h1>Pattern Set to " + pattern + "</h1><a href='/'>Go Back</a></body></html>";
+
+    request->send(200, "text/html", page);
+});
+
+
+// Toggle output states without leaving the dashboard
+server.on("/toggleOutput", HTTP_GET, [](AsyncWebServerRequest *request){
+  String outputIndexStr = request->getParam("output")->value();
+  int outputIndex = outputIndexStr.toInt();
+
+  // Toggle the selected output
+  if (outputIndex >= 0 && outputIndex < 8) {
+    outputStates[outputIndex] = !outputStates[outputIndex];
+  }
+
+  // Send response back without leaving the page
+  request->send(200, "text/html", "<h1>Output " + String(outputIndex + 1) + " Toggled</h1>");
+});
+
+
+
+
+  // Start the web server
+  server.begin();
+
+
 }
+
+void getOutputStates() {
+
+  // Get current output states via AJAX
+server.on("/getOutputStates", HTTP_GET, [](AsyncWebServerRequest *request){
+  String outputHtml = "<div style='text-align: center; margin: 10px;'>";
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
+    outputHtml += "<div class=\"dot " + String(outputStates[i] ? "on" : "off") + "\">Pin " + String(i+1)+"</div>";
+    outputHtml += "</div>";
+  }
+  request->send(200, "text/html", outputHtml);
+});
+
+}
+
 
 void loop() {
   if (!client.connected()) {
@@ -124,49 +280,71 @@ void loop() {
 
 void handlePattern(unsigned long currentTime) {
    
-  if (currentPattern == "static") {
-    setAllOutputs(HIGH);  // Turn all outputs ON
-  } else if (currentPattern == "off") {
-    setAllOutputs(LOW);  // Turn all outputs OFF
-  } else if (currentPattern == "blink") {
-    if (currentTime - patternLastTime >= 500) {  // 500ms interval
-      patternLastTime = currentTime;
-      toggleAllOutputs();
-    }
-  } else if (currentPattern == "chase") {
-     
-
-    if (currentTime - patternLastTime >= 200) {  // 200ms interval
-      patternLastTime = currentTime;
-      setAllOutputs(LOW);  // Turn off all outputs
-      digitalWrite(outputPins[chaseIndex], HIGH);  // Light up one output
-      chaseIndex = (chaseIndex + 1) % NUM_OUTPUTS;  // Move to the next output
-    }
-  } else if (currentPattern == "reverseChase") {
-    if (currentTime - patternLastTime >= 200) {  // 200ms interval
-      patternLastTime = currentTime;
-      setAllOutputs(LOW);  // Turn off all outputs
-      digitalWrite(outputPins[reverseChaseIndex], HIGH);  // Light up one output in reverse
-      reverseChaseIndex = (reverseChaseIndex - 1 + NUM_OUTPUTS) % NUM_OUTPUTS;  // Move to the previous output
-    }
-  } else if (currentPattern == "randomBlink") {
-    if (currentTime - patternLastTime >= 200) {  // 200ms interval
-      patternLastTime = currentTime;
-      int randomPin = random(0, NUM_OUTPUTS);
-      digitalWrite(outputPins[randomPin], !digitalRead(outputPins[randomPin]));  // Toggle a random output
-    }
-  } else if (currentPattern == "wave") {
-    if (currentTime - patternLastTime >= 300) {  // 300ms interval
-      patternLastTime = currentTime;
+  // Update outputs based on current pattern
+  if (currentPattern == "blink") {
+    if (currentTime - lastUpdateTime > blinkInterval) {
+      lastUpdateTime = currentTime;
       for (int i = 0; i < NUM_OUTPUTS; i++) {
-        if (i % 2 == 0) {
-          digitalWrite(outputPins[i], HIGH);  // Turn ON alternating outputs
-        } else {
-          digitalWrite(outputPins[i], LOW);  // Turn OFF alternating outputs
-        }
+        outputStates[i] = !outputStates[i];  // Toggle all outputs
       }
+      getOutputStates();
     }
   }
+  else if (currentPattern == "chase") {
+    if (currentTime - lastUpdateTime > blinkInterval) {
+      lastUpdateTime = currentTime;
+      outputStates[chaseIndex] = true;
+      if (chaseIndex > 0) outputStates[chaseIndex - 1] = false;
+      chaseIndex = (chaseIndex + 1) % NUM_OUTPUTS;
+      getOutputStates();
+    }
+  }
+  else if (currentPattern == "reverseChase") {
+    if (currentTime - lastUpdateTime > blinkInterval) {
+      lastUpdateTime = currentTime;
+      outputStates[chaseIndex] = true;
+      if (chaseIndex < (NUM_OUTPUTS-1)) outputStates[chaseIndex + 1] = false;
+      chaseIndex = (chaseIndex - 1 + NUM_OUTPUTS) % NUM_OUTPUTS;
+      getOutputStates();
+    }
+  }
+  else if (currentPattern == "randomBlink") {
+    if (currentTime - lastUpdateTime > blinkInterval) {
+      lastUpdateTime = currentTime;
+      int randOutput = random(0, NUM_OUTPUTS);
+      outputStates[randOutput] = !outputStates[randOutput];  // Toggle random output
+      getOutputStates();
+    }
+  }
+  else if (currentPattern == "wave") {
+    if (currentTime - lastUpdateTime > blinkInterval) {
+      lastUpdateTime = currentTime;
+      for (int i = 0; i < NUM_OUTPUTS; i++) {
+        outputStates[i] = false;  // Turn off all outputs
+      }
+      outputStates[waveIndex] = true;  // Turn on the "wave" output
+      waveIndex = (waveIndex + 1) % 8;
+      getOutputStates();
+    }
+  }
+  else if (currentPattern == "static") {
+    // In "static" pattern, you can keep the outputs in a fixed state
+    // For example, set all to ON or OFF based on your choice
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+      outputStates[i] = true;  // Keep all outputs on in static mode
+    }
+        getOutputStates();
+
+  }
+  else if (currentPattern == "off") {
+    // In "off" pattern, turn all outputs off
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+      outputStates[i] = false;  // Turn all outputs off
+    }
+        getOutputStates();
+
+  }
+
 }
 
 void connectWiFi() {
@@ -279,7 +457,7 @@ void checkForUpdates() {
     String newVersion = extractVersionFromPayload(payload);
     
     // Get stored version from Preferences
-    String storedVersion = preferences.getString("version", "0.0.0");  // Default to "0.0.0" if no version is stored
+    String storedVersion = preferences.getString("version", "0.0.2 (new)");  // Default to "0.0.0" if no version is stored
 
     Serial.print("Current stored version: ");
     Serial.println(storedVersion);
