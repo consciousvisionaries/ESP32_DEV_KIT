@@ -54,12 +54,16 @@ AsyncWebServer server(80);
 void saveVersion(const String& newVersion) {
   preferences.begin("ino-config", false);
   preferences.putString("Version", newVersion);
+  String savedVersion = preferences.getString("version", "Not found");
+  Serial.println("Saved version: " + savedVersion);
   preferences.end();
 }
 
+
 String loadVersion() {
   preferences.begin("ino-config", true);
-  String newversion = preferences.getString("Version","");
+  String newversion = preferences.getString("version","");
+  Serial.println("New version: " + newversion);
   preferences.end();
   return newversion;
 }
@@ -539,11 +543,15 @@ void toggleAllOutputs() {
 }
 
 void checkForUpdates() {
+  
   HTTPClient http;
-  String url = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
+  String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
 
-  http.begin(url);
-  int httpCode = http.GET();
+   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
+    
+    http.begin(versionURL);
+    
+    int httpCode = http.GET();
 
   if (httpCode == HTTP_CODE_OK) {
     String payload = http.getString();
@@ -559,7 +567,7 @@ void checkForUpdates() {
 
     if (newVersion != storedVersion) {
       Serial.println("New firmware update found. Updating...");
-      performFirmwareUpdate(url);  // Perform the update
+      performFirmwareUpdate(firmwareURL);  // Perform the update
     } else {
       Serial.println("Firmware is up to date.");
     }
