@@ -7,7 +7,7 @@
 #include <ESPAsyncWebServer.h>
 
 
-String version = "1.3.3";  // Default version
+String version = "";  // Default version
 
 
 String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
@@ -53,13 +53,13 @@ AsyncWebServer server(80);
 
 void saveVersion(const String& newVersion) {
   preferences.begin("ino-config", false);
-  preferences.putString("version", newVersion);
+  preferences.putString("Version", newVersion);
   preferences.end();
 }
 
 String loadVersion() {
   preferences.begin("ino-config", true);
-  String newversion = preferences.getString("version","");
+  String newversion = preferences.getString("Version","");
   preferences.end();
   return newversion;
 }
@@ -314,16 +314,7 @@ server.on("/toggleOutput", HTTP_GET, [](AsyncWebServerRequest *request){
 
   // Initialize Preferences
   preferences.begin("firmware", false);
-    
-  // Load and print the stored version
-  String storedVersion = loadVersion();
-  if (storedVersion.isEmpty()) {
-    Serial.println("No version stored. Saving default version...");
-    saveVersion(version);
-    storedVersion = version;
-  }
-  Serial.print("Stored version: ");
-  Serial.println(storedVersion);
+
  
   delay(3000);
   checkForUpdates();
@@ -559,7 +550,7 @@ void checkForUpdates() {
     String newVersion = extractVersionFromPayload(payload);
     
     // Get stored version from Preferences
-    String storedVersion = preferences.getString("version", "0.0.2 (new)");  // Default to "0.0.0" if no version is stored
+    String storedVersion = loadVersion();  // Default to "0.0.0" if no version is stored
 
     Serial.print("Current stored version: ");
     Serial.println(storedVersion);
