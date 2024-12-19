@@ -11,35 +11,27 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
 void loadWiFiCredentials() {
   preferences.begin("wifi-config", true); // Initialize namespace
   if (ssid.isEmpty() || password.isEmpty()) {
-
     ssid = preferences.getString("ssid", "");
     password = preferences.getString("password", "");
     storedVersion = preferences.getString("version", "");
-
   }
   preferences.end(); // Close preferences
-
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found.");
-
   } else {
     Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
   }
 }
 
 void connectWiFi() {
-  
   Serial.printf("Connecting to WiFi: %s\n", ssid);
     Serial.printf(" WiFi Password: %s\n", password);
-
   WiFi.begin(ssid, password);
-
   unsigned long startAttemptTime = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
     delay(500);
     Serial.print(".");
   }
-
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nWiFi connected.");
     Serial.print("IP Address: ");
@@ -53,7 +45,6 @@ void connectWiFi() {
 }
 
 void firmwareUpdates() {
-  
   static unsigned long lastOTA = 0;
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     lastOTA = millis();
@@ -65,19 +56,21 @@ void checkForUpdates() {
   
   HTTPClient http;
   String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
-
-   String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
-    
-    http.begin(versionURL);
-    
-    int httpCode = http.GET();
-
+  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";  
+  http.begin(versionURL);
+  int httpCode = http.GET();
   if (httpCode == HTTP_CODE_OK) {
     String payload = http.getString();
     String newFWVersion = extractVersionFromPayload(payload);
-    newFWVersion.trim();
-    // Get stored version from Preferences
 
+    Serial.print("Fetching version from URL: ");
+Serial.println(versionURL);
+Serial.print("HTTP Response Code: ");
+Serial.println(httpCode);
+Serial.print("Payload: ");
+Serial.println(payload);
+
+    // Get stored version from Preferences
     Serial.print("Current stored version: ");
     Serial.println(storedVersion);
     Serial.print("New version available: ");
@@ -98,9 +91,10 @@ void checkForUpdates() {
 
 
 String extractVersionFromPayload(String payload) {
-  int startIndex = payload.indexOf("version\": \"");
-  int endIndex = payload.indexOf("\"", startIndex + 11);
-  return payload.substring(startIndex + 11, endIndex);
+    Serial.print("Raw payload: ");
+    Serial.println(payload);
+    // Adjust parsing logic here if needed
+    return payload; // Assuming the version is directly the payload
 }
 
 void performFirmwareUpdate(String firmwareUrl, String newversion) {
