@@ -97,7 +97,7 @@ String extractVersionFromPayload(String payload) {
     return payload; // Assuming the version is directly the payload
 }
 
-void performFirmwareUpdate(String firmwareUrl, String newversion) {
+void performFirmwareUpdate(String firmwareUrl, String versionID) {
   HTTPClient http;
   http.begin(firmwareUrl);
   int httpCode = http.GET();
@@ -116,11 +116,14 @@ void performFirmwareUpdate(String firmwareUrl, String newversion) {
 // Get stored version from Preferences
     Serial.print("SSID: ");
     Serial.println(ssid);
-    Serial.print("New version updated: ");
-    Serial.println(newversion);
-
+    
         // Store the new version in Preferences
-        saveWiFiCredentials(ssid, password, newversion);
+        saveWiFiCredentials(ssid, password, versionID);
+
+        Serial.print("New version SAVED: ");
+    Serial.println(versionID);
+
+        
         delay(2000);
         ESP.restart();
         
