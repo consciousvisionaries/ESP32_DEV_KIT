@@ -1,3 +1,7 @@
+
+// Set up the server on port 80
+AsyncWebServer server(80);
+
 void setupDashboard() {
   
 server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -186,6 +190,22 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest* request) {
     }
   });
 
+
+
   server.begin();
-  
+}
+
+  void getOutputStates() {
+
+  // Get current output states via AJAX
+server.on("/getOutputStates", HTTP_GET, [](AsyncWebServerRequest *request){
+  String outputHtml = "<div style='text-align: center; margin: 10px;'>";
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
+    outputHtml += "<div class=\"dot " + String(outputStates[i] ? "on" : "off") + "\">Pin " + String(i+1)+"</div>";
+    outputHtml += "</div>";
+  }
+  request->send(200, "text/html", outputHtml);
+});
+
 }

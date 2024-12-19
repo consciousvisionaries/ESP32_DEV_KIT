@@ -1,3 +1,4 @@
+
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
   preferences.begin("wifi-config", false); // Initialize namespace
   preferences.putString("ssid", newSSID);
@@ -23,6 +24,31 @@ void loadWiFiCredentials() {
 
   } else {
     Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
+  }
+}
+
+void connectWiFi() {
+  
+  Serial.printf("Connecting to WiFi: %s\n", ssid);
+    Serial.printf(" WiFi Password: %s\n", password);
+
+  WiFi.begin(ssid, password);
+
+  unsigned long startAttemptTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi connected.");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\nWiFi connection failed. Starting Access Point...");
+    WiFi.softAP("ESP32_AccessPoint", "12345678");
+    Serial.print("Access Point IP Address: ");
+    Serial.println(WiFi.softAPIP());
   }
 }
 
@@ -110,4 +136,86 @@ void performFirmwareUpdate(String firmwareUrl, String newversion) {
     Serial.println("Failed to fetch firmware update.");
   }
   http.end();
+}
+
+void connectMQTT() {
+
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(mqttCallback);  // Set MQTT callback function
+  
+  while (!client.connected()) {
+    Serial.print("Connecting to MQTT...");
+    if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
+      Serial.println("Connected to MQTT.");
+      client.subscribe(topicData);  // Subscribe to the topic
+    } else {
+      Serial.print("Failed (state=");
+      Serial.print(client.state());
+      Serial.println("). Retrying in 5 seconds...");
+      delay(5000);
+    }
+  }
+}
+
+void clientMQTTConnected() {
+  
+  if (!client.connected()) {
+    connectMQTT();
+  }
+  client.loop();  // Ensure MQTT is being handled
+}
+
+void sendMQTTPayload() {
+  StaticJsonDocument<512> doc;
+  doc["mac"] = WiFi.macAddress();
+  doc["puzzleName"] = "Outputs Puzzle";
+  doc["designer"] = "Paul Hopkins";
+  doc["ipAddress"] = WiFi.localIP().toString();
+  doc["timestamp"] = millis();
+  doc["tab"] = "Christmas Lights";
+  doc["group"] = "Stage 2";
+  doc["version"] = storedVersion;
+  doc["num_outputs"] = NUM_OUTPUTS;
+
+  String jsonPayload;
+  serializeJson(doc, jsonPayload);
+
+  if (client.publish(topicData, jsonPayload.c_str())) {
+    Serial.println("Puzzle details sent:");
+    Serial.println(jsonPayload);
+  } else {
+    Serial.println("Failed to send puzzle details.");
+  }
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived on topic: ");
+  Serial.println(topic);
+
+  if (strcmp(topic, topicData) == 0) {  // Check if the message is for the correct topic
+    
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, payload, length);
+
+    if (error) {
+      Serial.print("JSON parse error: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    // Check for the pattern name and update the currentPattern variable
+    if (doc.containsKey("pattern")) {
+      currentPattern = doc["pattern"].as<String>();
+      Serial.printf("Pattern set to: %s\n", currentPattern.c_str());
+    }
+
+    // Update output states based on JSON
+    for (int i = 0; i < NUM_OUTPUTS; i++) {
+      String key = "XmasOutput" + String(i + 1);
+      if (doc.containsKey(key)) {
+        outputStates[i] = doc[key].as<bool>();
+        digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
+      }
+    }
+  }
 }
