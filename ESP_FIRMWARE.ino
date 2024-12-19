@@ -1,33 +1,63 @@
 
-void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion1) {
-  preferences.begin("wifi-config", false); // Initialize namespace
+// Function to save WiFi credentials (SSID, password) and version in Preferences
+void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
+  preferences.begin("wifi-config", false); // Open namespace for writing
+  
+  // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
-  preferences.putString("versiontxt", newVersion1);
+  preferences.putString("versiontxt", newVersion);
+  
   preferences.end();
-  Serial.println("WiFi credentials saved." + newVersion1);
-  loadWiFiCredentials();
+  
+  Serial.println("WiFi credentials and version saved.");
 }
 
+// Function to load WiFi credentials and version from Preferences
 void loadWiFiCredentials() {
-    preferences.begin("wifi-config", true); // Read-only mode
-    ssid = preferences.getString("ssid", "");
-    password = preferences.getString("password", "");
-    storedVersion = preferences.getString("versiontxt", "");
-    preferences.end();
-
-    if (ssid.isEmpty() || password.isEmpty()) {
-        Serial.println("WiFi credentials not found.");
-    } else {
-        Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
-    }
+  preferences.begin("wifi-config", true); // Open namespace for reading
+  
+  ssid = preferences.getString("ssid", "");
+  password = preferences.getString("password", "");
+  storedVersion = preferences.getString("versiontxt", "");
+  
+  preferences.end();
+  
+  if (ssid.isEmpty() || password.isEmpty()) {
+    Serial.println("WiFi credentials not found.");
+  } else {
+    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
+  }
 }
 
+// Function to simulate checking for a version update and saving it if a new version is found
+void checkForVersionUpdate() {
+  String currentVersion = "1.3.4d"; // Assume current version is this
+  String newVersion = "1.3.4e";     // For testing, we simulate a version update
+  
+  if (newVersion != storedVersion) {
+    Serial.println("New version available: " + newVersion);
+    Serial.println("Updating firmware...");
+    
+    // Simulate some update time (2 seconds delay for demonstration)
+    delay(2000);
+    
+    // Save the new version
+    saveWiFiCredentials(ssid, password, newVersion);
+    
+    Serial.println("Update complete. Rebooting...");
+    delay(1000);
+    ESP.restart();
+  } else {
+    Serial.println("Device firmware is up-to-date.");
+  }
+}
 
 void connectWiFi() {
-  Serial.printf("Connecting to WiFi: %s\n", ssid);
-    Serial.printf(" WiFi Password: %s\n", password);
-  WiFi.begin(ssid, password);
+  Serial.printf("Connecting to WiFi: %s\n", ssid.c_str());
+  Serial.printf("WiFi Password: %s\n", password.c_str());
+  WiFi.begin(ssid.c_str(), password.c_str());
+
   unsigned long startAttemptTime = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
     delay(500);
@@ -54,174 +84,81 @@ void firmwareUpdates() {
 }
 
 void checkForUpdates() {
-  
   HTTPClient http;
-  String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";  
+  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
+
+  Serial.println("Fetching version from URL: " + versionURL);
   http.begin(versionURL);
   int httpCode = http.GET();
-  if (httpCode == HTTP_CODE_OK) {
-    String payload = http.getString();
-    String newFWVersion = extractVersionFromPayload(payload);
 
-    Serial.print("Fetching version from URL: ");
-Serial.println(versionURL);
-Serial.print("HTTP Response Code: ");
-Serial.println(httpCode);
-Serial.print("Payload: ");
-Serial.println(payload);
+  if (httpCode == 200) {
+    String newVersion = http.getString();
+    newVersion.trim();
+    Serial.println("HTTP Response Code: " + String(httpCode));
+    Serial.println("Payload: " + newVersion);
 
-    // Get stored version from Preferences
-    Serial.print("Current stored version: ");
-    Serial.println(storedVersion);
-    Serial.print("New version available: ");
-    Serial.println(newFWVersion);
-
-    if (newFWVersion != storedVersion) {
-      Serial.println("New firmware update found. Updating...");
-      performFirmwareUpdate(firmwareURL,newFWVersion);  // Perform the update
+    if (newVersion != storedVersion) {
+      Serial.println("New version available: " + newVersion);
+      Serial.println("Updating firmware...");
+      if (updateFirmware(newVersion)) {
+        saveWiFiCredentials(ssid, password, newVersion);
+        Serial.println("Update complete. Rebooting...");
+        ESP.restart();
+      } else {
+        Serial.println("Firmware update failed.");
+      }
     } else {
-      Serial.println("Firmware is up to date.");
+      Serial.println("Device firmware is up-to-date.");
     }
   } else {
-    Serial.println("Failed to fetch update information.");
+    Serial.println("Failed to fetch version info. HTTP code: " + String(httpCode));
   }
-
   http.end();
 }
 
-
-String extractVersionFromPayload(String payload) {
-    Serial.print("Raw payload: ");
-    Serial.println(payload);
-    // Adjust parsing logic here if needed
-    return payload; // Assuming the version is directly the payload
-}
-
-void performFirmwareUpdate(String firmwareUrl, String versionID) {
-// Store the new version in Preferences
-        saveWiFiCredentials(ssid, password, versionID);
-
-  
+bool updateFirmware(const String& newVersion) {
   HTTPClient http;
-  http.begin(firmwareUrl);
+  String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
+  Serial.println("Fetching firmware from URL: " + firmwareURL);
+
+  http.begin(firmwareURL);
   int httpCode = http.GET();
-  
-  if (httpCode == HTTP_CODE_OK) {
+
+  if (httpCode == 200) {
     int contentLength = http.getSize();
-    
-    if (Update.begin(contentLength)) {
-      WiFiClient *client = http.getStreamPtr();
+    bool canBegin = Update.begin(contentLength);
+
+    if (canBegin) {
+      WiFiClient* client = http.getStreamPtr();
       size_t written = Update.writeStream(*client);
-      
+
       if (written == contentLength) {
-        Serial.println("Update complete. Rebooting...");
-        Update.end();
-
-// Get stored version from Preferences
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-    
-        
-        Serial.print("New version SAVED: ");
-    Serial.println(versionID);
-
-        
-        delay(2000);
-        ESP.restart();
-        
+        Serial.println("Firmware written successfully.");
       } else {
-        
-        Serial.println("Update failed.");
-        Update.end();
+        Serial.println("Firmware write failed. Written: " + String(written) + ", Expected: " + String(contentLength));
+        return false;
+      }
+
+      if (Update.end()) {
+        if (Update.isFinished()) {
+          Serial.println("Update successfully completed.");
+          return true;
+        } else {
+          Serial.println("Update not finished. Something went wrong.");
+          return false;
+        }
+      } else {
+        Serial.println("Update failed. Error #: " + String(Update.getError()));
+        return false;
       }
     } else {
       Serial.println("Not enough space for update.");
+      return false;
     }
   } else {
-    Serial.println("Failed to fetch firmware update.");
+    Serial.println("Failed to download firmware. HTTP code: " + String(httpCode));
+    return false;
   }
   http.end();
-}
-
-void connectMQTT() {
-
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(mqttCallback);  // Set MQTT callback function
-  
-  while (!client.connected()) {
-    Serial.print("Connecting to MQTT...");
-    if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
-      Serial.println("Connected to MQTT.");
-      client.subscribe(topicData);  // Subscribe to the topic
-    } else {
-      Serial.print("Failed (state=");
-      Serial.print(client.state());
-      Serial.println("). Retrying in 5 seconds...");
-      delay(5000);
-    }
-  }
-}
-
-void clientMQTTConnected() {
-  
-  if (!client.connected()) {
-    connectMQTT();
-  }
-  client.loop();  // Ensure MQTT is being handled
-}
-
-void sendMQTTPayload() {
-  StaticJsonDocument<512> doc;
-  doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Outputs Puzzle";
-  doc["designer"] = "Paul Hopkins";
-  doc["ipAddress"] = WiFi.localIP().toString();
-  doc["timestamp"] = millis();
-  doc["tab"] = "Christmas Lights";
-  doc["group"] = "Stage 2";
-  doc["version"] = storedVersion;
-  doc["num_outputs"] = NUM_OUTPUTS;
-
-  String jsonPayload;
-  serializeJson(doc, jsonPayload);
-
-  if (client.publish(topicData, jsonPayload.c_str())) {
-    Serial.println("Puzzle details sent:");
-    Serial.println(jsonPayload);
-  } else {
-    Serial.println("Failed to send puzzle details.");
-  }
-}
-
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.println(topic);
-
-  if (strcmp(topic, topicData) == 0) {  // Check if the message is for the correct topic
-    
-    StaticJsonDocument<256> doc;
-    DeserializationError error = deserializeJson(doc, payload, length);
-
-    if (error) {
-      Serial.print("JSON parse error: ");
-      Serial.println(error.c_str());
-      return;
-    }
-
-    // Check for the pattern name and update the currentPattern variable
-    if (doc.containsKey("pattern")) {
-      currentPattern = doc["pattern"].as<String>();
-      Serial.printf("Pattern set to: %s\n", currentPattern.c_str());
-    }
-
-    // Update output states based on JSON
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      String key = "XmasOutput" + String(i + 1);
-      if (doc.containsKey(key)) {
-        outputStates[i] = doc[key].as<bool>();
-        digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
-      }
-    }
-  }
+  return false;
 }

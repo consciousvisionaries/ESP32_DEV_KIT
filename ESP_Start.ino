@@ -12,6 +12,18 @@ void setup() {
   clientId = "ESP32_" + String(WiFi.macAddress());
   //saveWiFiCredentials(ssid,password,storedVersion);
   loadWiFiCredentials();
+
+  // Print the loaded credentials
+  if (ssid.isEmpty() || password.isEmpty()) {
+    Serial.println("WiFi credentials not found. Setting default values.");
+    ssid = "yourSSID";
+    password = "yourPassword";
+  }
+  
+  Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
+  
+  // Simulate the version checking and saving
+  checkForVersionUpdate();
   connectWiFi();
   setupDashboard();
   connectMQTT();
