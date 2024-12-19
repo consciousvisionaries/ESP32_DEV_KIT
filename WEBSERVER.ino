@@ -181,7 +181,7 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest* request) {
 
     if (!newSSID.isEmpty() && !newPassword.isEmpty()) {
      
-      saveWiFiCredentials(newSSID, newPassword, version);
+      saveWiFiCredentials(newSSID, newPassword, storedVersion);
       request->send(200, "text/html", "<p>WiFi credentials saved! Restarting...</p>");
       delay(2000);
       ESP.restart();

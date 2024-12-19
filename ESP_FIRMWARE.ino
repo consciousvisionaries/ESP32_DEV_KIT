@@ -3,7 +3,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.begin("wifi-config", false); // Initialize namespace
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
-  preferences.putString("version", newVersion);
+  preferences.putString("versiontxt", newVersion);
   preferences.end();
   Serial.println("WiFi credentials saved.");
 }
@@ -13,13 +13,13 @@ void loadWiFiCredentials() {
   if (ssid.isEmpty() || password.isEmpty()) {
     ssid = preferences.getString("ssid", "");
     password = preferences.getString("password", "");
-    storedVersion = preferences.getString("version", "");
+    storedVersion = preferences.getString("versiontxt", "");
   }
   preferences.end(); // Close preferences
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found.");
   } else {
-    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
+    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password +", Version=" + storedVersion);
   }
 }
 
@@ -112,6 +112,12 @@ void performFirmwareUpdate(String firmwareUrl, String newversion) {
       if (written == contentLength) {
         Serial.println("Update complete. Rebooting...");
         Update.end();
+
+// Get stored version from Preferences
+    Serial.print("SSID: ");
+    Serial.println(ssid);
+    Serial.print("New version updated: ");
+    Serial.println(newversion);
 
         // Store the new version in Preferences
         saveWiFiCredentials(ssid, password, newversion);

@@ -13,11 +13,9 @@ PubSubClient client(espClient);
 String clientId = "";
 bool allServicesActive = false;
 
-String storedVersion = "";  // Default to "0.0.0" if no version is stored
-String version = "";  // Default version
-
-String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
-String password = "3X3K22832E";     // Replace with your WiFi password
+String storedVersion = ""; //"1.3.4d";  // Default to "0.0.0" if no version is stord
+String ssid = ""; //"TELUSDE0875_2.4G";   // Replace with your WiFi SSID
+String password = ""; //"3X3K22832E";     // Replace with your WiFi password
 
 const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;

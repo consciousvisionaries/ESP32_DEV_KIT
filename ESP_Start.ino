@@ -10,7 +10,7 @@ void setup() {
   }
 
   clientId = "ESP32_" + String(WiFi.macAddress());
-
+  //saveWiFiCredentials(ssid,password,storedVersion);
   loadWiFiCredentials();
   connectWiFi();
   setupDashboard();
