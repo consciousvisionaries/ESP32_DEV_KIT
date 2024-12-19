@@ -52,39 +52,42 @@ int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was th
 AsyncWebServer server(80);
 
 void saveVersion(const String& newVersion) {
-  preferences.begin("ino-config", false);
-  preferences.putString("Version", newVersion);
-  String savedVersion = preferences.getString("version", "Not found");
-  Serial.println("Saved version: " + savedVersion);
-  preferences.end();
+  preferences.begin("general-config", false); // Initialize namespace
+  preferences.putString("version", newVersion);
+  preferences.end(); // Ensure changes are saved
+  Serial.println("Version saved: " + newVersion);
 }
 
-
 String loadVersion() {
-  preferences.begin("ino-config", true);
-  String newversion = preferences.getString("version","");
-  Serial.println("New version: " + newversion);
-  preferences.end();
-  return newversion;
+  preferences.begin("general-config", true); // Initialize namespace
+  String newVersion = preferences.getString("version", "Not Found");
+  preferences.end(); // Close preferences
+  Serial.println("Loaded version: " + newVersion);
+  return newVersion;
 }
 
 void saveWiFiCredentials(const String& newSSID, const String& newPassword) {
-    preferences.begin("wifi-config", false);
-    preferences.putString("ssid", newSSID);
-    preferences.putString("password", newPassword);
-    preferences.end();
+  preferences.begin("wifi-config", false); // Initialize namespace
+  preferences.putString("ssid", newSSID);
+  preferences.putString("password", newPassword);
+  preferences.end();
+  Serial.println("WiFi credentials saved.");
 }
 
 void loadWiFiCredentials() {
-      if (ssid == "") {
-      
-    preferences.begin("wifi-config", true);
+  preferences.begin("wifi-config", true); // Initialize namespace
+  if (ssid.isEmpty() || password.isEmpty()) {
     ssid = preferences.getString("ssid", "");
     password = preferences.getString("password", "");
-    preferences.end();
-
-      }
+    preferences.end(); // Close preferences
+  }
+  if (ssid.isEmpty() || password.isEmpty()) {
+    Serial.println("WiFi credentials not found.");
+  } else {
+    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
+  }
 }
+
 
 
 
@@ -555,7 +558,7 @@ void checkForUpdates() {
 
   if (httpCode == HTTP_CODE_OK) {
     String payload = http.getString();
-    String newVersion = extractVersionFromPayload(payload);
+    String newFWVersion = extractVersionFromPayload(payload);
     
     // Get stored version from Preferences
     String storedVersion = loadVersion();  // Default to "0.0.0" if no version is stored
@@ -563,11 +566,11 @@ void checkForUpdates() {
     Serial.print("Current stored version: ");
     Serial.println(storedVersion);
     Serial.print("New version available: ");
-    Serial.println(newVersion);
+    Serial.println(newFWVersion);
 
-    if (newVersion != storedVersion) {
+    if (newFWVersion != storedVersion) {
       Serial.println("New firmware update found. Updating...");
-      performFirmwareUpdate(firmwareURL);  // Perform the update
+      performFirmwareUpdate(firmwareURL,newFWVersion);  // Perform the update
     } else {
       Serial.println("Firmware is up to date.");
     }
@@ -585,7 +588,7 @@ String extractVersionFromPayload(String payload) {
   return payload.substring(startIndex + 11, endIndex);
 }
 
-void performFirmwareUpdate(String firmwareUrl) {
+void performFirmwareUpdate(String firmwareUrl, String newversion) {
   HTTPClient http;
   http.begin(firmwareUrl);
   int httpCode = http.GET();
@@ -602,8 +605,7 @@ void performFirmwareUpdate(String firmwareUrl) {
         Update.end();
 
         // Store the new version in Preferences
-        String newVersion = extractVersionFromPayload(http.getString());
-        saveVersion(newVersion);  
+        saveVersion(newversion);  
         ESP.restart();
         
       } else {
