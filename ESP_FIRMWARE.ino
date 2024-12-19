@@ -1,27 +1,28 @@
 
-void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
+void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion1) {
   preferences.begin("wifi-config", false); // Initialize namespace
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
-  preferences.putString("versiontxt", newVersion);
+  preferences.putString("versiontxt", newVersion1);
   preferences.end();
-  Serial.println("WiFi credentials saved.");
+  Serial.println("WiFi credentials saved." + newVersion1);
+  loadWiFiCredentials();
 }
 
 void loadWiFiCredentials() {
-  preferences.begin("wifi-config", true); // Initialize namespace
-  if (ssid.isEmpty() || password.isEmpty()) {
+    preferences.begin("wifi-config", true); // Read-only mode
     ssid = preferences.getString("ssid", "");
     password = preferences.getString("password", "");
     storedVersion = preferences.getString("versiontxt", "");
-  }
-  preferences.end(); // Close preferences
-  if (ssid.isEmpty() || password.isEmpty()) {
-    Serial.println("WiFi credentials not found.");
-  } else {
-    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password +", Version=" + storedVersion);
-  }
+    preferences.end();
+
+    if (ssid.isEmpty() || password.isEmpty()) {
+        Serial.println("WiFi credentials not found.");
+    } else {
+        Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
+    }
 }
+
 
 void connectWiFi() {
   Serial.printf("Connecting to WiFi: %s\n", ssid);
@@ -98,6 +99,10 @@ String extractVersionFromPayload(String payload) {
 }
 
 void performFirmwareUpdate(String firmwareUrl, String versionID) {
+// Store the new version in Preferences
+        saveWiFiCredentials(ssid, password, versionID);
+
+  
   HTTPClient http;
   http.begin(firmwareUrl);
   int httpCode = http.GET();
@@ -117,9 +122,7 @@ void performFirmwareUpdate(String firmwareUrl, String versionID) {
     Serial.print("SSID: ");
     Serial.println(ssid);
     
-        // Store the new version in Preferences
-        saveWiFiCredentials(ssid, password, versionID);
-
+        
         Serial.print("New version SAVED: ");
     Serial.println(versionID);
 
