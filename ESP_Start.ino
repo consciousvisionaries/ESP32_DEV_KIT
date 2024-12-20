@@ -1,5 +1,8 @@
 
 void setup() {
+
+ saveWiFiCredentials("TELUSDE0875_2.4G","3X3K22832E","1.1.1")
+ ;
   
   Serial.begin(115200);
 
@@ -16,14 +19,13 @@ void setup() {
   // Print the loaded credentials
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found. Setting default values.");
-    ssid = "yourSSID";
-    password = "yourPassword";
+    ssid = "TELUSDE0875_2.4G";
+    password = "3X3K22832E";
   }
   
   Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
   
   // Simulate the version checking and saving
-  checkForVersionUpdate();
   connectWiFi();
   setupDashboard();
   connectMQTT();

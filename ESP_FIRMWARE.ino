@@ -1,27 +1,28 @@
 
 // Function to save WiFi credentials (SSID, password) and version in Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
-  preferences.begin("wifi-config", false); // Open namespace for writing
+  //preferences.begin("settings", false); // Open namespace for writing
   
   // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newVersion);
   
-  preferences.end();
+  //preferences.end();
   
   Serial.println("WiFi credentials and version saved.");
 }
 
 // Function to load WiFi credentials and version from Preferences
 void loadWiFiCredentials() {
-  preferences.begin("wifi-config", true); // Open namespace for reading
+  
+  //preferences.begin("settings", true); // Open namespace for reading
   
   ssid = preferences.getString("ssid", "");
   password = preferences.getString("password", "");
   storedVersion = preferences.getString("versiontxt", "");
   
-  preferences.end();
+  //preferences.end();
   
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found.");
@@ -30,28 +31,7 @@ void loadWiFiCredentials() {
   }
 }
 
-// Function to simulate checking for a version update and saving it if a new version is found
-void checkForVersionUpdate() {
-  String currentVersion = "1.3.4d"; // Assume current version is this
-  String newVersion = "1.3.4e";     // For testing, we simulate a version update
-  
-  if (newVersion != storedVersion) {
-    Serial.println("New version available: " + newVersion);
-    Serial.println("Updating firmware...");
-    
-    // Simulate some update time (2 seconds delay for demonstration)
-    delay(2000);
-    
-    // Save the new version
-    saveWiFiCredentials(ssid, password, newVersion);
-    
-    Serial.println("Update complete. Rebooting...");
-    delay(1000);
-    ESP.restart();
-  } else {
-    Serial.println("Device firmware is up-to-date.");
-  }
-}
+
 
 void connectWiFi() {
   Serial.printf("Connecting to WiFi: %s\n", ssid.c_str());
@@ -134,6 +114,7 @@ bool updateFirmware(const String& newVersion) {
 
       if (written == contentLength) {
         Serial.println("Firmware written successfully.");
+        
       } else {
         Serial.println("Firmware write failed. Written: " + String(written) + ", Expected: " + String(contentLength));
         return false;
