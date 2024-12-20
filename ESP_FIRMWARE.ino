@@ -1,14 +1,25 @@
 #include <Preferences.h>
 
-
 // Function to save WiFi credentials (SSID, password) and version in Preferences
-void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
+void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newtxtVersion) {
   preferences.begin("settings", false); // Open namespace for writing
-  Serial.println("Saving Version: " +newVersion);
+  preferences.clear(); // Clears all preferences in the "settings" namespace
+  preferences.end();
+  preferences.begin("settings", false);
+  
+  Serial.println("Saving Version: " + newtxtVersion);
   // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
-  preferences.putString("versiontxt", newVersion);
+  preferences.putString("versiontxt", newtxtVersion);
+  
+String savedVersion = preferences.getString("versiontxt", "");
+if (savedVersion == newtxtVersion) {
+    Serial.println("Version saved successfully." + savedVersion);
+} else {
+    Serial.println("Version save failed.");
+}
+
   
   preferences.end(); // Close namespace
   

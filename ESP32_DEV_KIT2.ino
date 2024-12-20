@@ -13,9 +13,9 @@ PubSubClient client(espClient);
 String clientId = "";
 bool allServicesActive = false;
 
-String storedVersion = ""; //"1.3.4d";  // Default to "0.0.0" if no version is stord
-String ssid = "";   // Replace with your WiFi SSID
-String password = "";     // Replace with your WiFi password
+String storedVersion; //"1.3.4d";  // Default to "0.0.0" if no version is stord
+String ssid;   // Replace with your WiFi SSID
+String password;     // Replace with your WiFi password
 
 const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;
