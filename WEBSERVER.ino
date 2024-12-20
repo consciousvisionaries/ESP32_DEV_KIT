@@ -13,6 +13,7 @@ void setupDashboard() {
     page += "#dashboard { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; } ";
     page += "</style>";
     page += "<script>";
+   
     page += "function refreshFirmwareInfo() { fetch('/getFirmwareInfo') ";
     page += ".then(response => response.text()) ";
     page += ".then(data => { document.getElementById('firmwareInfo').innerHTML = data; }); }";
@@ -62,7 +63,10 @@ void setupDashboard() {
     for (String pattern : patterns) {
       page += "<button id='" + pattern + "' onclick='setPattern(\"" + pattern + "\")'>" + pattern + "</button>";
     }
-    page += "</div></div></body></html>";
+    page += "</div>";
+    
+
+    page += "</div></body></html>";
 
     request->send(200, "text/html", page);
   });
@@ -122,6 +126,10 @@ void setupDashboard() {
     info += "Pattern: " + currentPattern + "<br>";
     request->send(200, "text/html", info);  // Send updated firmware info
   });
+
+  
+ 
+
 
   server.begin();
 }

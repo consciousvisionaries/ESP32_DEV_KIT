@@ -31,6 +31,8 @@ void setup() {
   delay(3000);
   checkForUpdates();
   sendMQTTPayload();  // Send initial MQTT message when connected
+
+  oscilliscopeSetUp();
 }
 
 void loop() {
@@ -38,4 +40,5 @@ void loop() {
   clientMQTTConnected();
   firmwareUpdates();
   handlePatterns();
+  oscilliscopeLoop();
 }
