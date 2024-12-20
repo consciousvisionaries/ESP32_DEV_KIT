@@ -1,74 +1,48 @@
+void handlePatterns() {
+  static int chaseIndex = 0;
 
+  if (millis() - lastMillis >= 500) { // Adjust interval as needed
+    lastMillis = millis();
 
-
-void handlePattern(unsigned long currentTime) {
-   
-  // Update outputs based on current pattern
-  if (currentPattern == "blink") {
-    if (currentTime - lastUpdateTime > blinkInterval) {
-      lastUpdateTime = currentTime;
+    // Update the outputs according to the current pattern
+    if (currentPattern == "off") {
+      setAllOutputs(false); // Turn all off
+    } else if (currentPattern == "blink") {
+      static bool state = false;
+      state = !state;
+      setAllOutputs(state);
+    } else if (currentPattern == "chase") {
       for (int i = 0; i < NUM_OUTPUTS; i++) {
-        outputStates[i] = !outputStates[i];  // Toggle all outputs
+        digitalWrite(outputPins[i], i == chaseIndex ? HIGH : LOW);
+        outputStates[i] = i == chaseIndex; // Update output states
       }
-      getOutputStates();
-    }
-  }
-  else if (currentPattern == "chase") {
-    if (currentTime - lastUpdateTime > blinkInterval) {
-      lastUpdateTime = currentTime;
-      outputStates[chaseIndex] = true;
-      if (chaseIndex > 0) outputStates[chaseIndex - 1] = false;
       chaseIndex = (chaseIndex + 1) % NUM_OUTPUTS;
-      getOutputStates();
-    }
-  }
-  else if (currentPattern == "reverseChase") {
-    if (currentTime - lastUpdateTime > blinkInterval) {
-      lastUpdateTime = currentTime;
-      outputStates[chaseIndex] = true;
-      if (chaseIndex < (NUM_OUTPUTS-1)) outputStates[chaseIndex + 1] = false;
-      chaseIndex = (chaseIndex - 1 + NUM_OUTPUTS) % NUM_OUTPUTS;
-      getOutputStates();
-    }
-  }
-  else if (currentPattern == "randomBlink") {
-    if (currentTime - lastUpdateTime > blinkInterval) {
-      lastUpdateTime = currentTime;
-      int randOutput = random(0, NUM_OUTPUTS);
-      outputStates[randOutput] = !outputStates[randOutput];  // Toggle random output
-      getOutputStates();
-    }
-  }
-  else if (currentPattern == "wave") {
-    if (currentTime - lastUpdateTime > blinkInterval) {
-      lastUpdateTime = currentTime;
+    } else if (currentPattern == "reverseChase") {
       for (int i = 0; i < NUM_OUTPUTS; i++) {
-        outputStates[i] = false;  // Turn off all outputs
+        digitalWrite(outputPins[i], i == (NUM_OUTPUTS - chaseIndex - 1) ? HIGH : LOW);
+        outputStates[i] = i == (NUM_OUTPUTS - chaseIndex - 1); // Update output states
       }
-      outputStates[waveIndex] = true;  // Turn on the "wave" output
-      waveIndex = (waveIndex + 1) % 8;
-      getOutputStates();
+      chaseIndex = (chaseIndex + 1) % NUM_OUTPUTS;
+    } else if (currentPattern == "randomBlink") {
+      for (int i = 0; i < NUM_OUTPUTS; i++) {
+        bool newState = random(2);
+        digitalWrite(outputPins[i], newState ? HIGH : LOW);
+        outputStates[i] = newState; // Update output states
+      }
+    } else if (currentPattern == "wave") {
+      static int waveStep = 0;
+      for (int i = 0; i < NUM_OUTPUTS; i++) {
+        int brightness = max(0, 255 - abs((i - waveStep) * 50)); // Adjust wave shape
+        analogWrite(outputPins[i], brightness);
+        outputStates[i] = brightness > 0; // Update output states
+      }
+      waveStep = (waveStep + 1) % NUM_OUTPUTS;
+    } else if (currentPattern == "static") {
+      setAllOutputs(true); // Turn all on
     }
   }
-  else if (currentPattern == "static") {
-    // In "static" pattern, you can keep the outputs in a fixed state
-    // For example, set all to ON or OFF based on your choice
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      outputStates[i] = true;  // Keep all outputs on in static mode
-    }
-        getOutputStates();
-
-  }
-  else if (currentPattern == "off") {
-    // In "off" pattern, turn all outputs off
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      outputStates[i] = false;  // Turn all outputs off
-    }
-        getOutputStates();
-
-  }
-
 }
+
 
 
 

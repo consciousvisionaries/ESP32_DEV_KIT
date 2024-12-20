@@ -67,7 +67,6 @@ void firmwareUpdates() {
     Serial.println("Last OTA > " + lastOTA);
     lastOTA = millis();
     checkForUpdates();
-    
   }
 }
 

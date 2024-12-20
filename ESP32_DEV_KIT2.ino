@@ -32,7 +32,7 @@ const int NUM_OUTPUTS = 8;
 // Define the pins
 const int ledPin = 2; // GPIO2 is commonly used for the onboard LED on ESP32 boards
 int outputPins[] = {12, 14, 27, 26, 33, 32, 5, 18};  // Define the GPIO pins for the 8 outputs
-bool outputStates[NUM_OUTPUTS] = {false};  // Track the state of each output
+bool outputStates[NUM_OUTPUTS] = {false, false, false, false, false, false, false, false};
 
 // Pattern variables
 String currentPattern = "chase";  // Default pattern
@@ -41,6 +41,8 @@ unsigned long lastUpdateTime = 0;
 unsigned long blinkInterval = 500; 
 int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
+static unsigned long lastMillis = 0;
+
 
 // Example output states
 int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was the intention)

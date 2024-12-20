@@ -1,7 +1,5 @@
 
 void setup() {
-
-
   
   Serial.begin(115200);
 
@@ -12,7 +10,6 @@ void setup() {
   }
 
   clientId = "ESP32_" + String(WiFi.macAddress());
-  //saveWiFiCredentials(ssid,password,storedVersion);
   loadWiFiCredentials();
 
   // Print the loaded credentials
@@ -40,5 +37,5 @@ void loop() {
 
   clientMQTTConnected();
   firmwareUpdates();
-  handlePattern(millis());
+  handlePatterns();
 }
