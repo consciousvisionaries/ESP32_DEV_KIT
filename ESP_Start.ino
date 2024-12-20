@@ -1,8 +1,7 @@
 
 void setup() {
 
- saveWiFiCredentials("TELUSDE0875_2.4G","3X3K22832E","1.1.1")
- ;
+
   
   Serial.begin(115200);
 
@@ -23,7 +22,7 @@ void setup() {
     password = "3X3K22832E";
   }
   
-  Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password);
+  Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
   
   // Simulate the version checking and saving
   connectWiFi();

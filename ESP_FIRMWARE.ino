@@ -1,28 +1,29 @@
+#include <Preferences.h>
+
 
 // Function to save WiFi credentials (SSID, password) and version in Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
-  //preferences.begin("settings", false); // Open namespace for writing
+  preferences.begin("settings", false); // Open namespace for writing
   
   // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newVersion);
   
-  //preferences.end();
+  preferences.end(); // Close namespace
   
   Serial.println("WiFi credentials and version saved.");
 }
 
 // Function to load WiFi credentials and version from Preferences
 void loadWiFiCredentials() {
-  
-  //preferences.begin("settings", true); // Open namespace for reading
+  preferences.begin("settings", true); // Open namespace for reading
   
   ssid = preferences.getString("ssid", "");
   password = preferences.getString("password", "");
   storedVersion = preferences.getString("versiontxt", "");
   
-  //preferences.end();
+  preferences.end(); // Close namespace
   
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found.");
@@ -30,6 +31,8 @@ void loadWiFiCredentials() {
     Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
   }
 }
+
+
 
 
 
@@ -82,7 +85,7 @@ void checkForUpdates() {
       Serial.println("Updating firmware...");
       if (updateFirmware(newVersion)) {
         saveWiFiCredentials(ssid, password, newVersion);
-        Serial.println("Update complete. Rebooting...");
+        Serial.println("Update complete. Rebooting..."+ newVersion);
         ESP.restart();
       } else {
         Serial.println("Firmware update failed.");
