@@ -1,6 +1,7 @@
 
-// Set up the server on port 80
+
 AsyncWebServer server(80);
+
 
 void setupDashboard() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -13,7 +14,6 @@ void setupDashboard() {
     page += "#dashboard { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; } ";
     page += "</style>";
     page += "<script>";
-   
     page += "function refreshFirmwareInfo() { fetch('/getFirmwareInfo') ";
     page += ".then(response => response.text()) ";
     page += ".then(data => { document.getElementById('firmwareInfo').innerHTML = data; }); }";
@@ -23,13 +23,20 @@ void setupDashboard() {
     page += "function toggleOutput(index) { fetch('/toggleOutput?output=' + index) ";
     page += ".then(() => refreshOutputStates()); }";
     page += "function setPattern(pattern) { fetch('/setPattern?pattern=' + pattern) ";
-    page += ".then(() => refreshPatternButtons()); }";
+    page += ".then(() => refreshPatternButtons()) ";
+    page += ".then(() => refreshFirmwareInfo()); }";
     page += "function refreshPatternButtons() { ";
     page += "fetch('/getCurrentPattern').then(response => response.text()).then(currentPattern => { ";
     page += "const patterns = ['static', 'off', 'blink', 'chase', 'reverseChase', 'randomBlink', 'wave']; ";
     page += "patterns.forEach(p => { const btn = document.getElementById(p); if (btn) { btn.style.backgroundColor = (p === currentPattern) ? 'green' : ''; } }); ";
     page += "}); };";
-    page += "window.onload = function() { refreshOutputStates(); refreshPatternButtons(); refreshFirmwareInfo(); setInterval(function() { refreshOutputStates(); refreshFirmwareInfo(); }, 200); };";
+
+    // Use two setIntervals: one for 10ms (refreshOutputStates), one for 1000ms (refreshFirmwareInfo)
+    page += "window.onload = function() { ";
+    page += "refreshOutputStates(); refreshPatternButtons(); refreshFirmwareInfo(); ";
+    page += "setInterval(function() { refreshOutputStates(); }, 10); ";  // 10ms refresh for output states
+    page += "setInterval(function() { refreshFirmwareInfo(); }, 10000); ";  // 1000ms refresh for firmware info
+    page += "};";
     page += "</script></head><body>";
     page += "<h1>ESP32 Dashboard</h1>";
     page += "<div id='dashboard'>";
@@ -43,12 +50,10 @@ void setupDashboard() {
     page += "Pattern: " + currentPattern + "<br>";
     page += "</div></div>";
   
-    // Quadrant 2: Output States
-    page += "<div><h2>Output States</h2><div id='outputs'>";
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      page += "<div class='dot " + String(outputStates[i] ? "on" : "off") + "'>Pin " + String(i + 1) + "</div>";
-    }
-    page += "</div></div>";
+    // Quadrant 2: Output States (Two columns in a table)
+    page += "<div class='quadrant'><h2>Output States</h2>";
+    page += "<div id='outputs'></div>";  // Table will be dynamically injected here
+    page += "</div>";
 
     // Quadrant 3: Toggle Buttons
     page += "<div><h2>Toggle Outputs</h2>";
@@ -64,23 +69,51 @@ void setupDashboard() {
       page += "<button id='" + pattern + "' onclick='setPattern(\"" + pattern + "\")'>" + pattern + "</button>";
     }
     page += "</div>";
-    
 
     page += "</div></body></html>";
 
     request->send(200, "text/html", page);
   });
 
-  // Define /getOutputStates endpoint
+  // Endpoint for getting output states
   server.on("/getOutputStates", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String outputHTML = "";
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      outputHTML += "<div class='dot " + String(outputStates[i] ? "on" : "off") + "'>Pin " + String(i + 1) + "</div>";
+    String outputHtml = "<table style='width: 100%; border-collapse: collapse;'>";
+    outputHtml += "<thead><tr><th>Odd Pins</th><th>Even Pins</th></tr></thead>";
+    outputHtml += "<tbody>";
+
+    int maxRows = (NUM_OUTPUTS + 1) / 2;
+
+    for (int row = 0; row < maxRows; row++) {
+      outputHtml += "<tr>";
+
+      // Odd column
+      int oddIndex = row * 2;
+      if (oddIndex < NUM_OUTPUTS) {
+        outputHtml += "<td style='padding: 10px; text-align: center;'>";
+        outputHtml += "<div class='dot " + String(outputStates[oddIndex] ? "on" : "off") + "'>Pin " + String(oddIndex + 1) + "</div>";
+        outputHtml += "</td>";
+      } else {
+        outputHtml += "<td></td>";
+      }
+
+      // Even column
+      int evenIndex = row * 2 + 1;
+      if (evenIndex < NUM_OUTPUTS) {
+        outputHtml += "<td style='padding: 10px; text-align: center;'>";
+        outputHtml += "<div class='dot " + String(outputStates[evenIndex] ? "on" : "off") + "'>Pin " + String(evenIndex + 1) + "</div>";
+        outputHtml += "</td>";
+      } else {
+        outputHtml += "<td></td>";
+      }
+
+      outputHtml += "</tr>";
     }
-    request->send(200, "text/html", outputHTML);  // Send updated states of outputs
+
+    outputHtml += "</tbody></table>";
+    request->send(200, "text/html", outputHtml);
   });
 
-  // Toggle output state handler
+  // Endpoint for toggling outputs
   server.on("/toggleOutput", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (request->hasParam("output")) {
       int index = request->getParam("output")->value().toInt();
@@ -93,60 +126,36 @@ void setupDashboard() {
     request->send(200, "text/plain", "Toggled");
   });
 
-  // Set pattern handler
+  // Endpoint for setting patterns
   server.on("/setPattern", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (request->hasParam("pattern")) {
       String newPattern = request->getParam("pattern")->value();
       Serial.println("Pattern Set to " + newPattern);
-
       if (newPattern.length() > 0) {
-        currentPattern = newPattern;  // Update the pattern variable
-        request->send(200, "text/plain", "Pattern set to " + currentPattern);  // Respond to the client
-        Serial.println("Pattern Set to " + currentPattern);
+        currentPattern = newPattern;
+        request->send(200, "text/plain", "Pattern set to " + currentPattern);
       } else {
-        request->send(400, "text/plain", "Invalid pattern");  // Handle invalid pattern input
-        Serial.println("Invalid Pattern");
+        request->send(400, "text/plain", "Invalid pattern");
       }
     } else {
       request->send(400, "text/plain", "Pattern parameter missing");
     }
   });
 
-  // Get current pattern
+  // Endpoint for getting current pattern
   server.on("/getCurrentPattern", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/plain", currentPattern);
   });
 
-  // Define /getFirmwareInfo endpoint
+  // Endpoint for getting firmware info
   server.on("/getFirmwareInfo", HTTP_GET, [](AsyncWebServerRequest *request) {
     String info = "Version: " + storedVersion + "<br>";
     info += "IP Address: " + WiFi.localIP().toString() + "<br>";
     info += String("WiFi Status: ") + (WiFi.isConnected() ? "Connected" : "Disconnected") + "<br>";
     info += String("MQTT Status: ") + (client.connected() ? "Connected" : "Disconnected") + "<br>";
     info += "Pattern: " + currentPattern + "<br>";
-    request->send(200, "text/html", info);  // Send updated firmware info
+    request->send(200, "text/html", info);
   });
 
-  
- 
-
-
   server.begin();
-}
-
-
-
-void getOutputStates() {
-
-  // Get current output states via AJAX
-server.on("/getOutputStates", HTTP_GET, [](AsyncWebServerRequest *request){
-  String outputHtml = "<div style='text-align: center; margin: 10px;'>";
-  for (int i = 0; i < 8; i++) {
-    digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
-    outputHtml += "<div class=\"dot " + String(outputStates[i] ? "on" : "off") + "\">Pin " + String(i+1)+"</div>";
-    outputHtml += "</div>";
-  }
-  request->send(200, "text/html", outputHtml);
-});
-
 }

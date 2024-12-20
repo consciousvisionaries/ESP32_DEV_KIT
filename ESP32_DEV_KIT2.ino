@@ -42,7 +42,7 @@ unsigned long blinkInterval = 500;
 int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
 static unsigned long lastMillis = 0;
-
+String audioPinStateText;
 
 // Example output states
 int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was the intention)

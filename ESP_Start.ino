@@ -41,4 +41,12 @@ void loop() {
   firmwareUpdates();
   handlePatterns();
   oscilliscopeLoop();
+  
+  // Monitoring the audio pin
+  int audioState = digitalRead(ledPin);
+  if (audioState == HIGH) {
+    audioPinStateText = "ON";
+  } else {
+    audioPinStateText = "OFF";
+  }
 }
