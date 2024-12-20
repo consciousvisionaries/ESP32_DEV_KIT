@@ -4,7 +4,7 @@
 // Function to save WiFi credentials (SSID, password) and version in Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newVersion) {
   preferences.begin("settings", false); // Open namespace for writing
-  
+  Serial.println("Saving Version: " +newVersion);
   // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
@@ -86,6 +86,7 @@ void checkForUpdates() {
       if (updateFirmware(newVersion)) {
         saveWiFiCredentials(ssid, password, newVersion);
         Serial.println("Update complete. Rebooting..."+ newVersion);
+        delay(5000);
         ESP.restart();
       } else {
         Serial.println("Firmware update failed.");

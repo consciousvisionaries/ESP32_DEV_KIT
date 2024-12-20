@@ -18,8 +18,9 @@ void setup() {
   // Print the loaded credentials
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found. Setting default values.");
-    ssid = "TELUSDE0875_2.4G";
-    password = "3X3K22832E";
+    //ssid = "TELUSDE0875_2.4G";
+    //password = "3X3K22832E";
+    //storedVersion = "1.3.4g";
   }
   
   Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
