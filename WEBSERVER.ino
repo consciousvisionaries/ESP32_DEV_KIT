@@ -1,7 +1,4 @@
-
-
 AsyncWebServer server(80);
-
 
 void setupDashboard() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -30,12 +27,16 @@ void setupDashboard() {
     page += "const patterns = ['static', 'off', 'blink', 'chase', 'reverseChase', 'randomBlink', 'wave']; ";
     page += "patterns.forEach(p => { const btn = document.getElementById(p); if (btn) { btn.style.backgroundColor = (p === currentPattern) ? 'green' : ''; } }); ";
     page += "}); };";
+    page += "function getAudioBeats() { fetch('/getAudioBeats') ";
+    page += ".then(response => response.text()) ";
+    page += ".then(data => { document.getElementById('audioBeats').innerHTML = data; }); }";
 
     // Use two setIntervals: one for 10ms (refreshOutputStates), one for 1000ms (refreshFirmwareInfo)
     page += "window.onload = function() { ";
-    page += "refreshOutputStates(); refreshPatternButtons(); refreshFirmwareInfo(); ";
+    page += "refreshOutputStates(); refreshPatternButtons(); refreshFirmwareInfo(); getAudioBeats(); ";
     page += "setInterval(function() { refreshOutputStates(); }, 10); ";  // 10ms refresh for output states
     page += "setInterval(function() { refreshFirmwareInfo(); }, 10000); ";  // 1000ms refresh for firmware info
+    page += "setInterval(function() { getAudioBeats(); }, 1000); "; // Update audio beats every 1000ms
     page += "};";
     page += "</script></head><body>";
     page += "<h1>ESP32 Dashboard</h1>";
@@ -49,7 +50,7 @@ void setupDashboard() {
     page += String("MQTT Status: ") + (client.connected() ? "Connected" : "Disconnected") + "<br>";
     page += "Pattern: " + currentPattern + "<br>";
     page += "</div></div>";
-  
+
     // Quadrant 2: Output States (Two columns in a table)
     page += "<div class='quadrant'><h2>Output States</h2>";
     page += "<div id='outputs'></div>";  // Table will be dynamically injected here
@@ -70,9 +71,45 @@ void setupDashboard() {
     }
     page += "</div>";
 
+    // Add section for audio beats
+    page += "<div><h2>Audio Beats</h2><div id='audioBeats'></div></div>";
+
     page += "</div></body></html>";
 
     request->send(200, "text/html", page);
+  });
+
+  // Endpoint for getting audio beats
+  server.on("/getAudioBeats", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String outputHtml = "<table style='width: 100%; border-collapse: collapse;'>";
+    outputHtml += "<thead><tr><th>Beat Name</th><th>Beat Status</th></tr></thead>";
+    outputHtml += "<tbody>";
+
+    // Define the names of the beats
+    String beatName[3] = {"Beat 1", "Beat 2", "Beat 3"};
+  
+    // Example of beat statuses (this should be dynamic based on actual data)
+    bool beatStatus[3] = {true, false, true}; // Replace with actual audio beat data logic
+  
+    // For each beat, display its name and status (on/off)
+    for (int i = 0; i < 3; i++) {
+      outputHtml += "<tr>";
+      
+      // Beat Name (Text)
+      outputHtml += "<td style='padding: 10px; text-align: center;'>";
+      outputHtml += beatName[i];
+      outputHtml += "</td>";
+      
+      // Beat Status (Visual representation of the dot)
+      outputHtml += "<td style='padding: 10px; text-align: center;'>";
+      outputHtml += "<div class='dot " + String(beatStatus[i] ? "on" : "off") + "'></div>";
+      outputHtml += "</td>";
+      
+      outputHtml += "</tr>";
+    }
+
+    outputHtml += "</tbody></table>";
+    request->send(200, "text/html", outputHtml);
   });
 
   // Endpoint for getting output states

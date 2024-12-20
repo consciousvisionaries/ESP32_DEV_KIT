@@ -43,35 +43,7 @@ int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
 static unsigned long lastMillis = 0;
 String audioPinStateText;
+int beatStatus[3] = {0,0,0};
 
 // Example output states
 int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was the intention)
-
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-
-#define SCREEN_WIDTH 128  // OLED width, in pixels
-#define SCREEN_HEIGHT 64  // OLED height, in pixels
-#define OLED_RESET -1     // Reset pin for OLED
-
-#define SAMPLING_FREQ 6000  // Sampling frequency in Hz (3kHz)
-#define SAMPLE_SIZE 128     // Number of samples per loop
-#define SIGNAL_PIN 35       // Pin for analog signal input
-#define PEAK_THRESHOLD 700  // Threshold for detecting peaks in the signal
-#define LED_PIN 2           // Pin for the LED
-
-#define SSD1306_I2C_ADDRESS 0x3C  // I2C address for the SSD1306 OLED
-#define SDA_PIN 21   // GPIO 21 for SDA
-#define SCL_PIN 22   // GPIO 22 for SCL
-
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-unsigned long samplingPeriod = 1000000 / SAMPLING_FREQ;  // Sampling period in microseconds
-unsigned long lastPeakTime = 0;  // Time of the last detected peak
-float totalBPM = 0;  // Total BPM for averaging
-int bpmCount = 0;    // Count of valid BPM readings
-float avgBPM = 0;    // Average BPM over time
-unsigned long lastPulseTime = 0;  // Last time the LED and dot were pulsed
-bool pulseVisible = false;  // Flag for pulse visibility
-unsigned long pulseDuration = 100;  // Default pulse duration (ms)
