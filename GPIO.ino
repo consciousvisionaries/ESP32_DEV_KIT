@@ -1,9 +1,9 @@
+int beatSource = 1;
+
 void handlePatterns() {
   static int chaseIndex = 0;
 
-  if (millis() - lastMillis >= 500) { // Adjust interval as needed
-    lastMillis = millis();
-
+  if (beatStatus[beatSource]) {  // Check if beatStatus[0] is true to trigger pattern update
     // Update the outputs according to the current pattern
     if (currentPattern == "off") {
       setAllOutputs(false); // Turn all off
@@ -40,8 +40,12 @@ void handlePatterns() {
     } else if (currentPattern == "static") {
       setAllOutputs(true); // Turn all on
     }
+    
+    // Reset beatStatus[0] after the pattern update, to prevent constant updates
+    beatStatus[beatSource] = false;
   }
 }
+
 
 
 

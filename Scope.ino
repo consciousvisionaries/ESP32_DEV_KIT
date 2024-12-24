@@ -1,148 +1,128 @@
-#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <arduinoFFT.h>
+#include <Wire.h>
 
-#define SCREEN_WIDTH 128  // OLED width, in pixels
-#define SCREEN_HEIGHT 64  // OLED height, in pixels
-#define OLED_RESET -1     // Reset pin for OLED
-
-#define SAMPLING_FREQ 6000  // Sampling frequency in Hz (3kHz)
-#define SAMPLE_SIZE 128     // Number of samples per loop
-#define SIGNAL_PIN 35       // Pin for analog signal input
-#define PEAK_THRESHOLD 700  // Threshold for detecting peaks in the signal
-#define LED_PIN 2           // Pin for the LED
-
-#define SSD1306_I2C_ADDRESS 0x3C  // I2C address for the SSD1306 OLED
-#define SDA_PIN 21   // GPIO 21 for SDA
-#define SCL_PIN 22   // GPIO 22 for SCL
-
+// OLED Display Configurations
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define OLED_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-unsigned long samplingPeriod = 1000000 / SAMPLING_FREQ;  // Sampling period in microseconds
-unsigned long lastPeakTime = 0;  // Time of the last detected peak
-float totalBPM = 0;  // Total BPM for averaging
-int bpmCount = 0;    // Count of valid BPM readings
-float avgBPM = 0;    // Average BPM over time
-unsigned long lastPulseTime = 0;  // Last time the LED and dot were pulsed
-bool pulseVisible = false;  // Flag for pulse visibility
-unsigned long pulseDuration = 100;  // Default pulse duration (ms)
+// Constants for FFT and signal processing
+#define SAMPLES 128
+#define SAMPLING_FREQ 6000
+#define SIGNAL_PIN 35
+#define LED_PIN_LOW 2 // Define the pin connected to the low beat LED
 
+#define PEAK_THRESHOLD 700
+
+// FFT Variables
+double vReal[SAMPLES];
+double vImag[SAMPLES];
+arduinoFFT FFT = arduinoFFT();
+
+// Timing variables for LED pulses
+unsigned long lastPulseTime[3] = {0, 0, 0};
+const unsigned long pulseDuration = 150;
+
+// Function prototypes
+void captureSignal();
+void detectBeats();
+void updateLEDs();
+void updateOLED();
+void initializeOscilloscope();
 
 void oscilliscopeSetUp() {
-  // Initialize OLED display
-    if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
-        Serial.println(F("SSD1306 allocation failed"));
-        for (;;);  // Halt if allocation fails
-    }
-
-    display.clearDisplay();
-    Wire.begin(SDA_PIN, SCL_PIN);
+    initializeOscilloscope();
 }
 
 void oscilliscopeLoop() {
-   int signal[SAMPLE_SIZE];
-    unsigned long startMicros = micros();
+    captureSignal();
+    FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+    FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+    FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); // Fix: Pass vReal and vImag correctly
+    detectBeats();
+    updateLEDs();
+    updateOLED();
+}
 
-    // Read the signal into the buffer
-    for (int i = 0; i < SAMPLE_SIZE; i++) {
-        while (micros() - startMicros < samplingPeriod);  // Timing control
-        startMicros += samplingPeriod;
-        signal[i] = analogRead(SIGNAL_PIN);
+void initializeOscilloscope() {
+    Serial.begin(115200);
+    Wire.begin(21, 22); // Initialize I2C communication on ESP32 pins
+
+    if (!display.begin(0x3C, OLED_RESET)) {
+        Serial.println(F("SSD1306 allocation failed"));
+        while (true); // Halt if OLED initialization fails
     }
-
-    // Detect peaks and calculate BPM
-    detectPeaksAndCalculateBPM(signal);
-
-    // Update OLED display
     display.clearDisplay();
-    displayAvgBPM();
-    displayWaveform(signal);
-    displayPulseOnEvent();  // Show or hide the pulsing dot
     display.display();
 
-    // Pulse the LED based on peak or BPM event
-    pulseLED();
+    pinMode(SIGNAL_PIN, INPUT);
+    pinMode(LED_PIN_LOW, OUTPUT);
+   
+
+    Serial.println("Oscilloscope initialized.");
 }
 
-void detectPeaksAndCalculateBPM(int signal[]) {
+void captureSignal() {
+    for (int i = 0; i < SAMPLES; i++) {
+        vReal[i] = analogRead(SIGNAL_PIN); // Read signal data
+        vImag[i] = 0; // Imaginary part is set to zero for real input
+        delayMicroseconds(1000000 / SAMPLING_FREQ); // Ensure sampling frequency
+    }
+}
+
+void detectBeats() {
+    // Frequency ranges for each beat type
+    int lowStart = 1, lowEnd = 10;
+    int midStart = 30, midEnd = 40;
+    int highStart = 50, highEnd = 63;
+
+    beatStatus[0] = beatStatus[1] = beatStatus[2] = false;
+
+    for (int i = lowStart; i <= lowEnd; i++) {
+        if (vReal[i] > PEAK_THRESHOLD) beatStatus[0] = true;
+    }
+    for (int i = midStart; i <= midEnd; i++) {
+        if (vReal[i] > PEAK_THRESHOLD) beatStatus[1] = true;
+    }
+    for (int i = highStart; i <= highEnd; i++) {
+        if (vReal[i] > PEAK_THRESHOLD) beatStatus[2] = true;
+    }
+}
+
+void updateLEDs() {
     unsigned long currentMillis = millis();
 
-    // Look for peaks in the signal
-    for (int i = 1; i < SAMPLE_SIZE - 1; i++) {
-        if (signal[i] > PEAK_THRESHOLD && signal[i] > signal[i - 1] && signal[i] > signal[i + 1]) {
-            unsigned long peakTime = currentMillis;
-
-            // If it's been enough time since the last peak, calculate BPM
-            if (peakTime - lastPeakTime > 200) {  // 200ms minimum between peaks
-                unsigned long interval = peakTime - lastPeakTime;
-
-                if (lastPeakTime > 0 && interval > 0) {
-                    // Calculate BPM based on the interval between peaks
-                    float bpm = 60000.0 / interval;
-
-                    // Avoid unrealistic BPM values (outliers)
-                    if (bpm > 40 && bpm < 200) {
-                        // Smooth the BPM by averaging over time
-                        totalBPM += bpm;
-                        bpmCount++;
-
-                        // Update the average BPM
-                        avgBPM = totalBPM / bpmCount;
-                    }
-                }
-
-                lastPeakTime = peakTime;  // Update the time of the last peak
-
-                // Trigger pulse immediately on peak detection or BPM calculation
-                pulseVisible = true;
-                lastPulseTime = currentMillis;  // Start the pulse immediately
-            }
-        }
+    // Update low beat LED
+    if (beatStatus[0]) {
+        digitalWrite(LED_PIN_LOW, HIGH);
+        lastPulseTime[0] = currentMillis;
+    } else if (currentMillis - lastPulseTime[0] >= pulseDuration) {
+        digitalWrite(LED_PIN_LOW, LOW);
     }
 
-    // Adjust the pulse duration based on the BPM
-    // The faster the BPM, the shorter the pulse duration
-    if (avgBPM > 0) {
-        pulseDuration = max((unsigned long)50, (unsigned long)(60000 / avgBPM));  // Ensure minimum pulse duration of 50ms
-    }
+   
 }
 
-void displayAvgBPM() {
-    display.setCursor(0, 0);
-    display.setTextColor(SSD1306_WHITE);
+void updateOLED() {
+    display.clearDisplay();
     display.setTextSize(1);
-    display.print("Avg BPM: ");
-    display.print(avgBPM, 1);  // Display average BPM with 1 decimal point
-}
+    display.setTextColor(SSD1306_WHITE);
 
-void displayWaveform(int signal[]) {
-    // Draw waveform
-    for (int i = 0; i < SAMPLE_SIZE - 1; i++) {
-        int y1 = map(signal[i], 0, 1023, 0, SCREEN_HEIGHT);
-        int y2 = map(signal[i + 1], 0, 1023, 0, SCREEN_HEIGHT);
-        display.drawLine(i, SCREEN_HEIGHT - y1, i + 1, SCREEN_HEIGHT - y2, SSD1306_WHITE);
-    }
-}
+    display.setCursor(0, 0);
+    display.print("Low Beat: ");
+    display.println(beatStatus[0] ? "YES" : "NO");
 
-void displayPulseOnEvent() {
-    unsigned long currentMillis = millis();
+    display.setCursor(0, 10);
+    display.print("Mid Beat: ");
+    display.println(beatStatus[1] ? "YES" : "NO");
 
-    // Keep the dot pulsing for the calculated duration after the event, then turn it off
-    if (pulseVisible && currentMillis - lastPulseTime < pulseDuration) {
-        // Draw the pulsing dot on top-right corner
-        display.fillCircle(SCREEN_WIDTH - 6, 2, 2, SSD1306_WHITE);  
-    } else {
-        pulseVisible = false;  // Turn off the dot after the calculated pulse duration
-    }
-}
+    display.setCursor(0, 20);
+    display.print("High Beat: ");
+    display.println(beatStatus[2] ? "YES" : "NO");
 
-void pulseLED() {
-    unsigned long currentMillis = millis();
-
-    // Pulse the LED based on peak or BPM event timing
-    if (pulseVisible && currentMillis - lastPulseTime < pulseDuration) {  // Pulse during the same period
-        digitalWrite(LED_PIN, HIGH);  // Turn on LED
-    } else {
-        digitalWrite(LED_PIN, LOW);   // Turn off LED
-    }
+    display.display();
 }

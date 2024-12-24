@@ -14,10 +14,10 @@ String clientId = "";
 bool allServicesActive = false;
 
 String storedVersion; //"1.3.4d";  // Default to "0.0.0" if no version is stord
-String ssid;   // Replace with your WiFi SSID
-String password;     // Replace with your WiFi password
+String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
+String password = "3X3K22832E";     // Replace with your WiFi password
 
-const char* mqttServer = "192.168.0.129"; // Replace with your MQTT broker IP
+const char* mqttServer = "192.168.0.78"; // Replace with your MQTT broker IP
 const int mqttPort = 1883;
 const char* mqttUserName = "pro1polaris";
 const char* mqttPassword = "CVr819P*!";
@@ -43,7 +43,8 @@ int chaseIndex = 0;
 int reverseChaseIndex = NUM_OUTPUTS - 1;
 static unsigned long lastMillis = 0;
 String audioPinStateText;
-int beatStatus[3] = {0,0,0};
+bool beatStatus[3] = {false,false,false};
+String beatName[3] = {"LOW","MID","HIGH"};
 
 // Example output states
 int waveIndex = 0;  // Declare waveIndex (or change to chaseIndex if that was the intention)

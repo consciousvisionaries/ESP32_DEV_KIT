@@ -25,9 +25,11 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
 // Function to load WiFi credentials and version from Preferences
 void loadWiFiCredentials() {
   preferences.begin("settings", true); // Open namespace for reading
-  
+  if (ssid == "") {
   ssid = preferences.getString("ssid", "");
-  password = preferences.getString("password", "");
+  password = preferences.getString("password", "");  
+  }
+  
   storedVersion = preferences.getString("versiontxt", "");
   
   preferences.end(); // Close namespace
