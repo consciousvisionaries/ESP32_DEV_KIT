@@ -42,10 +42,6 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   Serial.println("Saved:     ssid " + newSSID);
   Serial.println("Saved: password " + newPassword);
 
-  preferences.begin("settings", false); // Open namespace for writing
-  preferences.clear(); // Clears all preferences in the "settings" namespace
-  preferences.end();
-
   preferences.begin("settings", true); // Open namespace for writing
 
   String savedVersion = preferences.getString("versiontxt", "");
