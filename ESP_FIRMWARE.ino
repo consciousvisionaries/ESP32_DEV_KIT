@@ -63,15 +63,14 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
 void loadWiFiCredentials() {
   
   preferences.begin("settings", true); // Open namespace for reading
-  if (ssid == "") {
   ssid = preferences.getString("ssid", "");
   password = preferences.getString("password", "");  
+  if (ssid == "") {
+    ssid = "TELUSDE0875_2.4G";
+    password = "3X3K22832E";
   }
-  
   storedVersion = preferences.getString("versiontxt", "");
-  
   preferences.end(); // Close namespace
-  
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("Loading WiFi... credentials not found.");
   } else {
@@ -106,31 +105,27 @@ void loopFIRMWARE() {
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     Serial.println("Last OTA > " + lastOTA);
     lastOTA = millis();
-
     checkForUpdates();
   }
 }
 
 void checkForUpdates() {
+  
   HTTPClient http;
-   
-   // Concatenate strings
-    String versionURL = String("https://raw.githubusercontent.com/") + 
-                         String(GITHUB_USER) + "/" + 
-                         String(GITHUB_REPO) + "/" + 
-                         String(GITHUB_BRANCH) + "/" + 
-                         "version.txt";
-    Serial.println(versionURL);
+  String versionURL = String("https://raw.githubusercontent.com/") + 
+                      String(GITHUB_USER) + "/" + 
+                      String(GITHUB_REPO) + "/" + 
+                      String(GITHUB_BRANCH) + "/" + 
+                       "version.txt";
+  Serial.println(versionURL);
   Serial.println("Fetching version from URL: " + versionURL);
   http.begin(versionURL);
   int httpCode = http.GET();
-
   if (httpCode == 200) {
     String newVersion = http.getString();
     newVersion.trim();
     Serial.println("    HTTP Response Code: " + String(httpCode));
     Serial.println("    Payload: " + newVersion);
-
     if (newVersion != storedVersion) {
       Serial.println("    Stored Version: " + storedVersion);
       Serial.println("    New version available: " + newVersion);
@@ -140,6 +135,7 @@ void checkForUpdates() {
         Serial.println("    Update complete. Rebooting..."+ newVersion);
         delay(5000);
         ESP.restart();
+       
       } else {
         Serial.println("    Firmware update failed.");
       }
@@ -155,8 +151,7 @@ void checkForUpdates() {
 
 bool updateFirmware(const String& newVersion) {
   HTTPClient http;
-// Concatenate strings
-    String firmwareURL = String("https://raw.githubusercontent.com/") + 
+  String firmwareURL = String("https://raw.githubusercontent.com/") + 
                          String(GITHUB_USER) + "/" + 
                          String(GITHUB_REPO) + "/" + 
                          String(GITHUB_BRANCH) + "/" + 
@@ -165,23 +160,18 @@ bool updateFirmware(const String& newVersion) {
 
   http.begin(firmwareURL);
   int httpCode = http.GET();
-
   if (httpCode == 200) {
     int contentLength = http.getSize();
     bool canBegin = Update.begin(contentLength);
-
     if (canBegin) {
       WiFiClient* client = http.getStreamPtr();
       size_t written = Update.writeStream(*client);
-
       if (written == contentLength) {
-        Serial.println("    Firmware written successfully.");
-        
+        Serial.println("    Firmware written successfully.");  
       } else {
         Serial.println("    Firmware write failed. Written: " + String(written) + ", Expected: " + String(contentLength));
         return false;
       }
-
       if (Update.end()) {
         if (Update.isFinished()) {
           Serial.println("    Update successfully completed.");
