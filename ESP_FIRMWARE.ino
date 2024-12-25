@@ -21,6 +21,30 @@ String storedVersion; //"1.3.4d";  // Default to "0.0.0" if no version is stord
 String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 String password = "3X3K22832E";     // Replace with your WiFi password
 
+void setupFirmware() {
+
+  preferences.begin("firmware", false);
+  
+  clientId = "ESP32_" + String(WiFi.macAddress());
+  loadWiFiCredentials();
+
+  // Print the loaded credentials
+  if (ssid.isEmpty() || password.isEmpty()) {
+    Serial.println("WiFi credentials not found. Setting default values.");
+    ssid = "TELUSDE0875_2.4G";
+    password = "3X3K22832E";
+    storedVersion = "V0.0.0 new";
+  }
+  
+  Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
+  
+  // Simulate the version checking and saving
+  connectWiFi();
+
+  delay(3000);
+  checkForUpdates();
+}
+
 // Function to save WiFi credentials (SSID, password) and version in Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newtxtVersion) {
   preferences.begin("settings", false); // Open namespace for writing
@@ -85,7 +109,7 @@ void connectWiFi() {
   }
 }
 
-void firmwareUpdates() {
+void loopFIRMWARE() {
   static unsigned long lastOTA = 0;
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     Serial.println("Last OTA > " + lastOTA);
@@ -103,7 +127,7 @@ void checkForUpdates() {
                          String(GITHUB_USER) + "/" + 
                          String(GITHUB_REPO) + "/" + 
                          String(GITHUB_BRANCH) + "/" + 
-                         "/version.txt";
+                         "version.txt";
     Serial.println(versionURL);
   Serial.println("Fetching version from URL: " + versionURL);
   http.begin(versionURL);
