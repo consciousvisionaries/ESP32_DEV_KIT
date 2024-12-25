@@ -46,7 +46,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.clear(); // Clears all preferences in the "settings" namespace
   preferences.end();
 
-  preferences.begin("settings", false); // Open namespace for writing
+  preferences.begin("settings", true); // Open namespace for writing
 
   String savedVersion = preferences.getString("versiontxt", "");
   if (savedVersion == newtxtVersion) {
@@ -65,12 +65,12 @@ void loadWiFiCredentials() {
   preferences.begin("settings", true); // Open namespace for reading
   ssid = preferences.getString("ssid", "");
   password = preferences.getString("password", "");  
+  storedVersion = preferences.getString("versiontxt", "");
+  preferences.end(); 
   if (ssid == "") {
     ssid = "TELUSDE0875_2.4G";
     password = "3X3K22832E";
   }
-  storedVersion = preferences.getString("versiontxt", "");
-  preferences.end(); // Close namespace
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("Loading WiFi... credentials not found.");
   } else {
