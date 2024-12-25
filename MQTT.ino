@@ -1,13 +1,20 @@
+#define MQTT_TOPIC "/3dialpuzzle"
+#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
+#define MQTT_PORT 1883
+
+const char* mqttUserName = "pro1polaris";
+const char* mqttPassword = "CVr819P*!";
+
 void connectMQTT() {
 
-  client.setServer(mqttServer, mqttPort);
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(mqttCallback);  // Set MQTT callback function
   
   while (!client.connected()) {
     Serial.print("Connecting to MQTT...");
     if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
       Serial.println("Connected to MQTT.");
-      client.subscribe(topicData);  // Subscribe to the topic
+      client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
@@ -28,19 +35,20 @@ void clientMQTTConnected() {
 void sendMQTTPayload() {
   StaticJsonDocument<512> doc;
   doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "Outputs Puzzle";
+  doc["puzzleName"] = "3 Dial Puzzle";
   doc["designer"] = "Paul Hopkins";
   doc["ipAddress"] = WiFi.localIP().toString();
   doc["timestamp"] = millis();
-  doc["tab"] = "Christmas Lights";
+  doc["tab"] = "Lost";
   doc["group"] = "Stage 2";
   doc["version"] = storedVersion;
   doc["num_outputs"] = NUM_OUTPUTS;
+  doc["num_inputs"] = NUM_INPUTS;
 
   String jsonPayload;
   serializeJson(doc, jsonPayload);
 
-  if (client.publish(topicData, jsonPayload.c_str())) {
+  if (client.publish(MQTT_TOPIC, jsonPayload.c_str())) {
     Serial.println("Puzzle details sent:");
     Serial.println(jsonPayload);
   } else {
@@ -52,7 +60,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.println(topic);
 
-  if (strcmp(topic, topicData) == 0) {  // Check if the message is for the correct topic
+  if (strcmp(topic, MQTT_TOPIC) == 0) {  // Check if the message is for the correct topic
     
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, payload, length);
@@ -63,19 +71,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       return;
     }
 
-    // Check for the pattern name and update the currentPattern variable
-    if (doc.containsKey("pattern")) {
-      currentPattern = doc["pattern"].as<String>();
-      Serial.printf("Pattern set to: %s\n", currentPattern.c_str());
-    }
+    
 
-    // Update output states based on JSON
-    for (int i = 0; i < NUM_OUTPUTS; i++) {
-      String key = "XmasOutput" + String(i + 1);
-      if (doc.containsKey(key)) {
-        outputStates[i] = doc[key].as<bool>();
-        digitalWrite(outputPins[i], outputStates[i] ? HIGH : LOW);
-      }
-    }
+   
   }
 }

@@ -1,4 +1,25 @@
 #include <Preferences.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <Update.h>
+
+Preferences preferences;
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+const char* GITHUB_USER = "consciousvisionaries";
+const char* GITHUB_REPO = "ESP32_DEV_KIT";
+const char* GITHUB_BIN = "ESP32_DEV_KIT2.ino.esp32.bin";
+const char* GITHUB_BRANCH = "ESPDEVKIT_3DialLEDStrip";
+
+String clientId = "";
+bool allServicesActive = false;
+
+String storedVersion; //"1.3.4d";  // Default to "0.0.0" if no version is stord
+String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
+String password = "3X3K22832E";     // Replace with your WiFi password
 
 // Function to save WiFi credentials (SSID, password) and version in Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newtxtVersion) {
@@ -7,6 +28,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.end();
   preferences.begin("settings", false);
   Serial.println("Saving Version: " + newtxtVersion);
+  
   // Store each piece separately
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
@@ -68,14 +90,21 @@ void firmwareUpdates() {
   if (millis() - lastOTA > 3600000) {  // Check for updates every hour
     Serial.println("Last OTA > " + lastOTA);
     lastOTA = millis();
+
     checkForUpdates();
   }
 }
 
 void checkForUpdates() {
   HTTPClient http;
-  String versionURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/version.txt";
-
+   
+   // Concatenate strings
+    String versionURL = String("https://raw.githubusercontent.com/") + 
+                         String(GITHUB_USER) + "/" + 
+                         String(GITHUB_REPO) + "/" + 
+                         String(GITHUB_BRANCH) + "/" + 
+                         "/version.txt";
+    Serial.println(versionURL);
   Serial.println("Fetching version from URL: " + versionURL);
   http.begin(versionURL);
   int httpCode = http.GET();
@@ -108,8 +137,13 @@ void checkForUpdates() {
 
 bool updateFirmware(const String& newVersion) {
   HTTPClient http;
-  String firmwareURL = "https://raw.githubusercontent.com/" + String(githubUser) + "/" + String(githubRepo) + "/" + String(branch) + "/" + String(firmwareFile);
-  Serial.println("Fetching firmware from URL: " + firmwareURL);
+// Concatenate strings
+    String firmwareURL = String("https://raw.githubusercontent.com/") + 
+                         String(GITHUB_USER) + "/" + 
+                         String(GITHUB_REPO) + "/" + 
+                         String(GITHUB_BRANCH) + "/" + 
+                         String(GITHUB_BIN);
+                         Serial.println("Fetching firmware from URL: " + firmwareURL);
 
   http.begin(firmwareURL);
   int httpCode = http.GET();
