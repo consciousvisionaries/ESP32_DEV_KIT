@@ -9,15 +9,11 @@ Preferences preferences;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const char* GITHUB_USER = "consciousvisionaries";
-const char* GITHUB_REPO = "ESP32_DEV_KIT";
-const char* GITHUB_BIN = "ESP32_DEV_KIT2.ino.esp32.bin";
-const char* GITHUB_BRANCH = "ESPDEVKIT_3DialLEDStrip";
 
 String clientId = "";
 bool allServicesActive = false;
 
-String storedVersion; //"1.3.4d";  // Default to "0.0.0" if no version is stord
+String storedVersion; ;  // Default to "0.0.0" if no version is stord
 String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
 String password = "3X3K22832E";     // Replace with your WiFi password
 
@@ -31,9 +27,9 @@ void setupFirmware() {
   // Print the loaded credentials
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("WiFi credentials not found. Setting default values.");
-    ssid = "TELUSDE0875_2.4G";
-    password = "3X3K22832E";
-    storedVersion = "V0.0.0 new";
+    //ssid = "TELUSDE0875_2.4G";
+    //password = "3X3K22832E";
+    //storedVersion = "V0.0.0 new";
   }
   
   Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
@@ -50,6 +46,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.begin("settings", false); // Open namespace for writing
   preferences.clear(); // Clears all preferences in the "settings" namespace
   preferences.end();
+  
   preferences.begin("settings", false);
   Serial.println("Saving Version: " + newtxtVersion);
   
