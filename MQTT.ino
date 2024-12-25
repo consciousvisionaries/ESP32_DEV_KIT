@@ -1,9 +1,3 @@
-#define MQTT_TOPIC "/3dialpuzzle"
-#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
-#define MQTT_PORT 1883
-
-const char* mqttUserName = "pro1polaris";
-const char* mqttPassword = "CVr819P*!";
 
 void connectMQTT() {
 
@@ -32,28 +26,34 @@ void clientMQTTConnected() {
   client.loop();  // Ensure MQTT is being handled
 }
 
-void sendMQTTPayload() {
-  StaticJsonDocument<512> doc;
-  doc["mac"] = WiFi.macAddress();
-  doc["puzzleName"] = "3 Dial Puzzle";
-  doc["designer"] = "Paul Hopkins";
-  doc["ipAddress"] = WiFi.localIP().toString();
-  doc["timestamp"] = millis();
-  doc["tab"] = "Lost";
-  doc["group"] = "Stage 2";
-  doc["version"] = storedVersion;
-  doc["num_outputs"] = NUM_OUTPUTS;
-  doc["num_inputs"] = NUM_INPUTS;
+void publishDataMQTTPayload_Doc(String jsonPayload) {
+   
+    // Send the payload via MQTT
+    if (client.publish(MQTT_TOPIC, jsonPayload.c_str())) {
+        Serial.println("Data sent:");
+        Serial.println(jsonPayload);
+    } else {
+        Serial.println("Failed to send data.");
+    }
+}
 
+void sendConfigMQTTPayload() {
+  
+  StaticJsonDocument<512> doc;
+    doc["mac"] = WiFi.macAddress();
+    doc["puzzleName"] = PUZZLE_NAME;
+    doc["designer"] = DESIGNER_NAME;
+    doc["ipAddress"] = WiFi.localIP().toString();
+    doc["timestamp"] = millis();
+    doc["tab"] = NR_TAB;
+    doc["group"] = NR_GROUP;
+    doc["version"] = storedVersion;
+    doc["num_outputs"] = NUM_OUTPUTS;
+    doc["num_inputs"] = NUM_INPUTS;
+  
   String jsonPayload;
   serializeJson(doc, jsonPayload);
-
-  if (client.publish(MQTT_TOPIC, jsonPayload.c_str())) {
-    Serial.println("Puzzle details sent:");
-    Serial.println(jsonPayload);
-  } else {
-    Serial.println("Failed to send puzzle details.");
-  }
+  publishDataMQTTPayload_Doc(jsonPayload);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
@@ -64,15 +64,16 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, payload, length);
-
     if (error) {
       Serial.print("JSON parse error: ");
       Serial.println(error.c_str());
       return;
-    }
+    }     
 
-    
-
-   
+    // Convert the JSON document to a string
+    String jsonMessage;
+    serializeJson(doc, jsonMessage);
+    Serial.println("Message contents:");
+    Serial.println(jsonMessage);
   }
 }

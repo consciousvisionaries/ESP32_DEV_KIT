@@ -9,30 +9,13 @@ Preferences preferences;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-
 String clientId = "";
 bool allServicesActive = false;
 
-String storedVersion; ;  // Default to "0.0.0" if no version is stord
-String ssid = "TELUSDE0875_2.4G";   // Replace with your WiFi SSID
-String password = "3X3K22832E";     // Replace with your WiFi password
-
 void setupFirmware() {
 
-  preferences.begin("firmware", false);
-  
   clientId = "ESP32_" + String(WiFi.macAddress());
   loadWiFiCredentials();
-
-  // Print the loaded credentials
-  if (ssid.isEmpty() || password.isEmpty()) {
-    Serial.println("WiFi credentials not found. Setting default values.");
-    //ssid = "TELUSDE0875_2.4G";
-    //password = "3X3K22832E";
-    //storedVersion = "V0.0.0 new";
-  }
-  
-  Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
   
   // Simulate the version checking and saving
   connectWiFi();
@@ -54,19 +37,31 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newtxtVersion);
-  
+  preferences.end(); // Close namespace
+
+  Serial.println("Saved:     ssid " + newSSID);
+  Serial.println("Saved: password " + newPassword);
+
+  preferences.begin("settings", false); // Open namespace for writing
+  preferences.clear(); // Clears all preferences in the "settings" namespace
+  preferences.end();
+
+  preferences.begin("settings", false); // Open namespace for writing
+
   String savedVersion = preferences.getString("versiontxt", "");
   if (savedVersion == newtxtVersion) {
-    Serial.println("    Version saved successfully." + savedVersion);
+    Serial.println("    Version saved successfully:" + savedVersion);
   } else {
     Serial.println("    Version save failed.");
   }
+  
+  preferences.end();
 
-  preferences.end(); // Close namespace
 }
 
 // Function to load WiFi credentials and version from Preferences
 void loadWiFiCredentials() {
+  
   preferences.begin("settings", true); // Open namespace for reading
   if (ssid == "") {
   ssid = preferences.getString("ssid", "");
@@ -100,7 +95,7 @@ void connectWiFi() {
     Serial.println(WiFi.localIP());
   } else {
     Serial.println("    \nWiFi connection failed. Starting Access Point...");
-    WiFi.softAP("ESP32_AccessPoint", "12345678");
+    WiFi.softAP(AP_SSID, AP_PASSWORD);
     Serial.print("    Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
   }
@@ -137,6 +132,7 @@ void checkForUpdates() {
     Serial.println("    Payload: " + newVersion);
 
     if (newVersion != storedVersion) {
+      Serial.println("    Stored Version: " + storedVersion);
       Serial.println("    New version available: " + newVersion);
       Serial.println("    Updating firmware...");
       if (updateFirmware(newVersion)) {
@@ -148,6 +144,7 @@ void checkForUpdates() {
         Serial.println("    Firmware update failed.");
       }
     } else {
+      Serial.println("    Stored Version: " + storedVersion);
       Serial.println("    Device firmware is up-to-date.");
     }
   } else {

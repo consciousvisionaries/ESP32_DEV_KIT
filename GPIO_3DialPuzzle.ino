@@ -1,27 +1,4 @@
-#define NUM_INPUTS 3
-#define NUM_OUTPUTS 2
 
-// Pin Definitions for Dial 1
-#define PIN_A1 14
-#define PIN_B1 25
-
-// Pin Definitions for Dial 2
-#define PIN_A2 27
-#define PIN_B2 33
-
-// Pin Definitions for Dial 3
-#define PIN_A3 26
-#define PIN_B3 32
-
-// Pulse Counters
-volatile int pulseCount1 = 0;
-volatile int pulseCount2 = 0;
-volatile int pulseCount3 = 0;
-
-// Last States
-volatile int lastStateA1 = LOW;
-volatile int lastStateA2 = LOW;
-volatile int lastStateA3 = LOW;
 
 // Interrupt Handlers
 void IRAM_ATTR handleInterruptA1() {
@@ -31,8 +8,10 @@ void IRAM_ATTR handleInterruptA1() {
     if (stateA != lastStateA1) {
         if (stateA != stateB) {
             pulseCount1++;
+            activityDetected();
         } else {
             pulseCount1--;
+            activityDetected();
         }
     }
 
@@ -46,8 +25,10 @@ void IRAM_ATTR handleInterruptA2() {
     if (stateA != lastStateA2) {
         if (stateA != stateB) {
             pulseCount2++;
+            activityDetected();
         } else {
             pulseCount2--;
+            activityDetected();
         }
     }
 
@@ -61,13 +42,23 @@ void IRAM_ATTR handleInterruptA3() {
     if (stateA != lastStateA3) {
         if (stateA != stateB) {
             pulseCount3++;
+            activityDetected();
         } else {
             pulseCount3--;
+            activityDetected();
         }
     }
 
     lastStateA3 = stateA;
 }
+
+unsigned long lastExecutionTime = 0; // Tracks the last execution time
+
+void activityDetected() {
+  
+}
+
+
 
 void setupGPIO() {
     Serial.begin(115200);
@@ -91,16 +82,37 @@ void setupGPIO() {
 }
 
 void loopGPIO() {
-    // Print pulse counts for each dial
-    Serial.print("Dial 1 Count: ");
-    Serial.println(pulseCount1);
 
-    Serial.print("Dial 2 Count: ");
-    Serial.println(pulseCount2);
+    static unsigned long lastExecutionTime = 0; // Tracks the last execution time
+    static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
+    static int lastPulseCount2 = 0; // Tracks the last state of pulseCount2
+    static int lastPulseCount3 = 0; // Tracks the last state of pulseCount3
 
-    Serial.print("Dial 3 Count: ");
-    Serial.println(pulseCount3);
+    unsigned long currentTime = millis(); // Get the current time in milliseconds
 
-    Serial.println("--------------------------");
-    delay(500);
+    // Check if pulse counts have changed
+    if ((pulseCount1 != lastPulseCount1 || pulseCount2 != lastPulseCount2 || pulseCount3 != lastPulseCount3) &&
+        (currentTime - lastExecutionTime >= 10)) {
+
+        lastExecutionTime = currentTime; // Update the last execution time
+
+        // Update the last pulse counts
+        lastPulseCount1 = pulseCount1;
+        lastPulseCount2 = pulseCount2;
+        lastPulseCount3 = pulseCount3;
+
+        updateFASTLED(); // Update LED display
+
+        // Debug output
+        Serial.print("Dial 1 Count: ");
+        Serial.println(pulseCount1);
+
+        Serial.print("Dial 2 Count: ");
+        Serial.println(pulseCount2);
+
+        Serial.print("Dial 3 Count: ");
+        Serial.println(pulseCount3);
+
+        Serial.println("--------------------------");
+    }
 }

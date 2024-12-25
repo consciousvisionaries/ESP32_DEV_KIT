@@ -2,13 +2,14 @@
 void setup() {
   
   Serial.begin(115200);
-
+  
   setupGPIO();
+  setupFASTLED();
   setupFirmware();
   setupDashboard();
 
   connectMQTT();
-  sendMQTTPayload();  // Send initial MQTT message when connected
+  sendConfigMQTTPayload();  // Send initial MQTT message when connected
 }
 
 void loop() {
@@ -16,4 +17,5 @@ void loop() {
   clientMQTTConnected();
   loopFIRMWARE();
   loopGPIO();
+  loopFASTLED();
 }
