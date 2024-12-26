@@ -66,9 +66,17 @@ void prepareLEDData(int count1, int count2, int count3) {
     doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
     doc["group"] = NR_GROUP;
-    doc["LED_STRIP_1"] = count1;
-    doc["LED_STRIP_2"] = count2;
-    doc["LED_STRIP_3"] = count3;
+    doc["output_type"] = NR_TYPE;
+    doc["version"] = storedVersion;
+    doc["num_outputs"] = NUM_OUTPUTS;
+    doc["num_inputs"] = NUM_INPUTS;
+    doc["num_leds"] = NUM_LEDS;
+    doc["num_channels"] = NUM_CHANNELS;
+
+    
+    doc["led_strip_1"] = count1;
+    doc["led_strip_2"] = count2;
+    doc["led_strip_3"] = count3;
 
     // Send the JSON payload via MQTT
     String jsonPayload;

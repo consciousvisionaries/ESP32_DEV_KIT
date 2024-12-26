@@ -58,8 +58,6 @@ void activityDetected() {
   
 }
 
-
-
 void setupGPIO() {
     Serial.begin(115200);
 

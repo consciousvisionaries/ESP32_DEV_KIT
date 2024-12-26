@@ -7,9 +7,13 @@ String storedVersion;
 String ssid;
 String password;
 
+String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
+String bup_password[] = { "3X3K22832E", "Gary2019" };
+
 #define MQTT_TOPIC "/lost"
 #define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 #define MQTT_PORT 1883
+
 
 // Node-Red User Login (Device Login - Raspberry Pi)
 const char* mqttUserName = "pro1polaris";
@@ -25,11 +29,14 @@ const char* mqttPassword = "CVr819P*!";
 
 #define NR_TAB "LOST"
 #define NR_GROUP "Stage 1"
+#define NR_TYPE "ADD_LED"
 
-//GPIO
-// Pin Definitions for Rotary Encoders
 #define NUM_INPUTS 3
 #define NUM_OUTPUTS 2
+#define NUM_LEDS 30  // Total number of LEDs (10 per dial)
+#define NUM_CHANNELS 3
+
+#define LED_PIN 12  // Pin for LEDs
 
 // Dial 1
 #define PIN_A1 14
@@ -42,11 +49,6 @@ const char* mqttPassword = "CVr819P*!";
 // Dial 3
 #define PIN_A3 26
 #define PIN_B3 32
-
-// FASTLED
-
-#define LED_PIN     12  // Pin for LEDs
-#define NUM_LEDS    30  // Total number of LEDs (10 per dial)
 
 // Pulse Counters
 volatile int pulseCount1 = 0;

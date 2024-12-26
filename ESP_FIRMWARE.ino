@@ -1,5 +1,6 @@
 #include <Preferences.h>
 #include <WiFi.h>
+#define MQTT_MAX_PACKET_SIZE 512  // Adjust size as needed
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
@@ -63,38 +64,64 @@ void loadWiFiCredentials() {
   password = preferences.getString("password", "");  
   storedVersion = preferences.getString("versiontxt", "");
   preferences.end(); 
-  if (ssid == "") {
-    ssid = "TELUSDE0875_2.4G";
-    password = "3X3K22832E";
-  }
+  
   if (ssid.isEmpty() || password.isEmpty()) {
     Serial.println("Loading WiFi... credentials not found.");
   } else {
     Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
   }
 }
+unsigned long startAttemptTime = millis();
 
 void connectWiFi() {
-  Serial.printf("Connecting to WiFi: %s\n", ssid.c_str());
-  Serial.printf("    WiFi Password: %s\n", password.c_str());
-  WiFi.begin(ssid.c_str(), password.c_str());
+  bool connected = false; // Flag to track connection status
 
-  unsigned long startAttemptTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
-    delay(500);
-    Serial.print(".");
+  for (int i = -1; i < 3; i++) {
+    
+    Serial.println("Attempting WIFI Loop #: " + String(i));
+
+    if (i != -1) {
+      ssid = bup_ssid[i];
+      password = bup_password[i];
+      Serial.println("Trying backup credentials...");
+    } else {
+      Serial.println("Trying stored credentials...");
+    }
+
+    Serial.printf("Connecting to WiFi: %s\n", ssid.c_str());
+    Serial.printf("    WiFi Password: %s\n", password.c_str());
+    
+    WiFi.begin(ssid.c_str(), password.c_str());
+
+    startAttemptTime = millis();
+
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+      delay(1000);
+      Serial.print(".");
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("\nWiFi connected.");
+      Serial.print("    IP Address: ");
+      Serial.println(WiFi.localIP());
+      connected = true; // Set connection flag
+      break; // Exit the loop as Wi-Fi is successfully connected
+    } else {
+      Serial.println("\nWiFi connection failed. Trying next network...");
+      delay(1000); // Small delay before trying next credentials
+    }
   }
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("    \nWiFi connected.");
-    Serial.print("    IP Address: ");
-    Serial.println(WiFi.localIP());
-  } else {
-    Serial.println("    \nWiFi connection failed. Starting Access Point...");
+
+  // If still not connected, start Access Point mode
+  if (!connected && millis() - startAttemptTime > 10000) {
+    Serial.println("No Wi-Fi connection established. Starting Access Point...");
     WiFi.softAP(AP_SSID, AP_PASSWORD);
     Serial.print("    Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
   }
 }
+
+
 
 void loopFIRMWARE() {
   static unsigned long lastOTA = 0;
