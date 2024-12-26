@@ -102,7 +102,11 @@ void loopGPIO() {
 
   if (getSolutionCompleted == true)  {
     Serial.println("WIN");
+    pinMode(2, OUTPUT);
+    digitalWrite(2, true);
   }
+
+
 
     static unsigned long lastExecutionTime = 0; // Tracks the last execution time
     static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
