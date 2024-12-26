@@ -60,16 +60,16 @@ void updateFASTLED() {
 void prepareLEDData(int count1, int count2, int count3) {
   
     DynamicJsonDocument doc(1024);  // Create a JSON document with 1KB capacity
-    doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = PUZZLE_NAME;
-    doc["ipAddress"] = WiFi.localIP().toString();
+    //doc["mac"] = WiFi.macAddress();
+    //doc["puzzleName"] = PUZZLE_NAME;
+    //doc["ipAddress"] = WiFi.localIP().toString();
     doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
     doc["group"] = NR_GROUP;
-    doc["output_type"] = NR_TYPE;
-    doc["version"] = storedVersion;
-    doc["num_outputs"] = NUM_OUTPUTS;
-    doc["num_inputs"] = NUM_INPUTS;
+    //doc["output_type"] = NR_TYPE;
+    //doc["version"] = storedVersion;
+    //doc["num_outputs"] = NUM_OUTPUTS;
+    //doc["num_inputs"] = NUM_INPUTS;
     doc["num_leds"] = NUM_LEDS;
     doc["num_channels"] = NUM_CHANNELS;
 

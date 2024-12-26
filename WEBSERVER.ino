@@ -35,8 +35,8 @@ String generatePage() {
   page += "}";
   page += "function renderLEDMatrix(payload) {";
   page += "  document.getElementById('puzzle-name').textContent = payload.puzzleName || 'Unnamed Puzzle';";
-  page += "  document.getElementById('group').textContent = payload.group || 'Unknown Group';";
-  page += "  document.getElementById('tab').textContent = payload.tab || 'Unknown Tab';";
+  page += "  document.getElementById('puzzle-designer').textContent = payload.designer || 'Unknown Designer';";
+  page += "  document.getElementById('puzzle-tech').textContent = payload.tachName || 'Unknown Tech';";
   page += "  document.getElementById('ip-address').textContent = payload.ipAddress || 'Unknown IP';";
   page += "  const ledMatrix = document.getElementById('led-matrix');";
   page += "  ledMatrix.innerHTML = '';"; // Clear previous content
