@@ -61,7 +61,7 @@ void prepareLEDData(int count1, int count2, int count3) {
   
     DynamicJsonDocument doc(1024);  // Create a JSON document with 1KB capacity
     //doc["mac"] = WiFi.macAddress();
-    //doc["puzzleName"] = PUZZLE_NAME;
+    doc["puzzleName"] = PUZZLE_NAME;
     //doc["ipAddress"] = WiFi.localIP().toString();
     doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
