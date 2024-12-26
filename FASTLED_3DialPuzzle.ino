@@ -1,5 +1,8 @@
 #include <FastLED.h>
 
+int ledCount[3];
+bool solutionFound = false;
+
 // LED Array
 CRGB leds[NUM_LEDS];
 
@@ -11,49 +14,58 @@ int getLEDCount(int pulseCount) {
 
 void updateFASTLED() {
 
-    int ledCount1 = getLEDCount(pulseCount1);
-    int ledCount2 = getLEDCount(pulseCount2);
-    int ledCount3 = getLEDCount(pulseCount3);
+    ledCount[0] = getLEDCount(pulseCount1);
+    ledCount[1] = getLEDCount(pulseCount2);
+    ledCount[2] = getLEDCount(pulseCount3);
+
+    for (int s=0; s < 3; s++) {
+      if (ledCount[s] == solutionWin[s]) {
+        solutionFound = true;
+        break;
+      }
+      solutionFound = false;
+      Serial.println("Solution Found");
+    }
     
     static int lastLedCount1 = 0; // Tracks the last LED count for Dial 1
     static int lastLedCount2 = 0; // Tracks the last LED count for Dial 2
     static int lastLedCount3 = 0; // Tracks the last LED count for Dial 3
 
     // Only update if any of the LED counts have changed
-    if (ledCount1 != lastLedCount1 || ledCount2 != lastLedCount2 || ledCount3 != lastLedCount3) {
+    if (ledCount[0] != lastLedCount1 || ledCount[1] != lastLedCount2 || ledCount[2] != lastLedCount3) {
         
         // Update last LED counts
-        lastLedCount1 = ledCount1;
-        lastLedCount2 = ledCount2;
-        lastLedCount3 = ledCount3;
+        lastLedCount1 = ledCount[0];
+        lastLedCount2 = ledCount[1];
+        lastLedCount3 = ledCount[2];
 
         // Clear all LEDs
         fill_solid(leds, NUM_LEDS, CRGB::Black);
 
         // Light up LEDs for Dial 1
-        for (int i = 0; i < ledCount1; i++) {
+        for (int i = 0; i < ledCount[0]; i++) {
             leds[i] = CRGB::Red;
         }
 
         // Light up LEDs for Dial 2
-        for (int i = 10; i < 10 + ledCount2; i++) {
+        for (int i = 10; i < 10 + ledCount[1]; i++) {
             leds[i] = CRGB::Green;
         }
 
         // Light up LEDs for Dial 3
-        for (int i = 20; i < 20 + ledCount3; i++) {
+        for (int i = 20; i < 20 + ledCount[3]; i++) {
             leds[i] = CRGB::Blue;
         }
 
         // Show updated LED states
         FastLED.show();
 
-        prepareLEDData(ledCount1, ledCount2, ledCount3);
+        prepareLEDData(ledCount[0], ledCount[1], ledCount[2]);
 
         // Debug output
-        Serial.println("LED Strip 1: " + String(ledCount1));
-        Serial.println("LED Strip 2: " + String(ledCount2));
-        Serial.println("LED Strip 3: " + String(ledCount3));
+        Serial.println("LED Strip 1: " + String(ledCount[0]));
+        Serial.println("LED Strip 2: " + String(ledCount[1]));
+        Serial.println("LED Strip 3: " + String(ledCount[2]));
     }
 }
 

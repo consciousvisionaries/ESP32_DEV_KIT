@@ -1,30 +1,13 @@
-bool getSolutionCompleted;
 
 
-void solutionCompleted () {
 
-getSolutionCompleted = true;
-  
-for (int s = 0; s < 3; s++) {
-  if (lastState[s] != solutionWin[s]) {
-    getSolutionCompleted = false;
-    break;
-  } 
-}
-
-}
-
-void activityDetected() {
-  
-}
-  
 
 // Interrupt Handlers
 void IRAM_ATTR handleInterruptA1() {
     int stateA = digitalRead(PIN_A1);
     int stateB = digitalRead(PIN_B1);
 
-    if (stateA != lastState[0]) {
+    if (stateA != lastStateA1) {
         if (stateA != stateB) {
             pulseCount1++;
             activityDetected();
@@ -34,14 +17,14 @@ void IRAM_ATTR handleInterruptA1() {
         }
     }
 
-    lastState[0] = stateA;
+    lastStateA1 = stateA;
 }
 
 void IRAM_ATTR handleInterruptA2() {
     int stateA = digitalRead(PIN_A2);
     int stateB = digitalRead(PIN_B2);
 
-    if (stateA != lastState[1]) {
+    if (stateA != lastStateA2) {
         if (stateA != stateB) {
             pulseCount2++;
             activityDetected();
@@ -51,14 +34,14 @@ void IRAM_ATTR handleInterruptA2() {
         }
     }
 
-    lastState[1] = stateA;
+    lastStateA2 = stateA;
 }
 
 void IRAM_ATTR handleInterruptA3() {
     int stateA = digitalRead(PIN_A3);
     int stateB = digitalRead(PIN_B3);
 
-    if (stateA != lastState[2]) {
+    if (stateA != lastStateA3) {
         if (stateA != stateB) {
             pulseCount3++;
             activityDetected();
@@ -68,12 +51,14 @@ void IRAM_ATTR handleInterruptA3() {
         }
     }
 
-    lastState[2] = stateA;
+    lastStateA3 = stateA;
 }
 
 unsigned long lastExecutionTime = 0; // Tracks the last execution time
 
-
+void activityDetected() {
+  
+}
 
 void setupGPIO() {
     Serial.begin(115200);
@@ -97,16 +82,6 @@ void setupGPIO() {
 }
 
 void loopGPIO() {
-
-  solutionCompleted();
-
-  if (getSolutionCompleted == true)  {
-    Serial.println("WIN");
-    pinMode(2, OUTPUT);
-    digitalWrite(2, true);
-  }
-
-
 
     static unsigned long lastExecutionTime = 0; // Tracks the last execution time
     static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
