@@ -3,6 +3,16 @@ const char* GITHUB_REPO = "ESP32_DEV_KIT";
 const char* GITHUB_BIN = "ESP32_DEV_KIT2.ino.esp32.bin";
 const char* GITHUB_BRANCH = "ESPDEVKIT_3DialLEDStrip";
 
+int solutionWin[] = {9,9,9};
+
+// Last States
+volatile int lastState[] = {LOW, LOW, LOW};
+
+// Pulse Counters
+volatile int pulseCount1 = 0;
+volatile int pulseCount2 = 0;
+volatile int pulseCount3 = 0;
+
 String storedVersion;
 String ssid;
 String password;
@@ -13,7 +23,6 @@ String bup_password[] = { "3X3K22832E", "Gary2019" };
 #define MQTT_TOPIC "/lost"
 #define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 #define MQTT_PORT 1883
-
 
 // Node-Red User Login (Device Login - Raspberry Pi)
 const char* mqttUserName = "pro1polaris";
@@ -36,6 +45,7 @@ const char* mqttPassword = "CVr819P*!";
 #define NUM_LEDS 30  // Total number of LEDs (10 per dial)
 #define NUM_CHANNELS 3
 
+
 #define LED_PIN 12  // Pin for LEDs
 
 // Dial 1
@@ -49,13 +59,3 @@ const char* mqttPassword = "CVr819P*!";
 // Dial 3
 #define PIN_A3 26
 #define PIN_B3 32
-
-// Pulse Counters
-volatile int pulseCount1 = 0;
-volatile int pulseCount2 = 0;
-volatile int pulseCount3 = 0;
-
-// Last States
-volatile int lastStateA1 = LOW;
-volatile int lastStateA2 = LOW;
-volatile int lastStateA3 = LOW;
