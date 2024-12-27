@@ -1,6 +1,6 @@
 const char* GITHUB_USER = "consciousvisionaries";
 const char* GITHUB_REPO = "ESP32_DEV_KIT";
-const char* GITHUB_BIN = "ESP32_DEV_KIT2.ino.esp32.bin";
+const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32.bin";
 const char* GITHUB_BRANCH = "ESPDEVKIT_3DialLEDStrip";
 
 String storedVersion;
@@ -39,6 +39,8 @@ const char* mqttPassword = "CVr819P*!";
 #define NUM_CHANNELS 3
 
 #define LED_PIN 12  // Pin for LEDs
+#define PIN_OUTPUT1 5 // to relay
+#define PIN_OUTPUT2 19 //to relay
 
 // Dial 1
 #define PIN_A1 14
@@ -52,6 +54,8 @@ const char* mqttPassword = "CVr819P*!";
 #define PIN_A3 26
 #define PIN_B3 32
 
+
+
 // Pulse Counters
 volatile int pulseCount1 = 0;
 volatile int pulseCount2 = 0;
@@ -61,3 +65,13 @@ volatile int pulseCount3 = 0;
 volatile int lastStateA1 = LOW;
 volatile int lastStateA2 = LOW;
 volatile int lastStateA3 = LOW;
+
+static unsigned long lastExecutionTime = 0; // Tracks the last execution time
+static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
+static int lastPulseCount2 = 0; // Tracks the last state of pulseCount2
+static int lastPulseCount3 = 0; // Tracks the last state of pulseCount3
+
+
+static int lastLedCount1 = -1; // Tracks the last LED count for Dial 1
+static int lastLedCount2 = -1; // Tracks the last LED count for Dial 2
+static int lastLedCount3 = -1; // Tracks the last LED count for Dial 3

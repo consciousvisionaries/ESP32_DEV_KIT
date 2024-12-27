@@ -2,6 +2,9 @@
 
 int ledCount[3];
 bool solutionFound = false;
+bool solutionStable = false; // Tracks if solutionFound is stable for 5 seconds
+unsigned long solutionCheckStart = 0; // Timestamp to track 5-second period
+
 
 // LED Array
 CRGB leds[NUM_LEDS];
@@ -27,12 +30,10 @@ void updateFASTLED() {
       Serial.println("Solution Found");
     }
     
-    static int lastLedCount1 = 0; // Tracks the last LED count for Dial 1
-    static int lastLedCount2 = 0; // Tracks the last LED count for Dial 2
-    static int lastLedCount3 = 0; // Tracks the last LED count for Dial 3
-
     // Only update if any of the LED counts have changed
     if (ledCount[0] != lastLedCount1 || ledCount[1] != lastLedCount2 || ledCount[2] != lastLedCount3) {
+
+
         
         // Update last LED counts
         lastLedCount1 = ledCount[0];
@@ -106,8 +107,32 @@ void setupFASTLED() {
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
     FastLED.clear();
     FastLED.show();
+
+
 }
 
 void loopFASTLED() {
-   
+  
+    // Check if solutionFound is true
+    if (solutionFound) {
+        // If it's the first time detecting solutionFound or if it changed state
+        if (!solutionStable) {
+            solutionCheckStart = millis(); // Record the current time
+            solutionStable = true; // Mark as stable
+        }
+
+        // Check if 5 seconds have passed without any change
+        if (millis() - solutionCheckStart >= 2000) {
+            // Execute the batch operation
+            executeBatch1();
+
+            // Reset the state to prevent re-triggering
+            solutionStable = false;
+        }
+    } else {
+        // Reset the stability if solutionFound becomes false
+        solutionStable = false;
+    }
+
+    // Additional logic or updates...
 }

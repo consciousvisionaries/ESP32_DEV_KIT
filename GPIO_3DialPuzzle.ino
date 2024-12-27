@@ -1,6 +1,26 @@
 
+// Batch operation function
+void executeBatch1() {
+  
+    // Add your batch operation code here
+    Serial.println("Solution stable for 5 seconds. Executing batch operation...");
+    digitalWrite(PIN_OUTPUT1, LOW);
+    delay(5000);
+    pulseCount1 = 0;
+    pulseCount2 = 0;
+    pulseCount3 = 0;
+    updateFASTLED();
+    digitalWrite(PIN_OUTPUT1, HIGH);
+    prepareLEDData(1, 1, 1);
+}
 
-
+void executeBatch2() {
+  
+    digitalWrite(PIN_OUTPUT2, LOW);
+    delay(5000);
+    digitalWrite(PIN_OUTPUT2, HIGH);
+  
+}
 
 // Interrupt Handlers
 void IRAM_ATTR handleInterruptA1() {
@@ -54,7 +74,6 @@ void IRAM_ATTR handleInterruptA3() {
     lastStateA3 = stateA;
 }
 
-unsigned long lastExecutionTime = 0; // Tracks the last execution time
 
 void activityDetected() {
   
@@ -62,6 +81,11 @@ void activityDetected() {
 
 void setupGPIO() {
     Serial.begin(115200);
+
+    pinMode(PIN_OUTPUT1, OUTPUT);
+    digitalWrite(PIN_OUTPUT1,HIGH);
+    pinMode(PIN_OUTPUT2, OUTPUT);
+    digitalWrite(PIN_OUTPUT2,HIGH);
 
     // Set up Dial 1
     pinMode(PIN_A1, INPUT_PULLUP);
@@ -83,11 +107,7 @@ void setupGPIO() {
 
 void loopGPIO() {
 
-    static unsigned long lastExecutionTime = 0; // Tracks the last execution time
-    static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
-    static int lastPulseCount2 = 0; // Tracks the last state of pulseCount2
-    static int lastPulseCount3 = 0; // Tracks the last state of pulseCount3
-
+    
     unsigned long currentTime = millis(); // Get the current time in milliseconds
 
     // Check if pulse counts have changed
@@ -97,9 +117,13 @@ void loopGPIO() {
         lastExecutionTime = currentTime; // Update the last execution time
 
         // Update the last pulse counts
-        lastPulseCount1 = pulseCount1;
-        lastPulseCount2 = pulseCount2;
-        lastPulseCount3 = pulseCount3;
+        if (pulseCount1 > 16000) { pulseCount1 = 16000; }
+        if (pulseCount2 > 16000) { pulseCount2 = 16000; }
+        if (pulseCount3 > 16000) { pulseCount3 = 16000; }
+        // Update the last pulse counts
+        if (pulseCount1 < 0) { pulseCount1 = 0; }
+        if (pulseCount2 < 0) { pulseCount2 = 0; }
+        if (pulseCount3 < 0) { pulseCount3 = 0; }
 
         updateFASTLED(); // Update LED display
 

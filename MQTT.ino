@@ -94,6 +94,26 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       return;
     }     
 
+    // Extract the value of the 'activity' key
+    const char* activity = doc["activity"];
+
+   
+    // Access and print the key
+    if (doc.containsKey("activity")) {
+        const char* activity = doc["activity"];
+        Serial.print("Activity: ");
+        Serial.println(activity);
+
+        if (String(activity) == (String(NR_GROUP) + " Button Pressed")) { 
+                    executeBatch1();
+        }
+        if (String(activity) == (String(NR_GROUP) + " Button 2 Pressed")) { 
+                    executeBatch2();
+        }
+    } else {
+        Serial.println("Key 'activity' not found");
+    }
+
     // Convert the JSON document to a string
     String jsonMessage;
     serializeJson(doc, jsonMessage);

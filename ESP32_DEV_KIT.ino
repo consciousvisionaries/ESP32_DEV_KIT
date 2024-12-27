@@ -9,7 +9,9 @@ void setup() {
   setupDashboard();
 
   connectMQTT();
-  sendConfigMQTTPayload();  // Send initial MQTT message when connected
+  sendConfigMQTTPayload(); // Send initial MQTT message when connected
+  prepareLEDData(1, 1, 1);
+
 }
 
 void loop() {
