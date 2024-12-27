@@ -10,6 +10,18 @@ Preferences preferences;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+const char* GITHUB_USER = "consciousvisionaries";
+const char* GITHUB_REPO = "ESP32_DEV_KIT";
+const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32.bin";
+const char* GITHUB_BRANCH = "ESPDEVKIT_3DialLEDStrip";
+
+String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
+String bup_password[] = { "3X3K22832E", "Gary2019" };
+
+String storedVersion;
+String ssid;
+String password;
+
 String clientId = "";
 bool allServicesActive = false;
 

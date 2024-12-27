@@ -1,13 +1,23 @@
 #include <FastLED.h>
 
+// LED Array
+CRGB leds[NUM_LEDS];
+
+// Pulse Counters
+volatile int pulseCount1 = 0;
+volatile int pulseCount2 = 0;
+volatile int pulseCount3 = 0;
+
 int ledCount[3];
+
+static int lastLedCount1 = -1; // Tracks the last LED count for Dial 1
+static int lastLedCount2 = -1; // Tracks the last LED count for Dial 2
+static int lastLedCount3 = -1; // Tracks the last LED count for Dial 3
+
 bool solutionFound = false;
 bool solutionStable = false; // Tracks if solutionFound is stable for 5 seconds
 unsigned long solutionCheckStart = 0; // Timestamp to track 5-second period
 
-
-// LED Array
-CRGB leds[NUM_LEDS];
 
 // Function to map pulse counts to the number of LEDs
 int getLEDCount(int pulseCount) {
@@ -45,18 +55,19 @@ void updateFASTLED() {
 
         // Light up LEDs for Dial 1
         for (int i = 0; i < ledCount[0]; i++) {
-            leds[i] = CRGB::Red;
-        }
+          leds[i] = CHSV(0, 255, 255);
+         }
 
         // Light up LEDs for Dial 2
         for (int i = 10; i < 10 + ledCount[1]; i++) {
-            leds[i] = CRGB::Green;
+          leds[i] = CHSV(0, 255, 255); // Uncommented for proper operation
         }
 
-        // Light up LEDs for Dial 3
-        for (int i = 20; i < 20 + ledCount[3]; i++) {
-            leds[i] = CRGB::Blue;
-        }
+      // Light up LEDs for Dial 3
+      for (int i = 20; i < 20 + ledCount[3]; i++) {
+         leds[i] = CHSV(0, 255, 255); // Uncommented for proper operation
+      }
+
 
         // Show updated LED states
         FastLED.show();
@@ -91,6 +102,7 @@ void prepareLEDData(int count1, int count2, int count3) {
     doc["ls2"] = count2;
     doc["ls3"] = count3;
     doc["sfound"] = solutionFound;
+    doc["scode"] = (String(solutionWin[0]) + String(solutionWin[1]) + String(solutionWin[2]));
 
     // Send the JSON payload via MQTT
     String jsonPayload;
@@ -103,8 +115,7 @@ void prepareLEDData(int count1, int count2, int count3) {
 
 void setupFASTLED() {
 
-    // Initialize FastLED
-    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, LED_PIN, RGB>(leds, NUM_LEDS);
     FastLED.clear();
     FastLED.show();
 

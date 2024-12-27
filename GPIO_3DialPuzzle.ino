@@ -1,4 +1,14 @@
 
+// Last States
+volatile int lastStateA1 = LOW;
+volatile int lastStateA2 = LOW;
+volatile int lastStateA3 = LOW;
+
+static unsigned long lastExecutionTime = 0; // Tracks the last execution time
+static int lastPulseCount1 = 0; // Tracks the last state of pulseCount1
+static int lastPulseCount2 = 0; // Tracks the last state of pulseCount2
+static int lastPulseCount3 = 0; // Tracks the last state of pulseCount3
+
 // Batch operation function
 void executeBatch1() {
   

@@ -1,5 +1,6 @@
 #include <ESPAsyncWebServer.h>
 
+// Create an AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
 
@@ -7,7 +8,7 @@ AsyncWebServer server(80);
 String generatePage() {
   String page = "<html><head>";
   
-  // Include styles for both the dashboard and LED matrix
+  // Include styles
   page += "<style>";
   page += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; }";
   page += "#inputsSection { margin: 20px auto; text-align: center; }";
@@ -21,7 +22,7 @@ String generatePage() {
   page += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
   page += "</style>";
 
-  // Include JavaScript for dynamic updates
+  // Include JavaScript
   page += "<script>";
   page += "function refreshInputs() {";
   page += "  fetch('/getAnalogInputs') ";
@@ -35,45 +36,39 @@ String generatePage() {
   page += "}";
   page += "function renderLEDMatrix(payload) {";
   page += "  document.getElementById('puzzle-name').textContent = payload.puzzleName || 'Unnamed Puzzle';";
-  page += "  document.getElementById('puzzle-designer').textContent = payload.designer || 'Unknown Designer';";
-  page += "  document.getElementById('puzzle-tech').textContent = payload.tachName || 'Unknown Tech';";
+  page += "  document.getElementById('group').textContent = payload.group || 'Unknown Group';";
+  page += "  document.getElementById('tab').textContent = payload.tab || 'Unknown Tab';";
   page += "  document.getElementById('ip-address').textContent = payload.ipAddress || 'Unknown IP';";
   page += "  const ledMatrix = document.getElementById('led-matrix');";
-  page += "  ledMatrix.innerHTML = '';"; // Clear previous content
-page += "  for (let c = 0; c < 3; c++) {"; // Loop through each LED strip (3 strips in total)
-page += "    let ledStrip = payload[`led_strip_${c+1}`];"; // Get the LED data for the current strip
-page += "    if (Array.isArray(ledStrip)) {"; // Check if the strip contains LED data
-page += "      const rowDiv = document.createElement('div');"; // Create a new row for the strip
-page += "      for (let i = 0; i < ledStrip.length; i++) {"; // Loop through each LED in the current strip
-page += "        const indicator = document.createElement('span');"; // Create a new indicator for the LED
-page += "        // Set the LED color based on its status (on/off)";
-page += "        indicator.className = `indicator ${ledStrip[i] === 'on' ? 'green' : 'red'}`;"; // Green if 'on', red if 'off'
-page += "        rowDiv.appendChild(indicator);"; // Append the indicator to the row
-page += "      }";
-page += "      ledMatrix.appendChild(rowDiv);"; // Append the row to the LED matrix
-page += "    }";
-page += "  }";
-
+  page += "  ledMatrix.innerHTML = '';";
+  page += "  for (let c = 0; c < 3; c++) {";
+  page += "    let ledStrip = payload[`led_strip_${c+1}`];";
+  page += "    if (Array.isArray(ledStrip)) {";
+  page += "      const rowDiv = document.createElement('div');";
+  page += "      for (let i = 0; i < ledStrip.length; i++) {";
+  page += "        const indicator = document.createElement('span');";
+  page += "        indicator.className = `indicator ${ledStrip[i] === 'on' ? 'green' : 'red'}`;";
+  page += "        rowDiv.appendChild(indicator);";
+  page += "      }";
+  page += "      ledMatrix.appendChild(rowDiv);";
+  page += "    }";
+  page += "  }";
   page += "}";
   page += "window.onload = function() {";
   page += "  refreshInputs();";
   page += "  refreshLEDMatrix();";
-  page += "  setInterval(refreshInputs, 1000);"; // Refresh inputs every second
-  page += "  setInterval(refreshLEDMatrix, 5000);"; // Refresh LED matrix every 5 seconds
+  page += "  setInterval(refreshInputs, 1000);";
+  page += "  setInterval(refreshLEDMatrix, 5000);";
   page += "};";
   page += "</script>";
 
-  // Begin body
+  // Body
   page += "</head><body>";
   page += "<h1>ESP32 Dashboard</h1>";
-
-  // Section for analog inputs
   page += "<div id='inputsSection'>";
   page += "<h2>Analog Inputs</h2>";
-  page += "<div id='inputs'></div>"; // Placeholder for input values
+  page += "<div id='inputs'></div>";
   page += "</div>";
-
-  // Section for LED matrix
   page += "<div id='led-matrix-container'>";
   page += "<h3 id='puzzle-name'>Loading...</h3>";
   page += "<p><strong>Group:</strong> <span id='group'>N/A</span></p>";
@@ -81,24 +76,22 @@ page += "  }";
   page += "<p><strong>IP Address:</strong> <span id='ip-address'>N/A</span></p>";
   page += "<div id='led-matrix'></div>";
   page += "</div>";
-
-  // Close body and html
   page += "</body></html>";
   
   return page;
 }
 
-// Setup the server and JSON endpoint
 void setupDashboard() {
+
+  // Setup server routes
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/html", generatePage());
   });
 
   server.on("/getAnalogInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
     String inputs = "<div>";
-    inputs += "<div class='input'>Analog 1: 123</div>"; // Example values
-    inputs += "<div class='input'>Analog 2: 456</div>";
-    inputs += "<div class='input'>Analog 3: 789</div>";
+    inputs += "<div class='input'>Analog 1: " + String(analogRead(34)) + "</div>";
+    inputs += "<div class='input'>Analog 2: " + String(analogRead(35)) + "</div>";
     inputs += "</div>";
     request->send(200, "text/html", inputs);
   });
@@ -107,5 +100,6 @@ void setupDashboard() {
     request->send(200, "application/json", jsonPublished);
   });
 
+  // Start server
   server.begin();
 }

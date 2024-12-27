@@ -1,3 +1,10 @@
+#define MQTT_TOPIC "/lost"
+#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
+#define MQTT_PORT 1883
+
+// Node-Red User Login (Device Login - Raspberry Pi)
+const char* mqttUserName = "pro1polaris";
+const char* mqttPassword = "CVr819P*!";
 
 void connectMQTT() {
 
@@ -26,7 +33,6 @@ void clientMQTTConnected() {
   client.loop();  // Ensure MQTT is being handled
 }
 
-String jsonPublished;
 
 void publishDataMQTTPayload_Doc(String jsonPayload) {
    
@@ -59,6 +65,7 @@ void sendConfigMQTTPayload() {
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
+    jsonPublished = jsonPayload;
 
     Serial.print("Payload size: ");
     Serial.println(jsonPayload.length());
