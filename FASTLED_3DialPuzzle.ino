@@ -19,11 +19,11 @@ void updateFASTLED() {
     ledCount[2] = getLEDCount(pulseCount3);
 
     for (int s=0; s < 3; s++) {
-      if (ledCount[s] == solutionWin[s]) {
-        solutionFound = true;
+      if (ledCount[s] != solutionWin[s]) {
+        solutionFound = false;
         break;
       }
-      solutionFound = false;
+      solutionFound = true;
       Serial.println("Solution Found");
     }
     
@@ -75,20 +75,21 @@ void prepareLEDData(int count1, int count2, int count3) {
     //doc["mac"] = WiFi.macAddress();
     doc["puzzleName"] = PUZZLE_NAME;
     //doc["ipAddress"] = WiFi.localIP().toString();
-    doc["timestamp"] = millis();
+    //doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
     doc["group"] = NR_GROUP;
-    //doc["output_type"] = NR_TYPE;
+    //doc["type"] = NR_TYPE;
     //doc["version"] = storedVersion;
-    //doc["num_outputs"] = NUM_OUTPUTS;
-    //doc["num_inputs"] = NUM_INPUTS;
-    doc["num_leds"] = NUM_LEDS;
-    doc["num_channels"] = NUM_CHANNELS;
+    //doc["outputs"] = NUM_OUTPUTS;
+    //doc["inputs"] = NUM_INPUTS;
+    doc["leds"] = NUM_LEDS;
+    doc["channels"] = NUM_CHANNELS;
 
     
-    doc["led_strip_1"] = count1;
-    doc["led_strip_2"] = count2;
-    doc["led_strip_3"] = count3;
+    doc["ls1"] = count1;
+    doc["ls2"] = count2;
+    doc["ls3"] = count3;
+    doc["sfound"] = solutionFound;
 
     // Send the JSON payload via MQTT
     String jsonPayload;

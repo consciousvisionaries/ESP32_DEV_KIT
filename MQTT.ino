@@ -44,18 +44,18 @@ void sendConfigMQTTPayload() {
     StaticJsonDocument<1024> doc;  // Adjust as needed
     doc["mac"] = WiFi.macAddress();
     doc["puzzleName"] = PUZZLE_NAME;
-    //doc["designer"] = DESIGNER_NAME;
-    doc["techName"] = TECH_NAME;
-    doc["ipAddress"] = WiFi.localIP().toString();
+    doc["designer"] = DESIGNER_NAME;
+    doc["tech"] = TECH_NAME;
+    doc["ip"] = WiFi.localIP().toString();
     //doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
     doc["group"] = NR_GROUP;
-    doc["output_type"] = NR_TYPE;
+    doc["type"] = NR_TYPE;
     doc["version"] = storedVersion;
-    //doc["num_outputs"] = NUM_OUTPUTS;
-    //doc["num_inputs"] = NUM_INPUTS;
-    doc["num_leds"] = NUM_LEDS;
-    doc["num_channels"] = NUM_CHANNELS;
+    //doc["outputs"] = NUM_OUTPUTS;
+    //doc["inputs"] = NUM_INPUTS;
+    doc["leds"] = NUM_LEDS;
+    doc["chan"] = NUM_CHANNELS;
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
