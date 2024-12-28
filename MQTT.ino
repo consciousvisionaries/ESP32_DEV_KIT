@@ -1,6 +1,9 @@
-#define MQTT_TOPIC "/lost"
+#define MQTT_TOPIC "/edna"
 #define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 #define MQTT_PORT 1883
+
+#define MQTT_REMOTE_SERVER "" // remote sandbox
+#define MQTT_REPORT_PORT "" // port?
 
 // Node-Red User Login (Device Login - Raspberry Pi)
 const char* mqttUserName = "pro1polaris";

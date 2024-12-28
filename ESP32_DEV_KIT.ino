@@ -1,23 +1,23 @@
 String jsonPublished;
 
-int solutionWin[] = {6,5,9};
+int solutionWin[] = {1,2,3,4,5,6,7,8};
 
 // Access Point
-#define AP_SSID "BB LOST ESP"
-#define AP_PASSWORD "Lost"
+#define AP_SSID "BB EDNA ESP"
+#define AP_PASSWORD "Edna"
 
-#define PUZZLE_NAME "LOST 3 Dial Puzzle"
+#define PUZZLE_NAME "EDNA 8 Button MP3 Puzzle"
 #define DESIGNER_NAME "Beyond Belief"
 #define TECH_NAME "MYSTTECH Creations"
 
-#define NR_TAB "LOST"
+#define NR_TAB "EDNA"
 #define NR_GROUP "Stage 1"
-#define NR_TYPE "LED_MATRIX"
+#define NR_TYPE "8_BUTTONMP3"
 
-#define NUM_INPUTS 3
+#define NUM_INPUTS 8
 #define NUM_OUTPUTS 2
-#define NUM_LEDS 30  // Total number of LEDs (10 per dial)
-#define NUM_CHANNELS 3
+#define NUM_LEDS 10 
+#define NUM_CHANNELS 1
 
 #define LED_PIN 12  // Pin for LEDs
 #define PIN_OUTPUT1 5 // to relay
