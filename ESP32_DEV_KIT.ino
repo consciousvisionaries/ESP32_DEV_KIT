@@ -1,6 +1,6 @@
 String jsonPublished;
 
-int solutionWin[] = {1,2,3,4,5,6,7,8};
+#define MODULE "ESP32WROOM by FREENOVE"
 
 // Access Point
 #define AP_SSID "BB EDNA ESP"
@@ -19,35 +19,29 @@ int solutionWin[] = {1,2,3,4,5,6,7,8};
 #define NUM_LEDS 10 
 #define NUM_CHANNELS 1
 
-#define LED_PIN 12  // Pin for LEDs
-#define PIN_OUTPUT1 5 // to relay
-#define PIN_OUTPUT2 19 //to relay
+#define MQTT_TOPIC "/edna"
+#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
+#define MQTT_PORT 1883
 
-// Dial 1
-#define PIN_A1 14
-#define PIN_B1 25
+#define MQTT_REMOTE_SERVER "" // remote sandbox
+#define MQTT_REPORT_PORT "" // port?
 
-// Dial 2
-#define PIN_A2 27
-#define PIN_B2 33
 
-// Dial 3
-#define PIN_A3 26
-#define PIN_B3 32
 
 void setup() {
   
   Serial.begin(115200);
   
   setupFirmware();
+  setupDashboard();
+
   connectMQTT();
   sendConfigMQTTPayload(); // Send initial MQTT message when connected
+  setupMP3Player();
   setupGPIO();
   setupFASTLED();
-  setupDashboard();
-  
-  prepareLEDData(1, 1, 1);
 
+  Serial.println("READY.");
 }
 
 void loop() {

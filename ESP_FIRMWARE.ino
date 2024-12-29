@@ -5,6 +5,11 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Update.h>
+#include <DFRobotDFPlayerMini.h>  // Make sure you have this library installed
+
+// Software serial for MP3 module
+HardwareSerial mp3Serial(2); // RX, TX uart2 rx 16 tx 17
+DFRobotDFPlayerMini mp3Player;
 
 Preferences preferences;
 WiFiClient espClient;

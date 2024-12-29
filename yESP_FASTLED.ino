@@ -1,0 +1,44 @@
+#include <FastLED.h>
+
+#define LED_PIN 12  // Pin for LEDs
+
+// LED Array
+CRGB leds[NUM_LEDS];
+
+
+void updateFASTLED() {
+
+   
+       
+
+
+        // Show updated LED states
+        FastLED.show();
+
+       
+    
+}
+
+
+
+void setupFASTLED() {
+
+    FastLED.addLeds<WS2812, LED_PIN, RGB>(leds, NUM_LEDS);
+    FastLED.clear();
+    FastLED.show();
+
+
+}
+
+void loopFASTLED() {
+  
+    // Check if solutionFound is true
+    if (solutionFound) {
+       
+    } else {
+
+    
+    }
+
+    // Additional logic or updates...
+}

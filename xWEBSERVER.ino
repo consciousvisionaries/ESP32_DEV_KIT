@@ -88,17 +88,17 @@ void setupDashboard() {
     request->send(200, "text/html", generatePage());
   });
 
-  server.on("/getAnalogInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/getDigitalInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
     String inputs = "<div>";
-    inputs += "<div class='input'>Analog 1: " + String(analogRead(34)) + "</div>";
-    inputs += "<div class='input'>Analog 2: " + String(analogRead(35)) + "</div>";
+    inputs += "<div class='input'>Digital 1: " + String(digitalRead(PIN_B1)) + "</div>";
+    inputs += "<div class='input'>Digital 2: " + String(digitalRead(PIN_B2)) + "</div>";
     inputs += "</div>";
     request->send(200, "text/html", inputs);
   });
 
-  server.on("/getLEDMatrix", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", jsonPublished);
-  });
+  //server.on("/getLEDMatrix", HTTP_GET, [](AsyncWebServerRequest *request) {
+  //  request->send(200, "application/json", jsonPublished);
+  //});
 
   // Start server
   server.begin();
