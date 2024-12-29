@@ -1,3 +1,10 @@
+#define MQTT_MAX_PACKET_SIZE 512  // Adjust size as needed
+#define MQTT_PORT 1883
+#define MQTT_REMOTE_SERVER "" // remote sandbox
+#define MQTT_REPORT_PORT "" // port?
+
+//#define MQTT_TOPIC "/edna"
+//#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 
 // Node-Red User Login (Device Login - Raspberry Pi)
 const char* mqttUserName = "pro1polaris";
@@ -115,11 +122,11 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       executeGPIOBatch1();
     } else if (activityString == (String(NR_GROUP) + " Button 2 Pressed")) { 
       executeGPIOBatch2();
-    } else if (activityString == (String(NR_GROUP) + " Button 3 Pressed")) {
-      executeGPIOBatch3();
+    } else {
+      executeMQTTBatch(activity);
     }
-
     activityString = "";
+    
   } else {
     Serial.println("Key 'activity' not found");
   }

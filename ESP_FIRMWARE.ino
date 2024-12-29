@@ -1,34 +1,56 @@
 #include <Preferences.h>
 #include <WiFi.h>
-#define MQTT_MAX_PACKET_SIZE 512  // Adjust size as needed
-#include <PubSubClient.h>
+
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Update.h>
-#include <DFRobotDFPlayerMini.h>  // Make sure you have this library installed
 
-// Software serial for MP3 module
-HardwareSerial mp3Serial(2); // RX, TX uart2 rx 16 tx 17
-DFRobotDFPlayerMini mp3Player;
+#include <PubSubClient.h>
 
-Preferences preferences;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const char* GITHUB_USER = "consciousvisionaries";
-const char* GITHUB_REPO = "ESP32_DEV_KIT";
-const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32.bin";
-const char* GITHUB_BRANCH = "ESP32DEVKIT_8ButtonMP3Puzzle";
+Preferences preferences;
 
-String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
-String bup_password[] = { "3X3K22832E", "Gary2019" };
+//const char* GITHUB_USER = "consciousvisionaries";
+//const char* GITHUB_REPO = "ESP32_DEV_KIT";
+//const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32.bin";
+//const char* GITHUB_BRANCH = "ESP32DEVKIT_8ButtonMP3Puzzle";
+
+//String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
+//String bup_password[] = { "3X3K22832E", "Gary2019" };
 
 String storedVersion;
 String ssid;
 String password;
+String jsonPublished;
 
 String clientId = "";
 bool allServicesActive = false;
+
+void setup() {
+  
+  Serial.begin(115200);
+  
+  setupFirmware();
+  setupDashboard();
+
+  connectMQTT();
+  sendConfigMQTTPayload(); // Send initial MQTT message when connected
+  setupMP3Player();
+  setupGPIO();
+  setupFASTLED();
+
+  Serial.println("READY.");
+}
+
+void loop() {
+
+  clientMQTTConnected();
+  loopFIRMWARE();
+  loopGPIO();
+  loopFASTLED();
+}
 
 void setupFirmware() {
 

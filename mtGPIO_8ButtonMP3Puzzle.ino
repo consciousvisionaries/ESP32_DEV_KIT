@@ -1,17 +1,20 @@
-// Buttons
-#define PIN_B1 14
-#define PIN_B2 27
-#define PIN_B3 26
-#define PIN_B4 33
-#define PIN_B5 0
-#define PIN_B6 4
-#define PIN_B7 5
-#define PIN_B8 19
-#define PIN_B9 18  // Start button
+// INPUT Buttons
 
-// Outputs
-#define PIN_OUTPUT1 22
-#define PIN_OUTPUT2 23
+//#define PIN_B1 14
+//#define PIN_B2 27
+//#define PIN_B3 26
+//#define PIN_B4 33
+//#define PIN_B5 0
+//#define PIN_B6 4
+//#define PIN_B7 5
+//#define PIN_B8 19
+
+//#define PIN_B9 18  // Start button
+
+// DIGITAL OUTPUTS
+
+//#define PIN_OUTPUT1 22
+//#define PIN_OUTPUT2 23
 
 // Debounce variables
 unsigned long lastDebounceTime[9] = {0};
@@ -91,15 +94,19 @@ void startGame() {
         gameActive = true;
         solutionIndex = 0;
         solutionFound = false;
-        mp3Player.play(10);  // Play starting song (track 10)
+       
+        // Play starting song (track 10)
         Serial.println("Game started! Press buttons in the correct order.");
+    } else {
+        Serial.println("Game is already started! Stop game to and press start to begin again.");
     }
 }
 
 // Handle button input during the game
 void handleGameInput(int buttonIndex) {
     
-    mp3Player.play(buttonIndex);  // Play corresponding song
+    //playMP3(buttonIndex, 30);  // Play corresponding song
+    
     if (solutionWin[solutionIndex] == buttonIndex) {
         solutionIndex++;
         Serial.println("Correct button!");
@@ -109,9 +116,9 @@ void handleGameInput(int buttonIndex) {
             winGame();
         }
     } else {
-        mp3Player.play(11);  // Play failure sound (track 11)
+        playMP3(11, 30);  // Play failure sound (track 11)
         Serial.println("Incorrect button! Try again.");
-        resetGame();
+       
     }
 }
 
@@ -125,7 +132,7 @@ void resetGame() {
 // Handle winning the game
 void winGame() {
     gameActive = false;
-    mp3Player.play(12);  // Play winning song (track 12)
+    playMP3(12,30);  // Play winning song (track 12)
     executeGPIOBatch1();
     Serial.println("Congratulations! You've won!");
 }
@@ -151,11 +158,18 @@ void executeGPIOBatch2() {
 }
 
 // Execute batch operation 2
-void executeGPIOBatch3() { //start button
-    if (!batch3Running) {
-        batchStartTime = millis();
-        startGame();
-        Serial.println("Executing batch 3...START");
+void executeMQTTBatch(String mqttMessage) { //start button
+    if (!gameActive) {
+        if (mqttMessage == "Start Edna's...") {
+           delay(500);
+           startGame();
+           delay(500);
+           Serial.println("Executed MQTT...START");
+        } else {
+          Serial.println("Actvity not recognized!");
+        }
+    } else {
+      Serial.println("Game already started!");
     }
 }
 

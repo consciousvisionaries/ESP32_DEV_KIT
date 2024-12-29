@@ -1,10 +1,9 @@
 #include <FastLED.h>
 
-#define LED_PIN 12  // Pin for LEDs
+//#define LED_PIN 12  // Pin for LEDs
 
 // LED Array
 CRGB leds[NUM_LEDS];
-
 
 void updateFASTLED() {
 
