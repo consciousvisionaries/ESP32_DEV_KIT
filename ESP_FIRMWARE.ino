@@ -1,15 +1,13 @@
 #include <Preferences.h>
 #include <WiFi.h>
-
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Update.h>
-
 #include <PubSubClient.h>
+#include <esp_task_wdt.h>
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
 Preferences preferences;
 
 //const char* GITHUB_USER = "consciousvisionaries";
@@ -40,6 +38,7 @@ void setup() {
   setupMP3Player();
   setupGPIO();
   setupFASTLED();
+  //setupESPTask();
 
   Serial.println("READY.");
 }
@@ -50,6 +49,23 @@ void loop() {
   loopFIRMWARE();
   loopGPIO();
   loopFASTLED();
+  //loopESPTask();
+}
+
+void setupESPTask() {
+  
+  esp_task_wdt_config_t wdt_config = {
+        .timeout_ms = 10000,  // Timeout in milliseconds (5 seconds)
+        .idle_core_mask = (1 << 0), // Use Core 0
+        .trigger_panic = true
+    };
+    esp_task_wdt_init(&wdt_config);
+    esp_task_wdt_add(NULL); // Add current task
+}
+
+void loopESPTask() {
+  
+    esp_task_wdt_reset(); // Feed the watchdog timer
 }
 
 void setupFirmware() {

@@ -62,8 +62,10 @@ void publishDataMQTTPayload_Doc(String jsonPayload) {
     }
 }
 
+
+
 void sendConfigMQTTPayload() {
-    StaticJsonDocument<1024> doc;  // Adjust as needed
+    DynamicJsonDocument doc(512);  // Use DynamicJsonDocument with appropriate size
     doc["mac"] = WiFi.macAddress();
     doc["puzzleName"] = PUZZLE_NAME;
     doc["designer"] = DESIGNER_NAME;
@@ -104,7 +106,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   memcpy(message, payload, length);
   message[length] = '\0';
 
-  StaticJsonDocument<256> doc;
+  DynamicJsonDocument doc(512);  // Use DynamicJsonDocument with appropriate size
+
   DeserializationError error = deserializeJson(doc, message);
   if (error) {
     Serial.print("JSON parse error: ");
