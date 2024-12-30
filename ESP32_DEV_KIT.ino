@@ -3,7 +3,7 @@
 #define MODULE "ESP32WROOM by FREENOVE"
 
 // puzzle details
-#define PUZZLE_NAME "ESP32 8GPIO MASTER"
+#define PUZZLE_NAME "Beyond Belief 8GPIO MASTER"
 #define DESIGNER_NAME "Appsations, Inc"
 #define TECH_NAME "MYSTTECH Creations"
 
@@ -19,7 +19,6 @@
 // fastled
 #define NUM_LEDS 10 
 #define NUM_CHANNELS 0
-
 // wifi
 String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
 String bup_password[] = { "3X3K22832E", "Gary2019" };
@@ -42,7 +41,7 @@ const char* mqttPassword = "CVr819P*!";
 #define MQTT_TOPIC "/myst/er/bb/president"      // Topic for publish/subscribe
 #define MQTT_SERVER "192.168.0.130" // Replace with your MQTT broker IP
 #define MQTT_BROKER "broker.emqx.io"  // EMQX Public Broker
-#define MQTT_CLIENT_ID "MystTech00" // Replace with a unique client ID
+#define MQTT_CLIENT_ID "MystTech01" // Replace with a unique client ID
 
 // If you plan to use TLS (secure connection)
 
