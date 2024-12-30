@@ -23,7 +23,6 @@ String ssid;
 String password;
 String jsonPublished;
 
-String clientId = "";
 bool allServicesActive = false;
 
 void setup() {
@@ -70,7 +69,6 @@ void loopESPTask() {
 
 void setupFirmware() {
 
-  clientId = "ESP32_" + String(WiFi.macAddress());
   loadWiFiCredentials();
   
   // Simulate the version checking and saving

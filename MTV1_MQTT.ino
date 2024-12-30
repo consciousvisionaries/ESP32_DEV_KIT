@@ -1,7 +1,5 @@
-#define MQTT_MAX_PACKET_SIZE 512  // Adjust size as needed
+#define MQTT_MAX_PACKET_SIZE 225  // Adjust size as needed
 #define MQTT_PORT 1883
-#define MQTT_REMOTE_SERVER "" // remote sandbox
-#define MQTT_REPORT_PORT "" // port?
 
 //#define MQTT_TOPIC "/edna"
 //#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
@@ -17,12 +15,43 @@ void connectMQTT() {
 
   unsigned long startAttemptTime = millis();
   const unsigned long retryInterval = 5000;  // Retry interval (in milliseconds)
+  const unsigned long timeout = 10000;       // Timeout after 30 seconds
+
+  while (!client.connected() && millis() - startAttemptTime < timeout) {
+    Serial.print("Connecting to MQTT...");
+    if (client.connect(MQTT_CLIENT_ID, mqttUserName, mqttPassword)) {
+      Serial.println("Connected to SERVER");
+      client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
+    } else {
+      Serial.print("Failed (state=");
+      Serial.print(client.state());
+      Serial.println("). Retrying in 5 seconds...");
+      unsigned long retryStart = millis();
+      while (millis() - retryStart < retryInterval && !client.connected()) {
+        delay(100);  // Non-blocking alternative, can handle tasks here
+      }
+    }
+  }
+
+  if (!client.connected()) {
+    Serial.println("MQTT connection failed.");
+    connectBrokerMQTT();
+  }
+}
+
+void connectBrokerMQTT() {
+  client.setServer(MQTT_BROKER, MQTT_PORT);
+  client.setCallback(mqttCallback);  // Set MQTT callback function
+  Serial.println("MQTT Callback should be set");
+
+  unsigned long startAttemptTime = millis();
+  const unsigned long retryInterval = 5000;  // Retry interval (in milliseconds)
   const unsigned long timeout = 30000;       // Timeout after 30 seconds
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(clientId.c_str(), mqttUserName, mqttPassword)) {
-      Serial.println("Connected to MQTT.");
+    if (client.connect(MQTT_CLIENT_ID)) {
+      Serial.println("Connected to BROKER");
       client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
       Serial.print("Failed (state=");
@@ -40,7 +69,6 @@ void connectMQTT() {
   }
 }
 
-
 void clientMQTTConnected() {
   
   if (!client.connected()) {
@@ -51,6 +79,16 @@ void clientMQTTConnected() {
 
 
 void publishDataMQTTPayload_Doc(String jsonPayload) {
+
+    Serial.print("Payload size: ");
+    Serial.println(jsonPayload.length());
+    Serial.print("MQTT Buffer Size: ");
+    Serial.println(MQTT_MAX_PACKET_SIZE);
+
+    if (jsonPayload.length() > MQTT_MAX_PACKET_SIZE) {
+        Serial.println("Error: Payload size exceeds MQTT buffer size.");
+        return;
+    }
    
     // Send the payload via MQTT
     if (client.publish(MQTT_TOPIC, jsonPayload.c_str())) {
@@ -71,30 +109,31 @@ void sendConfigMQTTPayload() {
     doc["designer"] = DESIGNER_NAME;
     doc["tech"] = TECH_NAME;
     doc["ip"] = WiFi.localIP().toString();
-    //doc["timestamp"] = millis();
+    doc["timestamp"] = millis();
     doc["tab"] = NR_TAB;
     doc["group"] = NR_GROUP;
-    doc["type"] = NR_TYPE;
-    doc["version"] = storedVersion;
-    //doc["outputs"] = NUM_OUTPUTS;
-    //doc["inputs"] = NUM_INPUTS;
-    doc["leds"] = NUM_LEDS;
-    doc["chan"] = NUM_CHANNELS;
+    
+    DynamicJsonDocument doc1(512);  // Use DynamicJsonDocument with appropriate size
+    doc1["mac"] = WiFi.macAddress();
+    doc1["puzzleName"] = PUZZLE_NAME;
+    doc1["type"] = NR_TYPE;
+    doc1["version"] = storedVersion;
+    doc1["leds"] = NUM_LEDS;
+    doc1["chan"] = NUM_CHANNELS;
+    doc1["inputs"] = NUM_INPUTS;
+    doc1["outputs"] = NUM_OUTPUTS;
+
+    
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
     jsonPublished = jsonPayload;
-
-    Serial.print("Payload size: ");
-    Serial.println(jsonPayload.length());
-    Serial.print("MQTT Buffer Size: ");
-    Serial.println(MQTT_MAX_PACKET_SIZE);
-
-    if (jsonPayload.length() > MQTT_MAX_PACKET_SIZE) {
-        Serial.println("Error: Payload size exceeds MQTT buffer size.");
-        return;
-    }
+    publishDataMQTTPayload_Doc(jsonPayload);
+    delay(50);
     
+    jsonPayload = "";
+    serializeJson(doc1, jsonPayload);
+    jsonPublished = jsonPayload;
     publishDataMQTTPayload_Doc(jsonPayload);
 }
 
