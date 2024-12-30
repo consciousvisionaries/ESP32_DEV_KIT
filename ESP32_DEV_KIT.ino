@@ -29,7 +29,7 @@ String bup_password[] = { "3X3K22832E", "Gary2019" };
 // github
 const char* GITHUB_USER = "consciousvisionaries";
 const char* GITHUB_REPO = "ESP32_DEV_KIT";
-const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32.bin";
+const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32da.bin"; // esp32 wroom
 const char* GITHUB_BRANCH = "ESP32DEVKIT_8ButtonMP3Puzzle";
 
 // MQTT
