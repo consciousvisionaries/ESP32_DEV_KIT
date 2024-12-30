@@ -88,10 +88,10 @@ void setupDashboard() {
     request->send(200, "text/html", generatePage());
   });
 
-  server.on("/getDigitalInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/getDigitalInpUTS", HTTP_GET, [](AsyncWebServerRequest *request) {
     String inputs = "<div>";
-    inputs += "<div class='input'>Digital 1: " + String(digitalRead(PIN_B1)) + "</div>";
-    inputs += "<div class='input'>Digital 2: " + String(digitalRead(PIN_B2)) + "</div>";
+    //inputs += "<div class='input'>Digital 1: " + String(digitalRead(PIN_B1)) + "</div>";
+    //inputs += "<div class='input'>Digital 2: " + String(digitalRead(PIN_B2)) + "</div>";
     inputs += "</div>";
     request->send(200, "text/html", inputs);
   });

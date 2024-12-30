@@ -7,8 +7,8 @@
 //#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 
 // Node-Red User Login (Device Login - Raspberry Pi)
-const char* mqttUserName = "pro1polaris";
-const char* mqttPassword = "CVr819P*!";
+//const char* mqttUserName = "pro1polaris";
+//const char* mqttPassword = "CVr819P*!";
 
 void connectMQTT() {
   client.setServer(MQTT_SERVER, MQTT_PORT);
@@ -120,15 +120,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     Serial.print("Activity: ");
     Serial.println(activity);
 
-    String activityString = String(activity);
-    if (activityString == (String(NR_GROUP) + " Button Pressed")) { 
-      executeGPIOBatch1();
-    } else if (activityString == (String(NR_GROUP) + " Button 2 Pressed")) { 
-      executeGPIOBatch2();
-    } else {
-      executeMQTTBatch(activity);
-    }
-    activityString = "";
+    
     
   } else {
     Serial.println("Key 'activity' not found");

@@ -31,13 +31,7 @@ void setupFASTLED() {
 
 void loopFASTLED() {
   
-    // Check if solutionFound is true
-    if (solutionFound) {
-       
-    } else {
-
-    
-    }
+   
 
     // Additional logic or updates...
 }
