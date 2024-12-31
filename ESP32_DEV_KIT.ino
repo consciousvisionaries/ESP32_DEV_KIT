@@ -10,7 +10,7 @@
 
 #define NR_TAB "PRESIDENTS BIG MISTAKE"
 #define NR_GROUP "Stage 1"
-#define NR_TYPE "8_OUTPUT" // 
+#define NR_TYPE "8_OUTPUT" 
 
 // digitalGPIO
 
