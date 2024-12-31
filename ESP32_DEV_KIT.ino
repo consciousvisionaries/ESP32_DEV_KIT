@@ -45,7 +45,7 @@ String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
 String bup_password[] = { "3X3K22832E", "Gary2019" };
 
 // access point
-#define AP_SSID "MystTech 8IO"
+#define AP_SSID "MystTech 8GPIO"
 #define AP_PASSWORD "MystTech" // 'localhost:1880/admin'
 
 // github
