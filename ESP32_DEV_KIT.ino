@@ -3,7 +3,7 @@
 #define MODULE "ESP32WROOM by FREENOVE"
 
 // puzzle details
-#define PUZZLE_NAME "Presidents Big Mistake MASTER"
+#define PUZZLE_NAME "President's Big Mistake"
 #define DESIGNER_NAME "Beyond Belief Entertainment"
 #define TECH_NAME "MYSTTECH Creations"
 #define MYSTTECH_MODEL "MYST8 GPIO MASTER"
@@ -16,7 +16,7 @@
 
 #define NUM_INPUTS 8
 String bodyInputTitle = "FLEXXMAX2 Input STATUS";
-String bodyOutputTitle = "FLEXXMAX2 Input OVERRIDE";
+String bodyOutputTitle = "OVERRIDE";
 String buttonsHTMLTitle = "Game Master INPUT Control";
 
 

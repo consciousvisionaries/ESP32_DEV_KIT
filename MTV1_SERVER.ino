@@ -69,7 +69,7 @@ String generateOutputsPayload() {
 // 4. Update generateOutputButtonsHTML() to use the outputNames array
 String generateOutputButtonsHTML() {
   String buttonsHTML = "<div id='buttonsSection'>";
-  buttonsHTML += "<h2>" + String(buttonsHTMLTitle) + "</h2>";
+  buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
 
   int numColumns = NUM_OUTPUTS / NUM_OUTPUT_ROWS;  // Calculate number of columns based on rows
 

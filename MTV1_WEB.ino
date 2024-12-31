@@ -7,7 +7,7 @@ String getStyle_cssHTML() {
   page += ".input:hover, .output:hover { background-color: #333; }";
   page += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
   page += "#led-matrix-container:hover { border-color: #4CAF50; }";
-  page += ".indicator { display: inline-block; width: 25px; height: 25px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
+  page += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   page += ".indicator.green { background-color: green; }";
   page += ".indicator.red { background-color: red; }";
   page += "h1 { font-size: 36px; margin-bottom: 20px; }";
@@ -30,7 +30,7 @@ String refreshInputs_dataHTML() {
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
   
   bodyDivHTML += "<div id='inputsSection'>";
-  bodyDivHTML += "<h2>" + String(bodyInputTitle) + "</h2>";
+  bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
   bodyDivHTML += "<div id='inputs'>Waiting for inputs...</div>";
   bodyDivHTML += "</div>";
 
