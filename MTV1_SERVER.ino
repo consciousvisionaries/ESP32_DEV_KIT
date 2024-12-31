@@ -184,63 +184,56 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 });
 
 server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-  String page = "<html><head><title>Admin Page</title>";
-  page += "<style>";
-  page += "body { font-family: Arial, sans-serif; margin: 20px; }";
-  page += "h1 { color: #333; }";
-  page += "label { display: block; margin-top: 10px; }";
-  page += "input { margin-bottom: 10px; padding: 5px; width: 300px; }";
-  page += "button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; cursor: pointer; }";
-  page += "button:hover { background-color: #45a049; }";
-  page += ".confirmation { margin-top: 20px; color: green; font-weight: bold; }";
-  page += "</style>";
-  page += "</head><body>";
-  page += "<h1>Admin Page</h1>";
-  page += "<form id='adminForm'>";
-  page += "<label for='ssid'>Current SSID:</label>";
-  page += "<input type='text' id='ssid' name='ssid' value='" + ssid + "'>";
-  page += "<label for='password'>Current Password:</label>";
-  page += "<input type='password' id='password' name='password' value='" + password + "'>";
-  page += "<button type='button' onclick='saveChanges()'>Save Changes</button>";
-  page += "</form>";
-  page += "<div id='confirmation' class='confirmation' style='display: none;'>Changes Saved Successfully!</div>";
-  page += "<script>";
-  page += "function saveChanges() {";
-  page += "  const ssid = document.getElementById('ssid').value;";
-  page += "  const password = document.getElementById('password').value;";
-  page += "  const xhr = new XMLHttpRequest();";
-  page += "  xhr.open('POST', '/saveCredentials', true);";
-  page += "  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');";
-  page += "  xhr.onreadystatechange = function() {";
-  page += "    if (xhr.readyState == 4 && xhr.status == 200) {";
-  page += "      document.getElementById('confirmation').style.display = 'block';";
-  page += "    }";
-  page += "  };";
-  page += "  xhr.send('ssid=' + encodeURIComponent(ssid) + '&password=' + encodeURIComponent(password));";
-  page += "}";
-  page += "</script>";
-  page += "</body></html>";
-  request->send(200, "text/html", page);
+  // Create HTML content for the /admin page
+  String adminPage = "<html><head><title>Admin Panel</title></head><body>";
+  adminPage += "<h1>Admin Panel</h1>";
+  adminPage += "<h3>Module Information</h3>";
+  adminPage += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
+  adminPage += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
+  adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
+  adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
+  adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
+  adminPage += "<p><strong>Group:</strong> " + String(NR_GROUP) + "</p>";
+  adminPage += "<p><strong>Type:</strong> " + String(NR_TYPE) + "</p>";
+  
+  // Existing SSID and password
+  adminPage += "<h3>WiFi Settings</h3>";
+  adminPage += "<form action='/saveConfig' method='POST'>";
+  adminPage += "<label for='ssid'>SSID:</label>";
+  adminPage += "<input type='text' id='ssid' name='ssid' value='" + ssid + "'><br><br>";
+  adminPage += "<label for='password'>Password:</label>";
+  adminPage += "<input type='text' id='password' name='password' value='" + password + "'><br><br>";
+  adminPage += "<button type='submit'>Save Changes</button>";
+  adminPage += "</form>";
+
+  adminPage += "</body></html>";
+  request->send(200, "text/html", adminPage);
 });
 
-// Handle saving credentials
-server.on("/saveCredentials", HTTP_POST, [](AsyncWebServerRequest *request) {
-  if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
-    ssid = request->getParam("ssid", true)->value();
-    password = request->getParam("password", true)->value();
+// Save new configuration
+server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
+  String newSSID = request->getParam("ssid", true)->value();
+  String newPassword = request->getParam("password", true)->value();
 
-    // Save the new credentials in memory or SPIFFS
-    Serial.println("New SSID: " + ssid);
-    Serial.println("New Password: " + password);
+  // Save the new SSID and password to global variables
+  ssid = newSSID;
+  password = newPassword;
 
-    // Optional: Save credentials to SPIFFS/EEPROM for persistence
-    // Example code here to write to SPIFFS or EEPROM
+  saveWiFiCredentials(newSSID, newPassword, storedVersion);
 
-    request->send(200, "text/plain", "Credentials updated");
-  } else {
-    request->send(400, "text/plain", "Missing SSID or Password");
-  }
+  // Send confirmation back to the user
+  String confirmationPage = "<html><head><title>Confirmation</title></head><body>";
+  confirmationPage += "<h1>Configuration Saved</h1>";
+  confirmationPage += "<p>New SSID: " + ssid + "</p>";
+  confirmationPage += "<p>New Password: " + password + "</p>";
+  confirmationPage += "<a href='/admin'>Back to Admin Panel</a>";
+  confirmationPage += "</body></html>";
+  request->send(200, "text/html", confirmationPage);
+
+  // Optionally restart the ESP32 to apply changes
+  // ESP.restart();
 });
+
 
 
   // Start the server
