@@ -1,19 +1,17 @@
 #define WEBHTML_VERSION V1.1
 
-// 4. getStyle_cssHTML() Function
 String getStyle_header() {
 
   String style = "<style>";
   style += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
-
+  style += "h1 { font-size: 36px; margin-bottom: 20px; }";
+  style += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
   return style;
 }
 
 String getStyle_footer() {
   String style = "";
   
-  styleHTML += "h1 { font-size: 36px; margin-bottom: 20px; }";
-  styleHTML += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
   //style += "@media (max-width: 600px) { body { font-size: 16px; } .input, .output { font-size: 20px; } #led-matrix-container { max-width: 100%; } button { font-size: 18px; } }";
   style += "</style>";
   return style;
@@ -25,8 +23,8 @@ String refreshInputs_dataHTML() {
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
-  //styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
-  //styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
+  styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
+  styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
 
   onloadHTML += "refreshInputs_data();";
   onloadHTML += "updateInputIndicators();";
@@ -70,7 +68,7 @@ String updateInputIndicatorsFunctionality() {
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
 
-  //styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
+  styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
   styleHTML += "#buttonsSection { margin-top: 20px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
   styleHTML += "button:hover { transform: scale(1.1); }";
