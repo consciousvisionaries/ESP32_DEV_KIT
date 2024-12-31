@@ -2,7 +2,7 @@
 
 // 4. getStyle_cssHTML() Function
 String getStyle_header() {
-  
+
   String style = "<style>";
   style += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
   style += "h1 { font-size: 36px; margin-bottom: 20px; }";
@@ -25,11 +25,11 @@ String refreshInputs_dataHTML() {
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
-  
+
   onloadHTML += "refreshInputs_data();";
   onloadHTML += "updateInputIndicators();";
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
-  
+
   bodyDivHTML += "<div id='inputsSection'>";
   bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
   bodyDivHTML += "<div id='inputs'>Waiting for inputs...</div>";
@@ -49,7 +49,7 @@ String updateInputIndicatorsFunctionality() {
   styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   styleHTML += ".indicator.green { background-color: green; }";
   styleHTML += ".indicator.red { background-color: red; }";
-  
+
   String script = "function updateInputIndicators() {";
   script += "  const inputs = document.querySelectorAll('[id^=\"inputIndicator\"]');";  // Select all input indicators
   script += "  inputs.forEach(indicator => {";
@@ -72,9 +72,9 @@ String refreshOutputs_dataHTML() {
   styleHTML += "button:hover { transform: scale(1.1); }";
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";
-  
+
   onloadHTML += "refreshOutputs_data();";
-  
+
   setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
 
   bodyDivHTML += "<div id='outputsSection'>";
@@ -103,7 +103,7 @@ String refreshOutputs_dataHTML() {
   script += ".then(response => response.text())";
   script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
   script += "}";
-  
+
   return script;
 }
 

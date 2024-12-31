@@ -20,7 +20,7 @@ String generatePage() {
 
   String page = "<html><head>";
   
-  page += getStyle_header(); // Adds CSS style
+  styleHTML += getStyle_header(); // Adds CSS style
   
   scriptHTML += scriptHeader_HTML();        // Adds JavaScript header
 
