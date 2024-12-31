@@ -52,7 +52,7 @@ String bup_password[] = { "3X3K22832E", "Gary2019" };
 const char* GITHUB_USER = "consciousvisionaries";
 const char* GITHUB_REPO = "ESP32_DEV_KIT";
 const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32da.bin"; // esp32 wroom
-const char* GITHUB_BRANCH = "MYST8_GPIO_Master";
+const char* GITHUB_BRANCH = "ESP32_8GPIO_Master";
 
 // MQTT
 // Node-Red User Login (Device Login - Raspberry Pi)
@@ -90,5 +90,5 @@ const char* mqttPassword = "CVr819P*!";
 #define PIN_B4 19
 #define PIN_B5 21
 #define PIN_B6 22
-#define PIN_B7 12
-#define PIN_B8 23
+#define PIN_B7 23
+#define PIN_B8 12
