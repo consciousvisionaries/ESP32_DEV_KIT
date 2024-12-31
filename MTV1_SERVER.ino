@@ -3,103 +3,186 @@
 // Create an AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
+String onloadHTML;
+String setIntervalHTML;
+String bodyDivHTML;
 
-// Function to generate the web page
+// 1. generatePage() Function
 String generatePage() {
+  onloadHTML = "";
+  setIntervalHTML = "";
+  bodyDivHTML = "";
+
   String page = "<html><head>";
-  
-  // Include styles
-  page += "<style>";
-  page += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; }";
-  page += "#inputsSection { margin: 20px auto; text-align: center; }";
-  page += ".input { font-size: 24px; margin: 10px; padding: 10px; border: 2px solid #fff; border-radius: 10px; }";
-  page += "#led-matrix-container { padding: 15px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; }";
-  page += "#led-matrix-container h3 { text-align: center; color: #333; font-family: Arial, sans-serif; }";
-  page += "#led-matrix-container p { margin: 5px 0; color: #555; font-size: 14px; font-family: Arial, sans-serif; }";
-  page += ".indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; margin: 3px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); }";
-  page += ".green { background-color: green; }";
-  page += ".red { background-color: red; }";
-  page += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
-  page += "</style>";
+  page += getStyle_cssHTML();         // Adds CSS style
+  page += scriptHeader_HTML();        // Adds JavaScript header
 
-  // Include JavaScript
-  page += "<script>";
-  page += "function refreshInputs() {";
-  page += "  fetch('/getAnalogInputs') ";
-  page += "    .then(response => response.text()) ";
-  page += "    .then(data => { document.getElementById('inputs').innerHTML = data; });";
-  page += "}";
-  page += "function refreshLEDMatrix() {";
-  page += "  fetch('/getLEDMatrix') ";
-  page += "    .then(response => response.json()) ";
-  page += "    .then(payload => { renderLEDMatrix(payload); });";
-  page += "}";
-  page += "function renderLEDMatrix(payload) {";
-  page += "  document.getElementById('puzzle-name').textContent = payload.puzzleName || 'Unnamed Puzzle';";
-  page += "  document.getElementById('group').textContent = payload.group || 'Unknown Group';";
-  page += "  document.getElementById('tab').textContent = payload.tab || 'Unknown Tab';";
-  page += "  document.getElementById('ip-address').textContent = payload.ipAddress || 'Unknown IP';";
-  page += "  const ledMatrix = document.getElementById('led-matrix');";
-  page += "  ledMatrix.innerHTML = '';";
-  page += "  for (let c = 0; c < 3; c++) {";
-  page += "    let ledStrip = payload[`led_strip_${c+1}`];";
-  page += "    if (Array.isArray(ledStrip)) {";
-  page += "      const rowDiv = document.createElement('div');";
-  page += "      for (let i = 0; i < ledStrip.length; i++) {";
-  page += "        const indicator = document.createElement('span');";
-  page += "        indicator.className = `indicator ${ledStrip[i] === 'on' ? 'green' : 'red'}`;";
-  page += "        rowDiv.appendChild(indicator);";
-  page += "      }";
-  page += "      ledMatrix.appendChild(rowDiv);";
-  page += "    }";
-  page += "  }";
-  page += "}";
-  page += "window.onload = function() {";
-  page += "  refreshInputs();";
-  page += "  refreshLEDMatrix();";
-  page += "  setInterval(refreshInputs, 1000);";
-  page += "  setInterval(refreshLEDMatrix, 5000);";
-  page += "};";
-  page += "</script>";
+  if (NUM_INPUTS >= 1) {
+    page += refreshInputs_dataHTML(); // Refresh inputs
+    page += updateInputIndicatorsFunctionality();
+  }
+  if (NUM_OUTPUTS >= 1) {
+    page += refreshOutputs_dataHTML(); // Refresh outputs
+  }
 
-  // Body
-  page += "</head><body>";
-  page += "<h1>ESP32 Dashboard</h1>";
-  page += "<div id='inputsSection'>";
-  page += "<h2>Analog Inputs</h2>";
-  page += "<div id='inputs'></div>";
-  page += "</div>";
-  page += "<div id='led-matrix-container'>";
-  page += "<h3 id='puzzle-name'>Loading...</h3>";
-  page += "<p><strong>Group:</strong> <span id='group'>N/A</span></p>";
-  page += "<p><strong>Tab:</strong> <span id='tab'>N/A</span></p>";
-  page += "<p><strong>IP Address:</strong> <span id='ip-address'>N/A</span></p>";
-  page += "<div id='led-matrix'></div>";
-  page += "</div>";
-  page += "</body></html>";
-  
+  page += onloadHTML;                 // Onload script
+  page += setIntervalHTML;            // Set interval script
+  page += headFooter_HTML();          // Adds head and footer HTML
+  page += bodyHeader_HTML();          // Adds body header HTML
+  page += bodyTitle_HTML();           // Adds body title HTML
+  page += bodyDivHTML;                // Adds body div content
+
+  page += "</body></html>";           // Closing HTML tags
   return page;
 }
 
-void setupDashboard() {
+// Function to create input indicators instead of buttons
+String generateInputIndicatorsHTML() {
+  String indicatorsHTML = "<div id='inputs'>";
+  for (int i = 0; i < NUM_INPUTS; i++) {
+    
+    indicatorsHTML += "<div id='inputIndicator" + String(i) + "' class='indicator red'></div>";
+  }
+  indicatorsHTML += "</div>";
+  return indicatorsHTML;
+}
 
-  // Setup server routes
+// 2. generateOutputsPayload() Function
+String generateOutputsPayload() {
+  StaticJsonDocument<200> doc;
+  doc["puzzleName"] = PUZZLE_NAME;    // Example
+  doc["mac"] = WiFi.macAddress();     // MAC address of the ESP32
+
+  String outputStatus = "[";
+  for (int i = 0; i < NUM_OUTPUTS; i++) {
+    outputStatus += (digitalRead(outputPins[i]) == HIGH) ? "'red'" : "'green'"; // Output state (red/green)
+    if (i < NUM_OUTPUTS - 1) outputStatus += ", ";  // Formatting between items
+  }
+  outputStatus += "]";
+  doc["outputs"] = outputStatus;
+
+  String payload;
+  serializeJson(doc, payload);       // Serialize JSON to string
+  return payload;
+}
+
+// 4. Update generateOutputButtonsHTML() to use the outputNames array
+String generateOutputButtonsHTML() {
+  String buttonsHTML = "<div id='buttonsSection'>";
+  buttonsHTML += "<h2>Control Outputs</h2>";
+
+  int numColumns = NUM_OUTPUTS / NUM_OUTPUT_ROWS;  // Calculate number of columns based on rows
+
+  // Ensure even distribution of buttons across rows
+  for (int row = 0; row < NUM_OUTPUT_ROWS; row++) {
+    buttonsHTML += "<div class='buttonRow'>"; // Start a new row
+
+    for (int col = 0; col < numColumns; col++) {
+      int outputIndex = row * numColumns + col;  // Calculate the index of the button
+
+      if (outputIndex < NUM_OUTPUTS) { // Ensure we do not exceed the number of outputs
+        String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
+        buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
+                       "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + outputNames[outputIndex] + "</button>";
+      }
+    }
+
+    buttonsHTML += "</div><br>"; // End the row and add line break for clarity
+  }
+
+  buttonsHTML += "</div>";
+  return buttonsHTML;
+}
+
+// Toggle output state
+void toggleOutputState(int outputNumber) {
+  if (outputNumber >= 0 && outputNumber < NUM_OUTPUTS) {
+    int pin = outputPins[outputNumber];
+
+    bool currentState = digitalRead(pin);  // Read the current state before toggling
+    bool newState = (currentState == HIGH) ? LOW : HIGH;  // Toggle state
+    digitalWrite(pin, newState);  // Set the new state
+
+    // Confirm the state change
+    Serial.print("Output ");
+    Serial.print(outputNumber);
+    Serial.print(": Toggled to ");
+    Serial.println(newState ? "HIGH" : "LOW");
+
+  } else {
+    Serial.println("Error: Invalid output number.");
+  }
+}
+
+// Function to get the state of an input
+String getInputState(int inputPin) {
+  int state = digitalRead(inputPin);
+  return (state == HIGH) ? "high" : "low";  // Return "high" or "low"
+}
+
+
+// Function to set up the dashboard server
+void setupDashboard() {
+  // Initialize the server routes
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/html", generatePage());
   });
 
-  server.on("/getDigitalInpUTS", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String inputs = "<div>";
-    //inputs += "<div class='input'>Digital 1: " + String(digitalRead(PIN_B1)) + "</div>";
-    //inputs += "<div class='input'>Digital 2: " + String(digitalRead(PIN_B2)) + "</div>";
-    inputs += "</div>";
-    request->send(200, "text/html", inputs);
+  server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String inputData = generateInputIndicatorsHTML();
+    request->send(200, "text/plain", inputData);
   });
 
-  //server.on("/getLEDMatrix", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //  request->send(200, "application/json", jsonPublished);
-  //});
+  // Server route for outputs data
+  server.on("/refreshOutputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // Generate and return the output data payload
+    String outputData = generateOutputsPayload();
+    request->send(200, "application/json", outputData);
+  });
 
-  // Start server
+  // Route to toggle output state
+  server.on("/toggleOutputState", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String outputNumberStr = request->getParam("output")->value();
+    int outputNumber = outputNumberStr.toInt();
+
+    // Toggle the output state
+    Serial.print("Toggle Output: ");
+    Serial.println(outputNumber);
+
+    toggleOutputState(outputNumber);
+
+    request->send(200, "text/plain", "Output toggled");
+  });
+
+  // Route to get the state of an output
+  server.on("/getOutputState", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String outputNumberStr = request->getParam("output")->value();
+    int outputNumber = outputNumberStr.toInt();
+
+    if (outputNumber >= 0 && outputNumber < NUM_OUTPUTS) {
+      bool state = digitalRead(outputPins[outputNumber]) == HIGH ? true : false;
+      request->send(200, "text/plain", state ? "high" : "low");
+    } else {
+      request->send(400, "text/plain", "Invalid output number");
+    }
+  });
+
+  // Route to get the state of an input
+server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
+  String inputNumberStr = request->getParam("input")->value();
+  int inputNumber = inputNumberStr.toInt();
+
+  if (inputNumber >= 0 && inputNumber < NUM_INPUTS) {
+    int pin = inputPins[inputNumber];  // You should have an array for input pins
+    String state = getInputState(pin);  // Get the state of the input pin
+    request->send(200, "text/plain", state);  // Send the state back
+  } else {
+    request->send(400, "text/plain", "Invalid input number");
+  }
+});
+
+
+  // Start the server
   server.begin();
 }

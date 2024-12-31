@@ -22,7 +22,7 @@ void updateFASTLED() {
 
 void setupFASTLED() {
 
-    FastLED.addLeds<WS2812, LED_PIN, RGB>(leds, NUM_LEDS);
+ //   FastLED.addLeds<WS2812, LED_PIN, RGB>(leds, NUM_LEDS);
     FastLED.clear();
     FastLED.show();
 

@@ -38,6 +38,7 @@ void setup() {
   setupGPIO();
   setupFASTLED();
   //setupESPTask();
+  setupDashboard();
 
   Serial.println("READY.");
 }

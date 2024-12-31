@@ -13,12 +13,28 @@
 
 // digitalGPIO
 
-#define NUM_INPUTS 0
+#define NUM_INPUTS 8
+
+String inputNames[NUM_INPUTS] = {
+  "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
+  "Input 5", "Input 6", "Input 7", "Input 8"  // Add more as needed
+};
+
+
+// outputs
 #define NUM_OUTPUTS 8
+#define NUM_OUTPUT_ROWS 2
+
+String outputNames[NUM_OUTPUTS] = {
+  "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
+  "Output 5", "Output 6", "Output 7", "Output 8"  // Add more as needed
+};
+
 
 // fastled
 #define NUM_LEDS 10 
 #define NUM_CHANNELS 0
+
 // wifi
 String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
 String bup_password[] = { "3X3K22832E", "Gary2019" };
@@ -39,34 +55,35 @@ const char* mqttUserName = "pro1polaris";
 const char* mqttPassword = "CVr819P*!";
 
 #define MQTT_TOPIC "/myst/er/bb/president"      // Topic for publish/subscribe
-#define MQTT_SERVER "192.168.0.130" // Replace with your MQTT broker IP
+#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 #define MQTT_BROKER "broker.emqx.io"  // EMQX Public Broker
 #define MQTT_CLIENT_ID "MystTech01" // Replace with a unique client ID
 
 // If you plan to use TLS (secure connection)
 
 // pins fastled
-#define LED_PIN 12  // Pin for LEDs
+#define LED_PIN 34  // Pin for LEDs
 
 // pins uart 2 MP3
 #define PIN_MP3_RX 17 
 #define PIN_MP3_TX 16 
 
-// pins buttons GPIO
-#define PIN_O1 14
-#define PIN_O2 27
-#define PIN_O3 26
-#define PIN_O4 33
-#define PIN_O5 0
-#define PIN_O6 4
-#define PIN_O7 5
-#define PIN_O8 19
+// pins outputs
+#define PIN_O1 13
+#define PIN_O2 14
+#define PIN_O3 27
+#define PIN_O4 26
+#define PIN_O5 25
+#define PIN_O6 33
+#define PIN_O7 32
+#define PIN_O8 2
 
-#define PIN_B1 -1
-#define PIN_B2 -1
-#define PIN_B3 -1
-#define PIN_B4 -1
-#define PIN_B5 -1
-#define PIN_B6 -1
-#define PIN_B7 -1
-#define PIN_B8 -1
+// pins inputs
+#define PIN_B1 4
+#define PIN_B2 5
+#define PIN_B3 18
+#define PIN_B4 19
+#define PIN_B5 21
+#define PIN_B6 22
+#define PIN_B7 23
+#define PIN_B8 12
