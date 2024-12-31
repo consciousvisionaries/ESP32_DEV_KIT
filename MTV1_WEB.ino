@@ -49,8 +49,6 @@ String updateInputIndicatorsFunctionality() {
   script += "  inputs.forEach(indicator => {";
   script += "    const inputNumber = indicator.id.replace('inputIndicator', '');";  // Extract input number from indicator ID
   script += "    fetch('/getInputState?input=' + inputNumber)";
-  script += "    .then(() => { updateButtonColor(outputNumber); })";
-
   script += "    .then(response => response.text())";
   script += "    .then(stateInput => {";
   script += "      indicator.className = (stateInput === 'low') ? 'indicator green' : 'indicator red';";  // Set indicator color based on state
@@ -78,7 +76,6 @@ String refreshOutputs_dataHTML() {
   script += "fetch('/refreshOutputs_dataHTML') ";
   script += ".then(response => response.text()) ";
   script += ".then(() => { updateButtonColor(outputNumber); })";
-
   script += ".then(data => { document.getElementById('outputs').innerHTML = data; });";
   script += "}";
 
