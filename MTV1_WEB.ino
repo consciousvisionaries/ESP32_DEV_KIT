@@ -88,9 +88,9 @@ String refreshOutputs_dataHTML() {
   script += "const button = document.getElementById('outputButton' + outputNumber);";
   script += "fetch('/getOutputState?output=' + outputNumber)";
   script += ".then(response => response.text())";
-  script += ".then(state => {";
-  script += "button.className = (state === 'low') ? 'green' : 'red';";
-  script += "});";
+  script += ".then(() => { updateButtonColor(outputNumber); })";
+
+  script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
   script += "}";
 
   
