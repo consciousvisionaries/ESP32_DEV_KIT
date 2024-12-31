@@ -61,10 +61,9 @@ String updateInputIndicatorsFunctionality() {
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
   onloadHTML += "refreshOutputs_data();";
-  onloadHTML += "updateButtonColor(OutputNumber);";
   
   setIntervalHTML += "setInterval(refreshOutputs_data, 500);";
-  setIntervalHTML += "setInterval(updateButtonColor,500);";
+  setIntervalHTML += "setInterval(updateButtonColor(outputNumber),500);";
 
   bodyDivHTML += "<div id='outputsSection'>";
   bodyDivHTML += "<h2>Outputs</h2>";
