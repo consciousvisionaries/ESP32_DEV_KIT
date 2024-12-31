@@ -72,7 +72,7 @@ String refreshOutputs_dataHTML() {
   styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
   styleHTML += "h1 { font-size: 36px; margin-bottom: 20px; }";
   styleHTML += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
-  styleHTML = "#buttonsSection { margin-top: 20px; }";
+  styleHTML += "#buttonsSection { margin-top: 20px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
   styleHTML += "button:hover { transform: scale(1.1); }";
   styleHTML += ".red { background-color: red; }";
