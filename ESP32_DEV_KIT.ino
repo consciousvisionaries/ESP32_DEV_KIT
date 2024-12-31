@@ -15,7 +15,7 @@
 // digitalGPIO
 
 #define NUM_INPUTS 8
-String bodyInputTitle = "FLEXXMAX2 Input STATUS";
+String bodyInputTitle = "Monitoring: FLEXXMAX2 Master";
 String bodyOutputTitle = "OVERRIDE";
 String buttonsHTMLTitle = "Game Master INPUT Control";
 

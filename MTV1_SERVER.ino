@@ -183,6 +183,66 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
   }
 });
 
+server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
+  String page = "<html><head><title>Admin Page</title>";
+  page += "<style>";
+  page += "body { font-family: Arial, sans-serif; margin: 20px; }";
+  page += "h1 { color: #333; }";
+  page += "label { display: block; margin-top: 10px; }";
+  page += "input { margin-bottom: 10px; padding: 5px; width: 300px; }";
+  page += "button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; cursor: pointer; }";
+  page += "button:hover { background-color: #45a049; }";
+  page += ".confirmation { margin-top: 20px; color: green; font-weight: bold; }";
+  page += "</style>";
+  page += "</head><body>";
+  page += "<h1>Admin Page</h1>";
+  page += "<form id='adminForm'>";
+  page += "<label for='ssid'>Current SSID:</label>";
+  page += "<input type='text' id='ssid' name='ssid' value='" + ssid + "'>";
+  page += "<label for='password'>Current Password:</label>";
+  page += "<input type='password' id='password' name='password' value='" + password + "'>";
+  page += "<button type='button' onclick='saveChanges()'>Save Changes</button>";
+  page += "</form>";
+  page += "<div id='confirmation' class='confirmation' style='display: none;'>Changes Saved Successfully!</div>";
+  page += "<script>";
+  page += "function saveChanges() {";
+  page += "  const ssid = document.getElementById('ssid').value;";
+  page += "  const password = document.getElementById('password').value;";
+  page += "  const xhr = new XMLHttpRequest();";
+  page += "  xhr.open('POST', '/saveCredentials', true);";
+  page += "  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');";
+  page += "  xhr.onreadystatechange = function() {";
+  page += "    if (xhr.readyState == 4 && xhr.status == 200) {";
+  page += "      document.getElementById('confirmation').style.display = 'block';";
+  page += "    }";
+  page += "  };";
+  page += "  xhr.send('ssid=' + encodeURIComponent(ssid) + '&password=' + encodeURIComponent(password));";
+  page += "}";
+  page += "</script>";
+  page += "</body></html>";
+  request->send(200, "text/html", page);
+});
+
+// Handle saving credentials
+server.on("/saveCredentials", HTTP_POST, [](AsyncWebServerRequest *request) {
+  if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
+    ssid = request->getParam("ssid", true)->value();
+    password = request->getParam("password", true)->value();
+
+    // Save the new credentials in memory or SPIFFS
+    Serial.println("New SSID: " + ssid);
+    Serial.println("New Password: " + password);
+
+    // Optional: Save credentials to SPIFFS/EEPROM for persistence
+    // Example code here to write to SPIFFS or EEPROM
+
+    request->send(200, "text/plain", "Credentials updated");
+  } else {
+    request->send(400, "text/plain", "Missing SSID or Password");
+  }
+});
+
+
   // Start the server
   server.begin();
 

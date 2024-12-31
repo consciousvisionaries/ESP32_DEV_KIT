@@ -5,7 +5,9 @@ String getStyle_header() {
   String style = "<style>";
   style += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
   style += "h1 { font-size: 36px; margin-bottom: 20px; }";
-  style += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
+  style += "h2 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
+  style += "h3 { font-size: 20px; font-weight: bold; margin-bottom: 15px; }";
+
   return style;
 }
 
@@ -31,6 +33,7 @@ String refreshInputs_dataHTML() {
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
 
   bodyDivHTML += "<div id='inputsSection'>";
+  bodyDivHTML += "<p>";
   bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
   bodyDivHTML += "<div id='inputs'>Waiting for inputs...</div>";
   bodyDivHTML += "</div>";
@@ -80,6 +83,8 @@ String refreshOutputs_dataHTML() {
   setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
 
   bodyDivHTML += "<div id='outputsSection'>";
+  bodyDivHTML += "<p>";
+
   bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
   bodyDivHTML += "<div id='outputs'>Waiting for outputs...</div>";
   bodyDivHTML += "</div>";
