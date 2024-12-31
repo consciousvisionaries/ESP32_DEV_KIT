@@ -1,5 +1,7 @@
 #include <FastLED.h>
 
+#define FASTLED_VERSION V1.1
+
 //#define LED_PIN 12  // Pin for LEDs
 
 // LED Array

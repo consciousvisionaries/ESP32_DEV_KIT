@@ -1,6 +1,8 @@
 #define MQTT_MAX_PACKET_SIZE 225  // Adjust size as needed
 #define MQTT_PORT 1883
 
+#define MQTT_VERSION V1.1
+
 //#define MQTT_TOPIC "/edna"
 //#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
 

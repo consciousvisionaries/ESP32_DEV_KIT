@@ -1,30 +1,31 @@
+#define WEBHTML_VERSION V1.1
+
 // 4. getStyle_cssHTML() Function
-String getStyle_cssHTML() {
-  String page = "<style>";
-  page += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
-  page += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
-  page += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
-  page += ".input:hover, .output:hover { background-color: #333; }";
-  page += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
-  page += "#led-matrix-container:hover { border-color: #4CAF50; }";
-  page += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
-  page += ".indicator.green { background-color: green; }";
-  page += ".indicator.red { background-color: red; }";
-  page += "h1 { font-size: 36px; margin-bottom: 20px; }";
-  page += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
-  page += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
-  page += "#buttonsSection { margin-top: 20px; }";
-  page += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
-  page += "button:hover { transform: scale(1.1); }";
-  page += ".red { background-color: red; }";
-  page += ".green { background-color: green; }";
-  page += "@media (max-width: 600px) { body { font-size: 16px; } .input, .output { font-size: 20px; } #led-matrix-container { max-width: 100%; } button { font-size: 18px; } }";
-  page += "</style>";
-  return page;
+String getStyle_header() {
+  
+  String style = "<style>";
+  style += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
+  style += "h1 { font-size: 36px; margin-bottom: 20px; }";
+  style += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
+  return style;
+}
+
+String getStyle_footer() {
+  String style = "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
+  style += "#led-matrix-container:hover { border-color: #4CAF50; }";
+  style += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
+  style += "@media (max-width: 600px) { body { font-size: 16px; } .input, .output { font-size: 20px; } #led-matrix-container { max-width: 100%; } button { font-size: 18px; } }";
+  style += "</style>";
+  return style;
 }
 
 // 5. refreshInputs_dataHTML() Function
 String refreshInputs_dataHTML() {
+
+  styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
+  styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
+  styleHTML += ".input:hover, .output:hover { background-color: #333; }";
+  
   onloadHTML += "refreshInputs_data();";
   onloadHTML += "updateInputIndicators();";
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
@@ -44,6 +45,11 @@ String refreshInputs_dataHTML() {
 
 // Function to update indicator states (green/red based on input status)
 String updateInputIndicatorsFunctionality() {
+
+  styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
+  styleHTML += ".indicator.green { background-color: green; }";
+  styleHTML += ".indicator.red { background-color: red; }";
+  
   String script = "function updateInputIndicators() {";
   script += "  const inputs = document.querySelectorAll('[id^=\"inputIndicator\"]');";  // Select all input indicators
   script += "  inputs.forEach(indicator => {";
@@ -60,6 +66,13 @@ String updateInputIndicatorsFunctionality() {
 
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
+
+  styleHTML = "#buttonsSection { margin-top: 20px; }";
+  styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
+  styleHTML += "button:hover { transform: scale(1.1); }";
+  styleHTML += ".red { background-color: red; }";
+  styleHTML += ".green { background-color: green; }";
+  
   onloadHTML += "refreshOutputs_data();";
   
   setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
@@ -90,9 +103,7 @@ String refreshOutputs_dataHTML() {
   script += ".then(response => response.text())";
   script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
   script += "}";
-
   
-
   return script;
 }
 
