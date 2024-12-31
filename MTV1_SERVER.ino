@@ -90,7 +90,7 @@ String generateOutputButtonsHTML() {
       if (outputIndex < NUM_OUTPUTS) { // Ensure we do not exceed the number of outputs
         String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
         buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
-                       "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + outputNames[outputIndex] + "</button>";
+                       "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
       }
     }
     buttonsHTML += "</div><br>"; // End the row and add line break for clarity
@@ -193,16 +193,16 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
   adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
   adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
   adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
-  adminPage += "<p><strong>Group:</strong> " + String(NR_GROUP) + "</p>";
+  adminPage += "<p><strong>Group:</strong> " + String(globalSettings.nrTab) + "</p>";
   adminPage += "<p><strong>Type:</strong> " + String(NR_TYPE) + "</p>";
   
   // Existing SSID and password
   adminPage += "<h3>WiFi Settings</h3>";
   adminPage += "<form action='/saveConfig' method='POST'>";
   adminPage += "<label for='ssid'>SSID:</label>";
-  adminPage += "<input type='text' id='ssid' name='ssid' value='" + ssid + "'><br><br>";
+  adminPage += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
   adminPage += "<label for='password'>Password:</label>";
-  adminPage += "<input type='text' id='password' name='password' value='" + password + "'><br><br>";
+  adminPage += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
   adminPage += "<button type='submit'>Save Changes</button>";
   adminPage += "</form>";
 
@@ -216,22 +216,24 @@ server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
   String newPassword = request->getParam("password", true)->value();
 
   // Save the new SSID and password to global variables
-  ssid = newSSID;
-  password = newPassword;
+  wifiSettings.ssid = newSSID;
+  wifiSettings.password = newPassword;
 
-  saveWiFiCredentials(newSSID, newPassword, storedVersion);
+  saveWiFiCredentials(newSSID, newPassword, wifiSettings.storedVersion);
 
   // Send confirmation back to the user
   String confirmationPage = "<html><head><title>Confirmation</title></head><body>";
   confirmationPage += "<h1>Configuration Saved</h1>";
-  confirmationPage += "<p>New SSID: " + ssid + "</p>";
-  confirmationPage += "<p>New Password: " + password + "</p>";
+  confirmationPage += "<p>New SSID: " + wifiSettings.ssid + "</p>";
+  confirmationPage += "<p>New Password: " + wifiSettings.password + "</p>";
   confirmationPage += "<a href='/admin'>Back to Admin Panel</a>";
+  confirmationPage += "<p>Restarting....</p>";
   confirmationPage += "</body></html>";
   request->send(200, "text/html", confirmationPage);
-
-  // Optionally restart the ESP32 to apply changes
-  // ESP.restart();
+  
+  delay(10000);
+  ESP.restart();
+  
 });
 
 

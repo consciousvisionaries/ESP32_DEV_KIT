@@ -1,4 +1,3 @@
-#include <Preferences.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
@@ -9,7 +8,6 @@
 #define FIRMWARE_VERSION V1.1
 WiFiClient espClient;
 PubSubClient client(espClient);
-Preferences preferences;
 
 //const char* GITHUB_USER = "consciousvisionaries";
 //const char* GITHUB_REPO = "ESP32_DEV_KIT";
@@ -19,22 +17,18 @@ Preferences preferences;
 //String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
 //String bup_password[] = { "3X3K22832E", "Gary2019" };
 
-String storedVersion;
-String ssid;
-String password;
+
+
 String jsonPublished;
 
 bool allServicesActive = false;
 
 void setup() {
   
-  Serial.begin(115200);
-  
   setupFirmware();
   setupDashboard();
 
-  connectMQTT();
-  sendConfigMQTTPayload(); // Send initial MQTT message when connected
+ 
   //setupMP3Player();
   setupGPIO();
   setupFASTLED();
@@ -70,62 +64,22 @@ void loopESPTask() {
 }
 
 void setupFirmware() {
-
-  loadWiFiCredentials();
+  
+  Serial.begin(115200);
+  loadAllSettings();
   
   // Simulate the version checking and saving
   connectWiFi();
 
+  connectMQTT();
+  sendConfigMQTTPayload(); // Send initial MQTT message when connected
+
   delay(3000);
   checkForUpdates();
-}
-
-// Function to save WiFi credentials (SSID, password) and version in Preferences
-void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newtxtVersion) {
-  preferences.begin("settings", false); // Open namespace for writing
-  preferences.clear(); // Clears all preferences in the "settings" namespace
-  preferences.end();
-  
-  preferences.begin("settings", false);
-  Serial.println("Saving Version: " + newtxtVersion);
-  
-  // Store each piece separately
-  preferences.putString("ssid", newSSID);
-  preferences.putString("password", newPassword);
-  preferences.putString("versiontxt", newtxtVersion);
-  preferences.end(); // Close namespace
-
-  Serial.println("Saved:     ssid " + newSSID);
-  Serial.println("Saved: password " + newPassword);
-
-  preferences.begin("settings", true); // Open namespace for writing
-
-  String savedVersion = preferences.getString("versiontxt", "");
-  if (savedVersion == newtxtVersion) {
-    Serial.println("    Version saved successfully:" + savedVersion);
-  } else {
-    Serial.println("    Version save failed.");
-  }
-  
-  preferences.end();
 
 }
 
-// Function to load WiFi credentials and version from Preferences
-void loadWiFiCredentials() {
-  
-  preferences.begin("settings", true); // Open namespace for reading
-  ssid = preferences.getString("ssid", "");
-  password = preferences.getString("password", "");  
-  storedVersion = preferences.getString("versiontxt", "");
-  preferences.end(); 
-  
-  if (ssid.isEmpty() || password.isEmpty()) {
-    Serial.println("Loading WiFi... credentials not found.");
-  } else {
-    Serial.println("Loaded WiFi credentials: SSID=" + ssid + ", Password=" + password + ", Version=" + storedVersion);
-  }
-}
+
 unsigned long startAttemptTime = millis();
 
 void connectWiFi() {
@@ -136,17 +90,17 @@ void connectWiFi() {
     Serial.println("Attempting WIFI Loop #: " + String(i));
 
     if (i != -1) {
-      ssid = bup_ssid[i];
-      password = bup_password[i];
+      wifiSettings.ssid = wifiSettings.bup_ssid[i];
+      wifiSettings.password = wifiSettings.bup_password[i];
       Serial.println("Trying backup credentials...");
     } else {
       Serial.println("Trying stored credentials...");
     }
 
-    Serial.printf("Connecting to WiFi: %s\n", ssid.c_str());
-    Serial.printf("    WiFi Password: %s\n", password.c_str());
+    Serial.printf("Connecting to WiFi: %s\n", wifiSettings.ssid.c_str());
+    Serial.printf("    WiFi Password: %s\n", wifiSettings.password.c_str());
     
-    WiFi.begin(ssid.c_str(), password.c_str());
+    WiFi.begin(wifiSettings.ssid.c_str(), wifiSettings.password.c_str());
 
     startAttemptTime = millis();
 
@@ -179,12 +133,7 @@ void connectWiFi() {
 
 
 void loopFIRMWARE() {
-  static unsigned long lastOTA = 0;
-  if (millis() - lastOTA > 3600000) {  // Check for updates every hour
-    Serial.println("Last OTA > " + lastOTA);
-    lastOTA = millis();
-    checkForUpdates();
-  }
+  
 }
 
 void checkForUpdates() {
@@ -204,12 +153,12 @@ void checkForUpdates() {
     newVersion.trim();
     Serial.println("    HTTP Response Code: " + String(httpCode));
     Serial.println("    Payload: " + newVersion);
-    if (newVersion != storedVersion) {
-      Serial.println("    Stored Version: " + storedVersion);
+    if (newVersion != wifiSettings.storedVersion) {
+      Serial.println("    Stored Version: " + wifiSettings.storedVersion);
       Serial.println("    New version available: " + newVersion);
       Serial.println("    Updating firmware...");
       if (updateFirmware(newVersion)) {
-        saveWiFiCredentials(ssid, password, newVersion);
+        saveWiFiCredentials(wifiSettings.ssid, wifiSettings.password, newVersion);
         Serial.println("    Update complete. Rebooting..."+ newVersion);
         delay(5000);
         ESP.restart();
@@ -218,7 +167,7 @@ void checkForUpdates() {
         Serial.println("    Firmware update failed.");
       }
     } else {
-      Serial.println("    Stored Version: " + storedVersion);
+      Serial.println("    Stored Version: " + wifiSettings.storedVersion);
       Serial.println("    Device firmware is up-to-date.");
     }
   } else {

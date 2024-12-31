@@ -11,7 +11,7 @@
 //const char* mqttPassword = "CVr819P*!";
 
 void connectMQTT() {
-  client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setServer(mqttSettings.mqttServer.c_str(), MQTT_PORT);
   client.setCallback(mqttCallback);  // Set MQTT callback function
   Serial.println("MQTT Callback should be set");
 
@@ -21,7 +21,7 @@ void connectMQTT() {
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID, mqttUserName, mqttPassword)) {
+    if (client.connect(MQTT_CLIENT_ID, mqttSettings.mqttUserName.c_str(), mqttSettings.mqttPassword.c_str())) {
       Serial.println("Connected to SERVER");
       client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
@@ -105,27 +105,25 @@ void publishDataMQTTPayload_Doc(String jsonPayload) {
 
 
 void sendConfigMQTTPayload() {
-    DynamicJsonDocument doc(512);  // Use DynamicJsonDocument with appropriate size
+    DynamicJsonDocument doc(512);
     doc["mac"] = WiFi.macAddress();
     doc["puzzleName"] = PUZZLE_NAME;
     doc["designer"] = DESIGNER_NAME;
     doc["tech"] = TECH_NAME;
     doc["ip"] = WiFi.localIP().toString();
     doc["timestamp"] = millis();
-    doc["tab"] = NR_TAB;
-    doc["group"] = NR_GROUP;
+    doc["tab"] = globalSettings.nrTab;
+    doc["group"] = globalSettings.nrGroup;
     
-    DynamicJsonDocument doc1(512);  // Use DynamicJsonDocument with appropriate size
+    DynamicJsonDocument doc1(512);
     doc1["mac"] = WiFi.macAddress();
     doc1["puzzleName"] = PUZZLE_NAME;
     doc1["type"] = NR_TYPE;
-    doc1["version"] = storedVersion;
+    doc1["version"] = wifiSettings.storedVersion;
     doc1["leds"] = NUM_LEDS;
     doc1["chan"] = NUM_CHANNELS;
     doc1["inputs"] = NUM_INPUTS;
     doc1["outputs"] = NUM_OUTPUTS;
-
-    
 
     String jsonPayload;
     serializeJson(doc, jsonPayload);
@@ -137,6 +135,8 @@ void sendConfigMQTTPayload() {
     serializeJson(doc1, jsonPayload);
     jsonPublished = jsonPayload;
     publishDataMQTTPayload_Doc(jsonPayload);
+    delay(50);
+
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
