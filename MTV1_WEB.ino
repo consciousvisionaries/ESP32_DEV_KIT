@@ -27,7 +27,7 @@ String getStyle_cssHTML() {
 String refreshInputs_dataHTML() {
   onloadHTML += "refreshInputs_data();";
   onloadHTML += "updateInputIndicators();";
-  setIntervalHTML += "setInterval(updateInputIndicators, 500);";
+  setIntervalHTML += "setInterval(updateInputIndicators, 1000);";
   
   bodyDivHTML += "<div id='inputsSection'>";
   bodyDivHTML += "<h2>Inputs</h2>";
@@ -61,10 +61,9 @@ String updateInputIndicatorsFunctionality() {
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
   onloadHTML += "refreshOutputs_data();";
-  onloadHTML += "updateButtonColor(outputNumber);";
   
-  setIntervalHTML += "setInterval(refreshOutputs_data, 200);";
-  //setIntervalHTML += "setInterval(updateButtonColor(outputNumber),500);";
+  setIntervalHTML += "setInterval(refreshOutputs_data, 500);";
+  setIntervalHTML += "setInterval(updateButtonColor(outputNumber),500);";
 
   bodyDivHTML += "<div id='outputsSection'>";
   bodyDivHTML += "<h2>Outputs</h2>";
