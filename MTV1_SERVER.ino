@@ -42,6 +42,7 @@ String generatePage() {
   page += bodyDivHTML;                // Adds body div content
 
   page += "</body></html>";           // Closing HTML tags
+    Serial.println(page);
   return page;
 }
 
@@ -184,4 +185,5 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 
   // Start the server
   server.begin();
+
 }
