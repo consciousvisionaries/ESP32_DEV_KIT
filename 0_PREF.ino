@@ -25,6 +25,10 @@ struct GlobalSettings {
                             "Input 5", "Input 6", "Input 7", "Input 8" };
   String outputNames[NUM_OUTPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
                             "Output 5", "Output 6", "Output 7", "Output 8" };
+  String buttonHTML = "<button onclick=\"navigate('/')\">Home</button>"
+                      "<button onclick=\"navigate('/admin')\">Admin</button>";
+                      
+
 };
 
 WiFiSettings wifiSettings;

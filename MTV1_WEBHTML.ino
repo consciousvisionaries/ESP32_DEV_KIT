@@ -114,6 +114,28 @@ String refreshOutputs_dataHTML() {
   return script;
 }
 
+// 11. refreshNavigationButtons_dataHTML() Function
+String refreshNavigationButtons_dataHTML() {
+
+  String navHTML = "<div id='navMenu' style='margin-top: 20px; text-align: center;'>";
+  navHTML += globalSettings.buttonHTML;
+  navHTML += "</div>";
+
+  navHTML += "<script>";
+  navHTML += "function navigate(page) {";
+  navHTML += "  fetch('/navigate?page=' + page)";
+  navHTML += "  .then(response => response.text())";
+  navHTML += "  .then(data => {";
+  navHTML += "    document.body.innerHTML = data;";
+  navHTML += "  })";
+  navHTML += "  .catch(error => console.error('Navigation error:', error));";
+  navHTML += "}";
+  navHTML += "</script>";
+
+  return navHTML;
+}
+
+
 // 7. scriptHeader_HTML() Function
 String scriptHeader_HTML() {
   return "<script>";

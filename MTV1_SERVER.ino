@@ -229,6 +229,8 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
     adminPage += "<button type='submit'>Save Changes</button>";
     adminPage += "</form>";
 
+    adminPage += refreshNavigationButtons_dataHTML();
+
     adminPage += "</body></html>";
     request->send(200, "text/html", adminPage);
 });
@@ -278,9 +280,7 @@ server.on("/saveGlobalSettings", HTTP_POST, [](AsyncWebServerRequest *request) {
 
         delay(2000);
         
-        request->send(200, "text/plain", "/");
-
-         setupDashboard();
+        setupDashboard();
 
     } else {
         request->send(400, "text/plain", "Missing parameters.");
