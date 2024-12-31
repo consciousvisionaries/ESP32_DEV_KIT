@@ -1,30 +1,39 @@
 #include <ESPAsyncWebServer.h>
 
-// Create an AsyncWebServer object on port 80
+#define WEBSERVER_VERSION V1.1
+
 AsyncWebServer server(80);
 
+String styleHTML;
 String onloadHTML;
 String setIntervalHTML;
 String bodyDivHTML;
+String scriptHTML;
 
-// 1. generatePage() Function
 String generatePage() {
+
+  styleHTML = "";
   onloadHTML = "";
   setIntervalHTML = "";
   bodyDivHTML = "";
+  scriptHTML = "";
 
   String page = "<html><head>";
-  page += getStyle_cssHTML();         // Adds CSS style
-  page += scriptHeader_HTML();        // Adds JavaScript header
+  
+  styleHTML += getStyle_header(); // Adds CSS style
+  
+  scriptHTML += scriptHeader_HTML();        // Adds JavaScript header
 
   if (NUM_INPUTS >= 1) {
-    page += refreshInputs_dataHTML(); // Refresh inputs
-    page += updateInputIndicatorsFunctionality();
+    scriptHTML += refreshInputs_dataHTML(); // Refresh inputs
+    scriptHTML += updateInputIndicatorsFunctionality();
   }
   if (NUM_OUTPUTS >= 1) {
-    page += refreshOutputs_dataHTML(); // Refresh outputs
+    scriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
   }
-
+  page += styleHTML;
+  page += getStyle_footer();
+  page += scriptHTML;
   page += onloadHTML;                 // Onload script
   page += setIntervalHTML;            // Set interval script
   page += headFooter_HTML();          // Adds head and footer HTML
@@ -36,7 +45,6 @@ String generatePage() {
   return page;
 }
 
-// Function to create input indicators instead of buttons
 String generateInputIndicatorsHTML() {
   String indicatorsHTML = "<div id='inputs'>";
   for (int i = 0; i < NUM_INPUTS; i++) {
@@ -47,7 +55,6 @@ String generateInputIndicatorsHTML() {
   return indicatorsHTML;
 }
 
-// 2. generateOutputsPayload() Function
 String generateOutputsPayload() {
   StaticJsonDocument<200> doc;
   doc["puzzleName"] = PUZZLE_NAME;    // Example
@@ -66,7 +73,6 @@ String generateOutputsPayload() {
   return payload;
 }
 
-// 4. Update generateOutputButtonsHTML() to use the outputNames array
 String generateOutputButtonsHTML() {
   String buttonsHTML = "<div id='buttonsSection'>";
   buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
@@ -86,7 +92,6 @@ String generateOutputButtonsHTML() {
                        "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + outputNames[outputIndex] + "</button>";
       }
     }
-
     buttonsHTML += "</div><br>"; // End the row and add line break for clarity
   }
 
@@ -94,7 +99,6 @@ String generateOutputButtonsHTML() {
   return buttonsHTML;
 }
 
-// Toggle output state
 void toggleOutputState(int outputNumber) {
   if (outputNumber >= 0 && outputNumber < NUM_OUTPUTS) {
     int pin = outputPins[outputNumber];
@@ -114,14 +118,11 @@ void toggleOutputState(int outputNumber) {
   }
 }
 
-// Function to get the state of an input
 String getInputState(int inputPin) {
   int state = digitalRead(inputPin);
   return (state == HIGH) ? "high" : "low";  // Return "high" or "low"
 }
 
-
-// Function to set up the dashboard server
 void setupDashboard() {
   // Initialize the server routes
 
@@ -151,7 +152,6 @@ void setupDashboard() {
     Serial.println(outputNumber);
 
     toggleOutputState(outputNumber);
-
     request->send(200, "text/plain", "Output toggled");
   });
 
@@ -181,7 +181,6 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(400, "text/plain", "Invalid input number");
   }
 });
-
 
   // Start the server
   server.begin();

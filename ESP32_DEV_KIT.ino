@@ -90,5 +90,5 @@ const char* mqttPassword = "CVr819P*!";
 #define PIN_B4 19
 #define PIN_B5 21
 #define PIN_B6 22
-#define PIN_B7 23
-#define PIN_B8 12
+#define PIN_B7 12
+#define PIN_B8 23
