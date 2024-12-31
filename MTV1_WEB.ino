@@ -75,8 +75,8 @@ String refreshOutputs_dataHTML() {
   String script = "function refreshOutputs_data() {";
   script += "fetch('/refreshOutputs_dataHTML') ";
   script += ".then(response => response.text()) ";
-  script += ".then(() => { updateButtonColor(outputNumber); })";
-  script += ".then(data => { document.getElementById('outputs').innerHTML = data; });";
+  script += ".then(data => { document.getElementById('outputs').innerHTML = data; })";
+  script += ".then(() => { updateButtonColor(outputNumber); });";
   script += "}";
 
   script += "function toggleOutput(outputNumber) {";
