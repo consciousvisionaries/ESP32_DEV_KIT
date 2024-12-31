@@ -30,7 +30,7 @@ String refreshInputs_dataHTML() {
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
   
   bodyDivHTML += "<div id='inputsSection'>";
-  bodyDivHTML += "<h2>Inputs</h2>";
+  bodyDivHTML += "<h2>" + String(bodyInputTitle) + "</h2>";
   bodyDivHTML += "<div id='inputs'>Waiting for inputs...</div>";
   bodyDivHTML += "</div>";
 
@@ -63,10 +63,9 @@ String refreshOutputs_dataHTML() {
   onloadHTML += "refreshOutputs_data();";
   
   setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
-  //setIntervalHTML += "setInterval(updateButtonColor(outputNumber),500);";
 
   bodyDivHTML += "<div id='outputsSection'>";
-  bodyDivHTML += "<h2>Outputs</h2>";
+  bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
   bodyDivHTML += "<div id='outputs'>Waiting for outputs...</div>";
   bodyDivHTML += "</div>";
 
@@ -114,5 +113,5 @@ String bodyHeader_HTML() {
 
 // 10. bodyTitle_HTML() Function
 String bodyTitle_HTML() {
-  return "<h2>Interactive Dashboard</h2>";
+  return "<h2>" + String(TECH_NAME) + " - " + String(MYSTTECH_MODEL) + "</h2>";
 }
