@@ -193,8 +193,11 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
   adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
   adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
   adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
-  adminPage += "<p><strong>Group:</strong> " + String(globalSettings.nrTab) + "</p>";
+  adminPage += "<p><strong>Tab:</strong> " + String(globalSettings.nrTab) + "</p>";
+  adminPage += "<p><strong>Group:</strong> " + String(globalSettings.nrGroup) + "</p>";
   adminPage += "<p><strong>Type:</strong> " + String(NR_TYPE) + "</p>";
+  adminPage += "<p><strong>Version:</strong> " + String(wifiSettings.storedVersion) + "</p>";
+  adminPage += "<p><strong>MQTT Server:</strong> " + String(mqttSettings.mqttServer) + "</p>";
   
   // Existing SSID and password
   adminPage += "<h3>WiFi Settings</h3>";
