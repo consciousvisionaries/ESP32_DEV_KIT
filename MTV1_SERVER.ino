@@ -266,8 +266,8 @@ server.on("/saveGlobalSettings", HTTP_POST, [](AsyncWebServerRequest *request) {
     // Logic to handle saving global settings goes here
     if (request->hasParam("nrTab", true) && request->hasParam("nrGroup", true) &&
         request->hasParam("storedVersion", true) && request->hasParam("mqttServer", true)) {
-        globalSettings.nrTab = request->getParam("nrTab", true)->value().toInt();
-        globalSettings.nrGroup = request->getParam("nrGroup", true)->value().toInt();
+        globalSettings.nrTab = request->getParam("nrTab", true)->value();
+        globalSettings.nrGroup = request->getParam("nrGroup", true)->value();
         wifiSettings.storedVersion = request->getParam("storedVersion", true)->value();
         mqttSettings.mqttServer = request->getParam("mqttServer", true)->value();
 
@@ -275,6 +275,13 @@ server.on("/saveGlobalSettings", HTTP_POST, [](AsyncWebServerRequest *request) {
         saveMQTTSettings();
 
         request->send(200, "text/plain", "Global settings saved successfully.");
+
+        delay(2000);
+        
+        request->send(200, "text/plain", "/");
+
+         setupDashboard();
+
     } else {
         request->send(400, "text/plain", "Missing parameters.");
     }
