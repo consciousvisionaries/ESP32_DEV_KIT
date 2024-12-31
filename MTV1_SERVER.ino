@@ -184,34 +184,56 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 });
 
 server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-  // Create HTML content for the /admin page
-  String adminPage = "<html><head><title>Admin Panel</title></head><body>";
-  adminPage += "<h1>Admin Panel</h1>";
-  adminPage += "<h3>Module Information</h3>";
-  adminPage += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
-  adminPage += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
-  adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
-  adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
-  adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
-  adminPage += "<p><strong>Tab:</strong> " + String(globalSettings.nrTab) + "</p>";
-  adminPage += "<p><strong>Group:</strong> " + String(globalSettings.nrGroup) + "</p>";
-  adminPage += "<p><strong>Type:</strong> " + String(NR_TYPE) + "</p>";
-  adminPage += "<p><strong>Version:</strong> " + String(wifiSettings.storedVersion) + "</p>";
-  adminPage += "<p><strong>MQTT Server:</strong> " + String(mqttSettings.mqttServer) + "</p>";
-  
-  // Existing SSID and password
-  adminPage += "<h3>WiFi Settings</h3>";
-  adminPage += "<form action='/saveConfig' method='POST'>";
-  adminPage += "<label for='ssid'>SSID:</label>";
-  adminPage += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
-  adminPage += "<label for='password'>Password:</label>";
-  adminPage += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
-  adminPage += "<button type='submit'>Save Changes</button>";
-  adminPage += "</form>";
+    // Create HTML content for the /admin page
+    String adminPage = "<html><head><title>Admin Panel</title><style>";
+    adminPage += "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
+    adminPage += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
+    adminPage += "h3 { color: #333; margin-top: 20px; }";
+    adminPage += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    adminPage += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+    adminPage += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
+    adminPage += "button:hover { background-color: #45a049; }";
+    adminPage += "</style></head><body>";
 
-  adminPage += "</body></html>";
-  request->send(200, "text/html", adminPage);
+    adminPage += "<h1>Admin Panel</h1>";
+
+    // Module Information
+    adminPage += "<h3>Module Information</h3>";
+    adminPage += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
+    adminPage += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
+    adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
+    adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
+    adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
+
+    // Global Settings Form
+    adminPage += "<h3>Global Settings</h3>";
+    adminPage += "<form action='/saveGlobalSettings' method='POST'>";
+    adminPage += "<label for='nrTab'>Tab:</label>";
+    adminPage += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
+    adminPage += "<label for='nrGroup'>Group:</label>";
+    adminPage += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
+    adminPage += "<label for='storedVersion'>Version:</label>";
+    adminPage += "<input type='text' id='storedVersion' name='storedVersion' value='" + String(wifiSettings.storedVersion) + "'><br><br>";
+    adminPage += "<label for='mqttServer'>MQTT Server:</label>";
+    adminPage += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
+    adminPage += "<button type='submit'>Save Global Settings</button>";
+    adminPage += "</form>";
+
+    // WiFi Settings
+    adminPage += "<h3>WiFi Settings</h3>";
+    adminPage += "<form action='/saveConfig' method='POST'>";
+    adminPage += "<label for='ssid'>SSID:</label>";
+    adminPage += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
+    adminPage += "<label for='password'>Password:</label>";
+    adminPage += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
+    adminPage += "<button type='submit'>Save Changes</button>";
+    adminPage += "</form>";
+
+    adminPage += "</body></html>";
+    request->send(200, "text/html", adminPage);
 });
+
+
 
 // Save new configuration
 server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -238,6 +260,26 @@ server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
   ESP.restart();
   
 });
+
+// Save new configuration
+server.on("/saveGlobalSettings", HTTP_POST, [](AsyncWebServerRequest *request) {
+    // Logic to handle saving global settings goes here
+    if (request->hasParam("nrTab", true) && request->hasParam("nrGroup", true) &&
+        request->hasParam("storedVersion", true) && request->hasParam("mqttServer", true)) {
+        globalSettings.nrTab = request->getParam("nrTab", true)->value().toInt();
+        globalSettings.nrGroup = request->getParam("nrGroup", true)->value().toInt();
+        wifiSettings.storedVersion = request->getParam("storedVersion", true)->value();
+        mqttSettings.mqttServer = request->getParam("mqttServer", true)->value();
+
+        saveGlobalSettings();
+        saveMQTTSettings();
+
+        request->send(200, "text/plain", "Global settings saved successfully.");
+    } else {
+        request->send(400, "text/plain", "Missing parameters.");
+    }
+});
+
 
 
 
