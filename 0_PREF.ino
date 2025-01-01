@@ -72,7 +72,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   } else {
     Serial.println("    Version save failed.");
   }
-  
+
   preferences.end();
 }
 

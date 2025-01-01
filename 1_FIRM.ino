@@ -33,8 +33,6 @@ void setup() {
   setupGPIO();
   setupFASTLED();
   //setupESPTask();
-  setupDashboard();
-
   Serial.println("READY.");
 }
 
@@ -66,7 +64,8 @@ void loopESPTask() {
 void setupFirmware() {
   
   Serial.begin(115200);
-    loadWiFiCredentials();
+  
+  loadWiFiCredentials();
 
   
   // Simulate the version checking and saving
@@ -118,7 +117,7 @@ void connectWiFi() {
       Serial.print("    IP Address: ");
       Serial.println(WiFi.localIP());
       wifiSettings.ipaddress = String(WiFi.localIP());
-      
+
       connected = true; // Set connection flag
       break; // Exit the loop as Wi-Fi is successfully connected
     } else {
