@@ -5,6 +5,30 @@
 const int outputPins[NUM_OUTPUTS] = {PIN_O1, PIN_O2, PIN_O3, PIN_O4, PIN_O5, PIN_O6, PIN_O7, PIN_O8};
 const int inputPins[NUM_INPUTS] = {PIN_B1, PIN_B2, PIN_B3, PIN_B4, PIN_B5, PIN_B6, PIN_B7, PIN_B8};
 
+String getInputStateGPIO(int inputPin) {
+  int state = digitalRead(inputPin);
+  return (state == HIGH) ? "high" : "low";  // Return "high" or "low"
+}
+
+void toggleOutputStateGPIO(int outputNumber) {
+  if (outputNumber >= 0 && outputNumber < NUM_OUTPUTS) {
+    int pin = outputPins[outputNumber];
+
+    bool currentState = digitalRead(pin);  // Read the current state before toggling
+    bool newState = (currentState == HIGH) ? LOW : HIGH;  // Toggle state
+    digitalWrite(pin, newState);  // Set the new state
+
+    // Confirm the state change
+    Serial.print("Output ");
+    Serial.print(outputNumber);
+    Serial.print(": Toggled to ");
+    Serial.println(newState ? "HIGH" : "LOW");
+
+  } else {
+    Serial.println("Error: Invalid output number.");
+  }
+}
+
 // Function to initialize GPIO pins
 void setupGPIO() {
 
