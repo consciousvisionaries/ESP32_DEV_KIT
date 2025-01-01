@@ -257,6 +257,8 @@ server.on("/saveWiFi", HTTP_POST, [](AsyncWebServerRequest *request) {
   confirmationPage += "<a href='/admin'>Back to Admin Panel</a>";
   confirmationPage += "<p>Restarting....</p>";
   confirmationPage += "</body></html>";
+
+  
   request->send(200, "text/html", confirmationPage);
   
   delay(10000);
@@ -266,7 +268,7 @@ server.on("/saveWiFi", HTTP_POST, [](AsyncWebServerRequest *request) {
 
 // Save new configuration
 server.on("/saveRedNode", HTTP_POST, [](AsyncWebServerRequest *request) {
-    // Logic to handle saving global settings goes here
+
     if (request->hasParam("nrTab", true) &&
         request->hasParam("nrGroup", true) &&
         request->hasParam("mqttPassword", true) &&
@@ -282,10 +284,6 @@ server.on("/saveRedNode", HTTP_POST, [](AsyncWebServerRequest *request) {
         prefSaveMQTTSettings();
 
         request->send(200, "text/plain", "Global settings saved successfully. This browser should take you back to administration!");
-
-        delay(5000);
-        
-        request->send(200, "text/html", generatePage());
 
     } else {
         request->send(400, "text/plain", "Missing parameters.");
