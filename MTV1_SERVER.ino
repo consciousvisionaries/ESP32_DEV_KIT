@@ -57,8 +57,6 @@ String generatePage() {
   bodyDivHTML += getBody_footerHTML();     
   page += bodyDivHTML;
   page += getHTML_footerHTML();        
- 
-  Serial.println(page);
   return page;
 }
 
@@ -241,7 +239,7 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
 
 
 // Save new configuration
-server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
+server.on("/saveWiFi", HTTP_POST, [](AsyncWebServerRequest *request) {
   String newSSID = request->getParam("ssid", true)->value();
   String newPassword = request->getParam("password", true)->value();
 
@@ -267,23 +265,26 @@ server.on("/saveConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
 });
 
 // Save new configuration
-server.on("/saveGlobalSettings", HTTP_POST, [](AsyncWebServerRequest *request) {
+server.on("/saveRedNode", HTTP_POST, [](AsyncWebServerRequest *request) {
     // Logic to handle saving global settings goes here
-    if (request->hasParam("nrTab", true) && request->hasParam("nrGroup", true) &&
-        request->hasParam("storedVersion", true) && request->hasParam("mqttServer", true)) {
+    if (request->hasParam("nrTab", true) &&
+        request->hasParam("nrGroup", true) &&
+        request->hasParam("mqttPassword", true) &&
+        request->hasParam("mqttServer", true) &&
+        request->hasParam("mqttUsername")) {
         globalSettings.nrTab = request->getParam("nrTab", true)->value();
         globalSettings.nrGroup = request->getParam("nrGroup", true)->value();
-        wifiSettings.storedVersion = request->getParam("storedVersion", true)->value();
+        mqttSettings.mqttUsername = request->getParam("mqttUsername", true)->value();
         mqttSettings.mqttServer = request->getParam("mqttServer", true)->value();
+        mqttSettings.mqttPassword = request->getParam("mqttPassword", true)->value();
+        prefSaveGlobalSettings();
+        prefSaveMQTTSettings();
 
-        saveGlobalSettings();
-        saveMQTTSettings();
+        request->send(200, "text/plain", "Global settings saved successfully. This browser should take you back to administration!");
 
-        request->send(200, "text/plain", "Global settings saved successfully.");
-
-        delay(2000);
+        delay(5000);
         
-        setupDashboard();
+        request->send(200, "text/html", generatePage());
 
     } else {
         request->send(400, "text/plain", "Missing parameters.");

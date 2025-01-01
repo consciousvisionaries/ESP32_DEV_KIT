@@ -91,7 +91,7 @@ void loadWiFiCredentials() {
 }
 
 // Function to save MQTT settings to Preferences
-void saveMQTTSettings() {
+void prefSaveMQTTSettings() {
   
   preferences.begin("mqtt", false); // Open namespace for MQTT settings
   preferences.putString("mqttUsername", mqttSettings.mqttUsername);
@@ -102,7 +102,7 @@ void saveMQTTSettings() {
 }
 
 // Function to load MQTT settings from Preferences
-void loadMQTTSettings() {
+void prefLoadMQTTSettings() {
   
   preferences.begin("mqtt", true); // Open namespace for MQTT settings
   mqttSettings.mqttUsername = preferences.getString("mqttUsername", mqttSettings.mqttUsername);
@@ -113,7 +113,7 @@ void loadMQTTSettings() {
 }
 
 // Function to save Global settings to Preferences
-void saveGlobalSettings() {
+void prefSaveGlobalSettings() {
   
   preferences.begin("global", false); // Open namespace for Global settings
   preferences.putString("nrTab", globalSettings.nrTab);
@@ -132,7 +132,7 @@ void saveGlobalSettings() {
 }
 
 // Function to load Global settings from Preferences
-void loadGlobalSettings() {
+void prefLoadGlobalSettings() {
   
   preferences.begin("global", true); // Open namespace for Global settings
   globalSettings.nrTab = preferences.getString("nrTab", globalSettings.nrTab);
@@ -150,7 +150,7 @@ void loadGlobalSettings() {
   Serial.println("Global settings loaded.");
 }
 
-void loadGlobalHyperlinks() {
+void prefLoadGlobalHyperlinks() {
     
     globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/'>Home on " + wifiSettings.ipaddress + "</a>";
     globalHyperlinks.adminButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/admin'>Admin</a>";
@@ -159,10 +159,10 @@ void loadGlobalHyperlinks() {
 }
 
 // Function to load all settings
-void loadAllSettings() {
+void prefLoadAllSettings() {
   
-  loadMQTTSettings();
-  loadGlobalSettings();
-  loadGlobalHyperlinks();
+  prefLoadMQTTSettings();
+  prefLoadGlobalSettings();
+  prefLoadGlobalHyperlinks();
   Serial.println("All settings have been loaded.");
 }

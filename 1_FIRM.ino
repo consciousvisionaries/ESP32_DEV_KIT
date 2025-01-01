@@ -71,7 +71,7 @@ void setupFirmware() {
   // Simulate the version checking and saving
   connectWiFi();
   
-  loadAllSettings();
+  prefLoadAllSettings();
 
   connectMQTT();
   

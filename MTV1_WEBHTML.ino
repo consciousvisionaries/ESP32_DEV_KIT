@@ -180,13 +180,12 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
     
-
     // MQTT Settings Form
+    bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
     bodyDivHTML += "<h3>Node-Red Configurations</h3>";
     bodyDivHTML += "<p><strong>MQTT Server:</strong> " + mqttSettings.mqttServer + "</p>";
     bodyDivHTML += "<p><strong>MQTT Username:</strong> " + mqttSettings.mqttUsername + "</p>";
 
-    bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
     bodyDivHTML += "<label for='nrTab'>UI Dashboard Tab:</label>";
     bodyDivHTML += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
     bodyDivHTML += "<label for='nrGroup'>UI Dashboard Group:</label>";
@@ -201,10 +200,10 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "</form>";
 
     // WiFi Settings
+    bodyDivHTML += "<form action='/saveWiFi' method='POST'>";
     bodyDivHTML += "<h3>WiFi Settings</h3>";
     bodyDivHTML += "<p><strong>WiFi SSID:</strong> " + wifiSettings.ssid + "</p>";
     bodyDivHTML += "<p><strong>WiFi Password:</strong> " + wifiSettings.password + "</p>";
-    bodyDivHTML += "<form action='/saveWiFi' method='POST'>";
     bodyDivHTML += "<label for='ssid'>SSID:</label>";
     bodyDivHTML += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
     bodyDivHTML += "<label for='password'>Password:</label>";
