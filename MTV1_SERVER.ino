@@ -9,6 +9,7 @@ String onloadHTML;
 String setIntervalHTML;
 String bodyDivHTML;
 String scriptHTML;
+String navButton;
 
 String generatePage() {
 
@@ -17,6 +18,7 @@ String generatePage() {
   setIntervalHTML = "";
   bodyDivHTML = "";
   scriptHTML = "";
+  navButton = "";
 
   String page = "<html><head>";
   
@@ -188,13 +190,16 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
     // Create HTML content for the /admin page
     String adminPage = "<html><head><title>Admin Panel</title><style>";
-    adminPage += "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
-    adminPage += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
-    adminPage += "h3 { color: #333; margin-top: 20px; }";
-    adminPage += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
-    adminPage += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
-    adminPage += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
-    adminPage += "button:hover { background-color: #45a049; }";
+    styleHTML = "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
+    styleHTML += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
+    styleHTML += "h3 { color: #333; margin-top: 20px; }";
+    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+    styleHTML += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
+    styleHTML += "button:hover { background-color: #45a049; }";
+
+    navButton = refreshNavigationButtons_dataHTML();
+
     adminPage += "</style></head><body>";
 
     adminPage += "<h1>Admin Panel</h1>";
@@ -231,7 +236,7 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
     adminPage += "<button type='submit'>Save Changes</button>";
     adminPage += "</form>";
 
-    adminPage += refreshNavigationButtons_dataHTML();
+    adminPage += navButton;
 
     adminPage += "</body></html>";
     request->send(200, "text/html", adminPage);
