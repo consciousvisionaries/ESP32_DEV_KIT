@@ -116,7 +116,7 @@ void setupDashboard() {
     });
 
     // Admin page route
-    server.on("/editConfig", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/editConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
         String inputData = generateHTMLPage("CONFIG");
         request->send(200, "text/html", inputData);
     });
