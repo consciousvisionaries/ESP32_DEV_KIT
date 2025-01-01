@@ -114,16 +114,21 @@ String refreshOutputs_dataHTML() {
   return script;
 }
 
-// 11. refreshNavigationButtons_dataHTML() Function
 String refreshNavigationButtons_dataHTML() {
-
-  String navHTML = "<div id='navMenu' style='margin-top: 20px; text-align: center;'>";
+  // Add navigation styles to styleHTML
+  styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
+  styleHTML += "#navMenu button { padding: 10px 20px; font-size: 18px; color: white; background-color: #007BFF; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
+  styleHTML += "#navMenu button:hover { transform: scale(1.1); background-color: #0056b3; }";
+  
+  // Add HTML for navigation buttons
+  String navHTML = "<div id='navMenu'>";
   navHTML += globalHyperlinks.adminButtonHTML;
   navHTML += globalHyperlinks.homeButtonHTML;
   navHTML += "</div>";
 
-    return navHTML;
+  return navHTML;
 }
+
 
 
 // 7. scriptHeader_HTML() Function
