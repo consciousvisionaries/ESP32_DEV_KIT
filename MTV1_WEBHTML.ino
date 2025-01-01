@@ -1,15 +1,23 @@
 #define WEBHTML_VERSION V1.1
 
+String getHTML_headerHTML() {
+  return "<html>";
+}
+
+String getHead_headerHTML() {
+  return "<head>";
+}
+
+String getStyle_headerHTML() {
+  return "<style>";
+}
+
 String getStyle_body_backgroundBlack(bool black) {
   if (!black) {
     return "body { background-color: white; color: black; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
   } else {
     return "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
   }
-}
-
-String getStyle_header() {
-  return "<style>";
 }
 
 String getStyle_headings() {
@@ -20,14 +28,40 @@ String getStyle_headings() {
 }
 
 String getStyle_buttons(String backgroundColor, String color) {
-    
    String style = "button { background-color: " + backgroundColor + "; color: " + color + "; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
    style += "button:hover { background-color: #45a049; }";
    return style;
 }
 
-String getStyle_footer() {
-   return "</style>";
+String getStyle_footerHTML() {
+  return "</style>";
+}
+
+String getScript_headerHTML() {
+  return "<script>";
+}
+
+String getScript_footerHTML () {
+  return "</script>";
+}
+String getHead_footerHTML() {
+  return "</head>";
+}
+
+String getBody_headerHTML() {
+  return "<body>";
+}
+
+String getBody_TitleHTML() {
+  return "<h2>" + String(TECH_NAME) + " - " + String(MYSTTECH_MODEL) + "</h2>";
+}
+
+String getBody_footerHTML() {
+  return "</body>";
+}
+
+String getHTML_footerHTML() {
+  return "</html>";
 }
 
 // 5. refreshInputs_dataHTML() Function
@@ -193,27 +227,4 @@ String refreshNavigationButtons_dataHTML() {
   navHTML += "</div>";
 
   return navHTML;
-}
-
-
-
-
-// 7. scriptHeader_HTML() Function
-String scriptHeader_HTML() {
-  return "<script>";
-}
-
-// 8. headFooter_HTML() Function
-String headFooter_HTML() {
-  return "</script></head>";
-}
-
-// 9. bodyHeader_HTML() Function
-String bodyHeader_HTML() {
-  return "<body><header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
-}
-
-// 10. bodyTitle_HTML() Function
-String bodyTitle_HTML() {
-  return "<h2>" + String(TECH_NAME) + " - " + String(MYSTTECH_MODEL) + "</h2>";
 }

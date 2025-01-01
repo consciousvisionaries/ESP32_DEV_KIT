@@ -22,11 +22,13 @@ String generatePage() {
 
   String page = "<html><head>";
 
+  styleHTML += getStyle_headerHTML();
   styleHTML += getStyle_body_backgroundBlack(true);
-  styleHTML += getStyle_header(); 
+ 
   styleHTML += getStyle_headings();
+  styleHTML += getStyle_footerHTML();
   
-  scriptHTML += scriptHeader_HTML();        
+  scriptHTML += getScript_headerHTML();        
 
   if (NUM_INPUTS >= 1) {
     scriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
@@ -38,17 +40,19 @@ String generatePage() {
   bodyDivHTML += refreshNavigationButtons_dataHTML();
 
   page += styleHTML;
-  page += getStyle_footer();
+  page += getStyle_footerHTML();
   page += scriptHTML;
   page += onloadHTML;                 // Onload script
   page += setIntervalHTML;            // Set interval script
-  page += headFooter_HTML();          // Adds head and footer HTML
-  page += bodyHeader_HTML();          // Adds body header HTML
-  page += bodyTitle_HTML();           // Adds body title HTML
-  page += bodyDivHTML;                // Adds body div content
-
-  page += "</body></html>";           // Closing HTML tags
-    Serial.println(page);
+  page += getHead_footerHTML();          // Adds head and footer HTML
+  page += getBody_headerHTML();
+  page += getBody_TitleHTML();          
+  page += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
+  page += bodyDivHTML;               
+  page += getBody_footerHTML();
+  page += "</html>";        
+ 
+  Serial.println(page);
   return page;
 }
 
@@ -58,19 +62,23 @@ String generateAdminPage() {
     bodyDivHTML = "";
     navButtonHTML = "";
 
-    String page = "<html><head><title>Admin Panel</title><style>";
-
-    String adminScript = refreshAdmin_dataHTML();
+    String page = "<html>";
+    page += getHead_headerHTML();
+    page += "<title>Admin Panel</title>";
+    page += getStyle_headerHTML();
     
+    String adminScript = refreshAdmin_dataHTML();
     navButtonHTML = refreshNavigationButtons_dataHTML();
     
     page += styleHTML;
-
-    page += "</style></head><body>";
+    page += getStyle_footerHTML();
+    page += getHead_footerHTML();
+    page += getBody_headerHTML();
     page += bodyDivHTML;
     page += navButtonHTML;
 
-    page += "</body></html>";
+    page += getBody_footerHTML();
+    page += "</html>";
     return page;
 }
 
