@@ -188,7 +188,7 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<h3>Network Settings</h3>";
     bodyDivHTML += "<p><strong>WiFi SSID:</strong> " + wifiSettings.ssid + "</p>";
     bodyDivHTML += "<p><strong>WiFi Password:</strong> " + wifiSettings.password + "</p>";
-    bodyDivHTML += "<button type='submit' name='action' value='WiFi'>Edit WiFi Config</button>";
+    bodyDivHTML += "<button type='submit' name='action' value='WIFI'>Edit WiFi Config</button>";
     bodyDivHTML += "</form>";
     
     String script = "";
@@ -261,7 +261,7 @@ String refreshWiFi_dataHTML() {
     return "";
 }
 
-String refreshNavigationButtons_dataHTML() {
+String refreshNavigationButtons_dataHTML(String form) {
   
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
@@ -277,9 +277,13 @@ String refreshNavigationButtons_dataHTML() {
   
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
-  navHTML += globalHyperlinks.adminButtonHTML;
-  navHTML += "<p></p><p></p><p></p>";
-  navHTML += globalHyperlinks.homeButtonHTML;
+  if (form != "ADMIN") {
+    navHTML += globalHyperlinks.adminButtonHTML;
+  } 
+  
+  if (form != "HOME") {
+    navHTML += globalHyperlinks.homeButtonHTML;
+  }
   navHTML += "</div>";
 
   return navHTML;

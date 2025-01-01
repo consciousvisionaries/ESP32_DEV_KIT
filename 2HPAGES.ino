@@ -39,7 +39,7 @@ String generatePage() {
   scriptHTML += setIntervalHTML;   
 
  
-  bodyDivHTML += refreshNavigationButtons_dataHTML();
+  bodyDivHTML += refreshNavigationButtons_dataHTML("HOME");
 
   // assemble page
   String page = getHTML_headerHTML();
@@ -56,7 +56,7 @@ String generatePage() {
   return page;
 }
 
-String generateHTMLPage(String script) {
+String generateADMINPage(String script) {
 
   styleHTML = "";
   onloadHTML = "";
@@ -79,7 +79,7 @@ String generateHTMLPage(String script) {
   } else if (script == "WIFI") {  // Fixed this line
     newScriptHTML = refreshWiFi_dataHTML();
   }
-  navButtonHTML = refreshNavigationButtons_dataHTML();
+  navButtonHTML = refreshNavigationButtons_dataHTML("ADMIN");
 
   page += styleHTML;
   page += getStyle_footerHTML();

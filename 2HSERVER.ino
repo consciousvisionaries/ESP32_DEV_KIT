@@ -64,7 +64,7 @@ void setupDashboard() {
 
     // Admin page route
     server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateHTMLPage("ADMIN");
+        String inputData = generateADMINPage("ADMIN");
         request->send(200, "text/html", inputData);
     });
 
@@ -117,7 +117,7 @@ void setupDashboard() {
     // Edit config route
     server.on("/editConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
         String action = request->getParam("action", true)->value();
-        String inputData = generateHTMLPage(action);
+        String inputData = generateADMINPage(action);
         request->send(200, "text/html", inputData);
     });
 
