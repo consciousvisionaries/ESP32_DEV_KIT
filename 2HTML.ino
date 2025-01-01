@@ -1,7 +1,7 @@
 #define WEBHTML_VERSION V1.1
 
 String getHTML_headerHTML() {
-  return "<html>";
+  return "<!DOCTYPE html><html lang=\"en\">";
 }
 
 String getHead_headerHTML() {
