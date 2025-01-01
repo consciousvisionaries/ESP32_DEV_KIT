@@ -271,7 +271,8 @@ server.on("/saveRedNode", HTTP_POST, [](AsyncWebServerRequest *request) {
         request->hasParam("nrGroup", true) &&
         request->hasParam("mqttPassword", true) &&
         request->hasParam("mqttServer", true) &&
-        request->hasParam("mqttUsername")) {
+        request->hasParam("mqttUsername", true)) {
+
         globalSettings.nrTab = request->getParam("nrTab", true)->value();
         globalSettings.nrGroup = request->getParam("nrGroup", true)->value();
         mqttSettings.mqttUsername = request->getParam("mqttUsername", true)->value();

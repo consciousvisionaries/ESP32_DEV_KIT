@@ -3,13 +3,6 @@
 
 #define MQTT_VERSION V1.1
 
-//#define MQTT_TOPIC "/edna"
-//#define MQTT_SERVER "192.168.0.129" // Replace with your MQTT broker IP
-
-// Node-Red User Login (Device Login - Raspberry Pi)
-//const char* mqttUserName = "pro1polaris";
-//const char* mqttPassword = "CVr819P*!";
-
 void connectMQTT() {
   client.setServer(mqttSettings.mqttServer.c_str(), MQTT_PORT);
   client.setCallback(mqttCallback);  // Set MQTT callback function
