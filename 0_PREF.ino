@@ -32,8 +32,9 @@ struct GlobalSettings {
                             "Input 5", "Input 6", "Input 7", "Input 8" };
   String outputNames[NUM_OUTPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
                             "Output 5", "Output 6", "Output 7", "Output 8" };
-  String buttonHTML = "<button onclick=\"navigate('" + wifiSettings.ipaddress + "/')\">Home</button><button onclick=\"navigate('" + wifiSettings.ipaddress + "/admin')\">Admin</button>";               
-};
+  String buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home</button><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
+  
+  };
 
 GlobalSettings globalSettings;
 
