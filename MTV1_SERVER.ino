@@ -81,10 +81,13 @@ String generateAdminPage() {
     page += styleHTML;
     page += getStyle_footerHTML();
     page += getScript_headerHTML();
+    page += scriptHTML;
+    page += onloadHTML;
+    page += setIntervalHTML;
     page += getScript_footerHTML();
     page += getHead_footerHTML();
     page += getBody_headerHTML();
-    page += "<title>Admin Panel</title>";
+    //page += "<title>Admin Panel</title>";
     page += bodyDivHTML;
     page += navButtonHTML;
 
