@@ -65,7 +65,7 @@ void setupDashboard() {
 
     // Admin page route
     server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateAdminPage();
+        String inputData = generateHTMLPage(refreshAdmin_dataHTML());
         request->send(200, "text/html", inputData);
     });
 
@@ -113,6 +113,12 @@ void setupDashboard() {
         } else {
             request->send(400, "text/plain", "Missing parameters.");
         }
+    });
+
+    // Admin page route
+    server.on("/editConfig", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String inputData = generateHTMLPage(refreshConfig_dataHTML());
+        request->send(200, "text/html", inputData);
     });
 
     // Start the server

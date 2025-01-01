@@ -170,6 +170,7 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<h1>Admin Panel</h1>";
 
     // Module Information
+    bodyDivHTML += "<form action='/editConfig' method='POST'>";
     bodyDivHTML += "<h3>Module Information</h3>";
     bodyDivHTML += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
     bodyDivHTML += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
@@ -179,6 +180,8 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
     bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
+    bodyDivHTML += "<button type='submit'>Edit GPIO Config</button>";
+    bodyDivHTML += "</form>";
     
     // MQTT Settings Form
     bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
@@ -213,6 +216,23 @@ String refreshAdmin_dataHTML() {
     
     String script = "";
     return script;
+}
+
+String refreshConfig_dataHTML() {
+
+    styleHTML += getStyle_body_backgroundBlack(false);
+    styleHTML += getStyle_headings();
+    styleHTML += getStyle_buttons("#4CAF50", "white");
+
+    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+   
+    bodyDivHTML += "<h1>GPIO Configuration Panel</h1>";
+    
+  
+
+
+  return "";
 }
 
 String refreshNavigationButtons_dataHTML() {

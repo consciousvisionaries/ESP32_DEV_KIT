@@ -56,7 +56,7 @@ String generatePage() {
   return page;
 }
 
-String generateAdminPage() {
+String generateHTMLPage(String pageScriptHTML) {
 
   styleHTML = "";
   onloadHTML = "";
@@ -69,19 +69,19 @@ String generateAdminPage() {
     page += getHead_headerHTML();
     page += getStyle_headerHTML();
     
-    String adminScript = refreshAdmin_dataHTML();
+    String scriptHTMLret = pageScriptHTML;
     navButtonHTML = refreshNavigationButtons_dataHTML();
     
     page += styleHTML;
     page += getStyle_footerHTML();
     page += getScript_headerHTML();
     page += scriptHTML;
+    page += scriptHTMLret;
     page += onloadHTML;
     page += setIntervalHTML;
     page += getScript_footerHTML();
     page += getHead_footerHTML();
     page += getBody_headerHTML();
-    //page += "<title>Admin Panel</title>";
     page += bodyDivHTML;
     page += navButtonHTML;
 
