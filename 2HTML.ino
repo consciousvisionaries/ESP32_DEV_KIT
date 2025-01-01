@@ -115,9 +115,7 @@ String refreshInputs_dataHTML() {
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
-  styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
-  styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
-
+  
   onloadHTML += "refreshInputs_data();";
   onloadHTML += "updateInputIndicators();";
   setIntervalHTML += "setInterval(updateInputIndicators, 500);";
@@ -138,7 +136,7 @@ String refreshInputs_dataHTML() {
 // Function to update indicator states (green/red based on input status)
 String updateInputIndicatorsFunctionality() {
 
-  styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
+  styleHTML += ".indicator { display: inline-block; width: 40px; height: 40px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   styleHTML += ".indicator.green { background-color: green; }";
   styleHTML += ".indicator.red { background-color: red; }";
   
@@ -160,11 +158,8 @@ String updateInputIndicatorsFunctionality() {
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
 
-  styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
-  styleHTML += "h1 { font-size: 36px; margin-bottom: 20px; }";
-  styleHTML += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
-  styleHTML += "#buttonsSection { margin-top: 20px; }";
-  styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
+  styleHTML += "#buttonsSection { margin-top: 80px; }";
+  styleHTML += "button { padding: 10px 20px; font-size: 15px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
   styleHTML += "button:hover { transform: scale(1.1); }";
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";

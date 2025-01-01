@@ -21,6 +21,7 @@ String generateADMINPage(String script) {
   page += getHead_metaHTML();
   page += getStyle_headerHTML();
 
+  bool blackTrue = false;
   String newScriptHTML;
   if (script == "ADMIN") {
     newScriptHTML = refreshAdmin_dataHTML();
@@ -31,6 +32,7 @@ String generateADMINPage(String script) {
   } else if (script == "WIFI") {  // Fixed this line
     newScriptHTML = refreshWiFi_dataHTML();
   } else if (script == "HOME") {
+    blackTrue = true;
     if (NUM_INPUTS >= 1) {
         newScriptHTML += refreshInputs_dataHTML(); // Refresh inputs
         newScriptHTML += updateInputIndicatorsFunctionality();
@@ -44,6 +46,7 @@ String generateADMINPage(String script) {
   navButtonHTML = refreshNavigationButtons_dataHTML(script);
 
   page += styleHTML;
+  page += getStyle_body_backgroundBlack(blackTrue);
   page += getStyle_footerHTML();
   page += getScript_headerHTML();
   page += scriptHTML;
