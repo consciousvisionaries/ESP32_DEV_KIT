@@ -32,11 +32,18 @@ struct GlobalSettings {
                             "Input 5", "Input 6", "Input 7", "Input 8" };
   String outputNames[NUM_OUTPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
                             "Output 5", "Output 6", "Output 7", "Output 8" };
-  String buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home</button><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
   
-  };
+};
 
 GlobalSettings globalSettings;
+
+struct GlobalHyperlinks {
+  
+    String buttonHTML = "";
+    
+};
+
+GlobalHyperlinks globalHyperlinks;
 
 // Function to save WiFi credentials, version, and expanded settings to Preferences
 void saveWiFiCredentials(const String& newSSID, const String& newPassword, const String& newtxtVersion) {
@@ -145,10 +152,17 @@ void loadGlobalSettings() {
   Serial.println("Global settings loaded.");
 }
 
+void loadGlobalHyperlinks() {
+    
+  globalHyperlinks.buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home</button><p> <p><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
+
+}
+
 // Function to load all settings
 void loadAllSettings() {
   
   loadMQTTSettings();
   loadGlobalSettings();
+  loadGlobalHyperlinks();
   Serial.println("All settings have been loaded.");
 }
