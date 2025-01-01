@@ -34,6 +34,8 @@ String generatePage() {
   if (NUM_OUTPUTS >= 1) {
     scriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
   }
+  scriptHTML += onloadHTML;                
+  scriptHTML += setIntervalHTML;   
 
   // body
   bodyDivHTML += getBody_headerHTML();
@@ -48,9 +50,7 @@ String generatePage() {
   styleHTML += getStyle_footerHTML();
   page += styleHTML;
   scriptHTML += getScript_footerHTML();
-  page += scriptHTML;
-  page += onloadHTML;                
-  page += setIntervalHTML;            
+  page += scriptHTML;         
   page += getHead_footerHTML(); 
   bodyDivHTML += getBody_footerHTML();     
   page += bodyDivHTML;
