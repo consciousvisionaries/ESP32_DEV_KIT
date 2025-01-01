@@ -154,7 +154,7 @@ void loadGlobalSettings() {
 
 void loadGlobalHyperlinks() {
     
-  globalHyperlinks.buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home on " + wifiSettings.ipaddress + "</button><p> <p><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
+  globalHyperlinks.buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home on " + wifiSettings.ipaddress + "</a><p> <p><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
 
 }
 
