@@ -117,6 +117,8 @@ void connectWiFi() {
       Serial.print("    IP Address: ");
       Serial.println(WiFi.localIP());
       wifiSettings.ipaddress = String(WiFi.localIP());
+      Serial.println(">>>>>>>>>>>>>>>>>>>>>>");
+      Serial.println(wifiSettings.ipaddress);
 
       connected = true; // Set connection flag
       break; // Exit the loop as Wi-Fi is successfully connected

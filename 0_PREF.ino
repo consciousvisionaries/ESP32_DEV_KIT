@@ -13,8 +13,7 @@ struct WiFiSettings {
 
 WiFiSettings wifiSettings;
 
-
-struct MQTTSettings {
+  struct MQTTSettings {
   String mqttUserName = "pro1polaris";
   String mqttPassword = "CVr819P*!";
   String mqttServer = "192.168.0.129";
@@ -58,8 +57,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newtxtVersion);
-  preferences.putString("ipaddress", wifiSettings.ipaddress);
-  preferences.end(); // Close namespace
+    preferences.end(); // Close namespace
 
   Serial.println("Saved:     ssid " + newSSID);
   Serial.println("Saved: password " + newPassword);
@@ -154,7 +152,7 @@ void loadGlobalSettings() {
 
 void loadGlobalHyperlinks() {
     
-    globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "'>Home on " + wifiSettings.ipaddress + "</a>";
+    globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/'>Home on " + wifiSettings.ipaddress + "</a>";
     globalHyperlinks.adminButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/admin'>Admin</a>";
 
 
