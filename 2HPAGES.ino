@@ -69,7 +69,6 @@ String generateADMINPage(String script) {
   page += getHead_headerHTML();
   page += getHead_metaHTML();
   page += getStyle_headerHTML();
-  page += getStyle_fullScreenDiv();
 
   String newScriptHTML;
   if (script == "ADMIN") {
@@ -93,8 +92,6 @@ String generateADMINPage(String script) {
   page += getScript_footerHTML();
   page += getHead_footerHTML();
   page += getBody_headerHTML();
-  page += getBody_ButtonFullscreenHTML();
-  page += getBody_ButtonExitScreenHTML();
   page += bodyDivHTML;
   page += navButtonHTML;
 

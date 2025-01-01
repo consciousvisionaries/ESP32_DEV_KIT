@@ -94,7 +94,7 @@ String getBody_TitleHTML() {
 }
 
 String getBody_ButtonFullscreenHTML() {
-  return "<div id=\"fullScreenDiv\"><button onclick=\"goFullScreen()\">Go Full Screen</button></div>";
+  return "<div id=\'fullScreenDiv\"><button onclick=\"goFullScreen()\">Go Full Screen</button></div>";
 }
 
 String getBody_ButtonExitScreenHTML() {
