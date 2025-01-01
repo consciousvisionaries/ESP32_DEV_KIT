@@ -176,24 +176,35 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
     bodyDivHTML += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
     bodyDivHTML += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
+    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
+    bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
+    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
+    
 
-    // Global Settings Form
-    bodyDivHTML += "<h3>Global Settings</h3>";
-    bodyDivHTML += "<form action='/saveGlobalSettings' method='POST'>";
-    bodyDivHTML += "<label for='nrTab'>Tab:</label>";
+    // MQTT Settings Form
+    bodyDivHTML += "<h3>Node-Red Configurations</h3>";
+    bodyDivHTML += "<p><strong>MQTT Server:</strong> " + mqttSettings.mqttServer + "</p>";
+    bodyDivHTML += "<p><strong>MQTT Username:</strong> " + mqttSettings.mqttUsername + "</p>";
+
+    bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
+    bodyDivHTML += "<label for='nrTab'>UI Dashboard Tab:</label>";
     bodyDivHTML += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
-    bodyDivHTML += "<label for='nrGroup'>Group:</label>";
+    bodyDivHTML += "<label for='nrGroup'>UI Dashboard Group:</label>";
     bodyDivHTML += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
-    bodyDivHTML += "<label for='storedVersion'>Version:</label>";
-    bodyDivHTML += "<input type='text' id='storedVersion' name='storedVersion' value='" + String(wifiSettings.storedVersion) + "'><br><br>";
     bodyDivHTML += "<label for='mqttServer'>MQTT Server:</label>";
     bodyDivHTML += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttUsername'>MQTT Username:</label>";
+    bodyDivHTML += "<input type='text' id='mqttUsername' name='mqttUsername' value='" + String(mqttSettings.mqttUsername) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttPassword'>MQTT Password:</label>";
+    bodyDivHTML += "<input type='text' id='mqttPassword' name='mqttPassword' value='" + String(mqttSettings.mqttPassword) + "'><br><br>";
     bodyDivHTML += "<button type='submit'>Save Global Settings</button>";
     bodyDivHTML += "</form>";
 
     // WiFi Settings
     bodyDivHTML += "<h3>WiFi Settings</h3>";
-    bodyDivHTML += "<form action='/saveConfig' method='POST'>";
+    bodyDivHTML += "<p><strong>WiFi SSID:</strong> " + wifiSettings.ssid + "</p>";
+    bodyDivHTML += "<p><strong>WiFi Password:</strong> " + wifiSettings.password + "</p>";
+    bodyDivHTML += "<form action='/saveWiFi' method='POST'>";
     bodyDivHTML += "<label for='ssid'>SSID:</label>";
     bodyDivHTML += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
     bodyDivHTML += "<label for='password'>Password:</label>";

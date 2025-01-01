@@ -14,7 +14,7 @@ struct WiFiSettings {
 WiFiSettings wifiSettings;
 
   struct MQTTSettings {
-  String mqttUserName = "pro1polaris";
+  String mqttUsername = "pro1polaris";
   String mqttPassword = "CVr819P*!";
   String mqttServer = "192.168.0.129";
   String mqttStatus = "";
@@ -57,7 +57,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newtxtVersion);
-    preferences.end(); // Close namespace
+  preferences.end(); // Close namespace
 
   Serial.println("Saved:     ssid " + newSSID);
   Serial.println("Saved: password " + newPassword);
@@ -94,7 +94,7 @@ void loadWiFiCredentials() {
 void saveMQTTSettings() {
   
   preferences.begin("mqtt", false); // Open namespace for MQTT settings
-  preferences.putString("mqttUserName", mqttSettings.mqttUserName);
+  preferences.putString("mqttUsername", mqttSettings.mqttUsername);
   preferences.putString("mqttPassword", mqttSettings.mqttPassword);
   preferences.putString("mqttServer", mqttSettings.mqttServer);
   preferences.end();
@@ -105,7 +105,7 @@ void saveMQTTSettings() {
 void loadMQTTSettings() {
   
   preferences.begin("mqtt", true); // Open namespace for MQTT settings
-  mqttSettings.mqttUserName = preferences.getString("mqttUserName", mqttSettings.mqttUserName);
+  mqttSettings.mqttUsername = preferences.getString("mqttUsername", mqttSettings.mqttUsername);
   mqttSettings.mqttPassword = preferences.getString("mqttPassword", mqttSettings.mqttPassword);
   mqttSettings.mqttServer = preferences.getString("mqttServer", mqttSettings.mqttServer);
   preferences.end();

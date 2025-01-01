@@ -21,7 +21,7 @@ void connectMQTT() {
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID, mqttSettings.mqttUserName.c_str(), mqttSettings.mqttPassword.c_str())) {
+    if (client.connect(MQTT_CLIENT_ID, mqttSettings.mqttUsername.c_str(), mqttSettings.mqttPassword.c_str())) {
       Serial.println("Connected to SERVER");
       client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
