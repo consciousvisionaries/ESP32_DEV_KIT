@@ -118,7 +118,8 @@ String refreshOutputs_dataHTML() {
 String refreshNavigationButtons_dataHTML() {
 
   String navHTML = "<div id='navMenu' style='margin-top: 20px; text-align: center;'>";
-  navHTML += globalHyperlinks.buttonHTML;
+  navHTML += globalHyperlinks.adminButtonHTML;
+  navHTML += globalHyperlinks.homeButtonHTML;
   navHTML += "</div>";
 
     return navHTML;

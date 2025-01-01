@@ -39,8 +39,8 @@ GlobalSettings globalSettings;
 
 struct GlobalHyperlinks {
   
-    String buttonHTML = "";
-    
+    String adminButtonHTML = "";
+    String homeButtonHTML = "";
 };
 
 GlobalHyperlinks globalHyperlinks;
@@ -154,7 +154,9 @@ void loadGlobalSettings() {
 
 void loadGlobalHyperlinks() {
     
-  globalHyperlinks.buttonHTML = "<a href='http://" + wifiSettings.ipaddress + "/')\">Home on " + wifiSettings.ipaddress + "</a><p> <p><a href='http://" + wifiSettings.ipaddress + "/admin')\">Admin</a>";               
+    globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "'>Home on " + wifiSettings.ipaddress + "</a>";
+    globalHyperlinks.adminButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/admin'>Admin</a>";
+
 
 }
 
