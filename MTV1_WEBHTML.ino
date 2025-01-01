@@ -117,8 +117,8 @@ String refreshOutputs_dataHTML() {
 String refreshNavigationButtons_dataHTML() {
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
-  styleHTML += "#navMenu button { padding: 10px 20px; font-size: 18px; color: white; background-color: #007BFF; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
-  styleHTML += "#navMenu button:hover { transform: scale(1.1); background-color: #0056b3; }";
+  styleHTML += "#navMenu a { padding: 10px 20px; font-size: 18px; color: white; background-color: #007BFF; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
+  styleHTML += "#navMenu a:hover { transform: scale(1.1); background-color: #0056b3; }";
   
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
