@@ -44,7 +44,6 @@ String generatePage() {
   // assemble page
   String page = getHTML_headerHTML();
   page += getHead_headerHTML();
-  page += getHead_metaHTML();
 
   styleHTML += getStyle_footerHTML();
   page += styleHTML;
