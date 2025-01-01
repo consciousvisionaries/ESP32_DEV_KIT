@@ -20,16 +20,17 @@ String generatePage() {
   scriptHTML = "";
   navButtonHTML = "";
 
-  String page = "<html><head>";
+  String page = getHTML_headerHTML();
+  page += getHead_headerHTML();
 
+  // style
   styleHTML += getStyle_headerHTML();
   styleHTML += getStyle_body_backgroundBlack(true);
- 
   styleHTML += getStyle_headings();
   styleHTML += getStyle_footerHTML();
-  
-  scriptHTML += getScript_headerHTML();        
 
+  // script
+  scriptHTML += getScript_headerHTML();        
   if (NUM_INPUTS >= 1) {
     scriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
     scriptHTML += updateInputIndicatorsFunctionality();
@@ -37,20 +38,22 @@ String generatePage() {
   if (NUM_OUTPUTS >= 1) {
     scriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
   }
+  scriptHTML += getScript_footerHTML();
+
+  // body
+  bodyDivHTML += getBody_headerHTML();
+  bodyDivHTML += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
+  bodyDivHTML += getBody_TitleHTML();
   bodyDivHTML += refreshNavigationButtons_dataHTML();
+  bodyDivHTML += getBody_footerHTML();
 
   page += styleHTML;
-  page += getStyle_footerHTML();
   page += scriptHTML;
   page += onloadHTML;                 // Onload script
   page += setIntervalHTML;            // Set interval script
   page += getHead_footerHTML();          // Adds head and footer HTML
-  page += getBody_headerHTML();
-  page += getBody_TitleHTML();          
-  page += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
-  page += bodyDivHTML;               
-  page += getBody_footerHTML();
-  page += "</html>";        
+  page += bodyDivHTML;
+  page += getHTML_footerHTML();        
  
   Serial.println(page);
   return page;
@@ -62,7 +65,7 @@ String generateAdminPage() {
     bodyDivHTML = "";
     navButtonHTML = "";
 
-    String page = "<html>";
+    String page = getHTML_headerHTML();
     page += getHead_headerHTML();
     page += "<title>Admin Panel</title>";
     page += getStyle_headerHTML();
@@ -78,7 +81,7 @@ String generateAdminPage() {
     page += navButtonHTML;
 
     page += getBody_footerHTML();
-    page += "</html>";
+    page += getHTML_footerHTML();
     return page;
 }
 
