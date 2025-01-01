@@ -228,6 +228,19 @@ String refreshConfig_dataHTML() {
     styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
    
     bodyDivHTML += "<h1>GPIO Configuration Panel</h1>";
+    // Module Information
+    bodyDivHTML += "<form action='/editConfig' method='POST'>";
+    bodyDivHTML += "<h3>Module Information</h3>";
+    bodyDivHTML += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
+    bodyDivHTML += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
+    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
+    bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
+    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
+    bodyDivHTML += "<button type='submit'>Edit GPIO Config</button>";
+    bodyDivHTML += "</form>";
     
   
 

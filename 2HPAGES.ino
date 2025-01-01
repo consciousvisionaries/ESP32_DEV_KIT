@@ -70,7 +70,7 @@ String generateHTMLPage(String script) {
     page += getStyle_headerHTML();
     
     String newScriptHTML;
-    if (script = "ADMIN") {
+    if (script == "ADMIN") {
       newScriptHTML = refreshAdmin_dataHTML();
     } else {
       newScriptHTML = refreshConfig_dataHTML();
@@ -93,22 +93,6 @@ String generateHTMLPage(String script) {
     page += getBody_footerHTML();
     page += getHTML_footerHTML();
     return page;
-}
-
-String generateEditConfigPage() {
-
-  styleHTML = "";
-  onloadHTML = "";
-  setIntervalHTML = "";
-  bodyDivHTML = "";
-  scriptHTML = "";
-  navButtonHTML = "";
-
-  String page = getHTML_headerHTML();
-  page += getHead_headerHTML();
-  page += getStyle_headerHTML();
-
-  return page;
 }
 
 String generateInputIndicatorsHTML() {
