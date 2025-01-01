@@ -190,6 +190,8 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
     // Create HTML content for the /admin page
     String adminPage = "<html><head><title>Admin Panel</title><style>";
+
+    
     styleHTML = "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
     styleHTML += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
     styleHTML += "h3 { color: #333; margin-top: 20px; }";
@@ -199,6 +201,7 @@ server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
     styleHTML += "button:hover { background-color: #45a049; }";
 
     navButton = refreshNavigationButtons_dataHTML();
+    adminPage += styleHTML;
 
     adminPage += "</style></head><body>";
 
