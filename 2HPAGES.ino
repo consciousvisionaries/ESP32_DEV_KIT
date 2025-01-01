@@ -56,7 +56,7 @@ String generatePage() {
   return page;
 }
 
-String generateHTMLPage(String pageScriptHTML) {
+String generateHTMLPage(String script) {
 
   styleHTML = "";
   onloadHTML = "";
@@ -69,14 +69,19 @@ String generateHTMLPage(String pageScriptHTML) {
     page += getHead_headerHTML();
     page += getStyle_headerHTML();
     
-    String scriptHTMLret = pageScriptHTML;
+    String newScriptHTML;
+    if (script = "ADMIN") {
+      newScriptHTML = refreshAdmin_dataHTML();
+    } else {
+      newScriptHTML = refreshConfig_dataHTML();
+    }
     navButtonHTML = refreshNavigationButtons_dataHTML();
     
     page += styleHTML;
     page += getStyle_footerHTML();
     page += getScript_headerHTML();
     page += scriptHTML;
-    page += scriptHTMLret;
+    page += newScriptHTML;
     page += onloadHTML;
     page += setIntervalHTML;
     page += getScript_footerHTML();
@@ -88,6 +93,22 @@ String generateHTMLPage(String pageScriptHTML) {
     page += getBody_footerHTML();
     page += getHTML_footerHTML();
     return page;
+}
+
+String generateEditConfigPage() {
+
+  styleHTML = "";
+  onloadHTML = "";
+  setIntervalHTML = "";
+  bodyDivHTML = "";
+  scriptHTML = "";
+  navButtonHTML = "";
+
+  String page = getHTML_headerHTML();
+  page += getHead_headerHTML();
+  page += getStyle_headerHTML();
+
+  return page;
 }
 
 String generateInputIndicatorsHTML() {
