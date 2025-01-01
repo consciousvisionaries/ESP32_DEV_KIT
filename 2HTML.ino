@@ -110,7 +110,7 @@ String getHTML_footerHTML() {
 }
 
 // 5. refreshInputs_dataHTML() Function
-String refreshInputs_dataHTML_retScript() {
+String refreshInputs_dataHTML() {
 
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
@@ -118,11 +118,11 @@ String refreshInputs_dataHTML_retScript() {
   styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
   styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
 
-  onloadHTML = "onloadHTML += \"refreshInputs_data();\";";
-  setIntervalHTML = "setIntervalHTML += \"setInterval(updateInputIndicators, 500);\";";
+  onloadHTML += "refreshInputs_data();";
+  onloadHTML += "updateInputIndicators();";
+  setIntervalHTML += "setInterval(updateInputIndicators, 500);";
 
   bodyDivHTML += "<div id='inputsSection'>";
-  bodyDivHTML += "<p>";
   bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
   bodyDivHTML += "<div id='inputs'>Waiting for inputs...</div>";
   bodyDivHTML += "</div>";
@@ -141,6 +141,7 @@ String updateInputIndicatorsFunctionality() {
   styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   styleHTML += ".indicator.green { background-color: green; }";
   styleHTML += ".indicator.red { background-color: red; }";
+  
 
   String script = "function updateInputIndicators() {";
   script += "  const inputs = document.querySelectorAll('[id^=\"inputIndicator\"]');";  // Select all input indicators
@@ -156,40 +157,52 @@ String updateInputIndicatorsFunctionality() {
   return script;
 }
 
+// 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
-  
+
   styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
+  styleHTML += "h1 { font-size: 36px; margin-bottom: 20px; }";
+  styleHTML += "h2, h3 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
   styleHTML += "#buttonsSection { margin-top: 20px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
   styleHTML += "button:hover { transform: scale(1.1); }";
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";
 
-  onloadHTML = "onloadHTML += \"refreshOutputs_data();\";";
+  onloadHTML += "refreshOutputs_data();";
 
-  setIntervalHTML = "setIntervalHTML += \"setInterval(refreshOutputs_data, 250);\";";
+  setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
 
   bodyDivHTML += "<div id='outputsSection'>";
-  bodyDivHTML += "<h3>Outputs: <span id='outputs'></span></h3>";
-  bodyDivHTML += "<div id='led-matrix'>";
-  bodyDivHTML += "<span id='ledOutput1' class='output red'>LED 1</span>";
-  bodyDivHTML += "<span id='ledOutput2' class='output green'>LED 2</span>";
-  bodyDivHTML += "<span id='ledOutput3' class='output red'>LED 3</span>";
-  bodyDivHTML += "</div>";
+  bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
+  bodyDivHTML += "<div id='outputs'>Waiting for outputs...</div>";
   bodyDivHTML += "</div>";
 
+  bodyDivHTML += generateOutputButtonsHTML(); // Add buttons section
+
   String script = "function refreshOutputs_data() {";
-  script += "  fetch('/getOutputs') ";
-  script += "    .then(response => response.json()) ";
-  script += "    .then(data => {";
-  script += "      for (let i = 0; i < data.length; i++) {";
-  script += "        const led = document.getElementById('ledOutput' + (i + 1));";
-  script += "        led.className = data[i] === 'on' ? 'output green' : 'output red';";
-  script += "      }";
-  script += "    });";
+  script += "fetch('/refreshOutputs_dataHTML') ";
+  script += ".then(response => response.text()) ";
+  script += ".then(data => { document.getElementById('outputs').innerHTML = data; })";
+  script += ".then(() => { updateButtonColor(outputNumber); });";
   script += "}";
+
+  script += "function toggleOutput(outputNumber) {";
+  script += "fetch('/toggleOutputState?output=' + outputNumber) ";
+  script += ".then(() => { updateButtonColor(outputNumber); })";
+  script += ".catch(error => console.error('Error toggling output:', error));";
+  script += "}";
+
+  script += "function updateButtonColor(outputNumber) {";
+  script += "const button = document.getElementById('outputButton' + outputNumber);";
+  script += "fetch('/getOutputState?output=' + outputNumber)";
+  script += ".then(response => response.text())";
+  script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
+  script += "}";
+
   return script;
 }
+
 
 String refreshAdmin_dataHTML() {
 

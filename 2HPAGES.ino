@@ -32,7 +32,7 @@ String generateADMINPage(String script) {
     newScriptHTML = refreshWiFi_dataHTML();
   } else if (script == "HOME") {
     if (NUM_INPUTS >= 1) {
-        newScriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
+        newScriptHTML += refreshInputs_dataHTML(); // Refresh inputs
         newScriptHTML += updateInputIndicatorsFunctionality();
     }
     if (NUM_OUTPUTS >= 1) {
