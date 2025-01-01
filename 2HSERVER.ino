@@ -8,8 +8,8 @@ void setupDashboard() {
 
     // Main page route
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", generatePage());
-    });
+        String inputData = generateADMINPage("HOME");
+        request->send(200, "text/html", inputData);    });
 
     // Route to refresh input indicators
     server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {

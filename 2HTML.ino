@@ -111,17 +111,16 @@ String getHTML_footerHTML() {
 
 // 5. refreshInputs_dataHTML() Function
 String refreshInputs_dataHTML_retScript() {
-  String styleHTML = "";
+
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
   styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
   styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
 
-  String onloadHTML = "onloadHTML += \"refreshInputs_data();\";";
-  String setIntervalHTML = "setIntervalHTML += \"setInterval(updateInputIndicators, 500);\";";
+  onloadHTML = "onloadHTML += \"refreshInputs_data();\";";
+  setIntervalHTML = "setIntervalHTML += \"setInterval(updateInputIndicators, 500);\";";
 
-  String bodyDivHTML = "";
   bodyDivHTML += "<div id='inputsSection'>";
   bodyDivHTML += "<p>";
   bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
@@ -138,7 +137,7 @@ String refreshInputs_dataHTML_retScript() {
 
 // Function to update indicator states (green/red based on input status)
 String updateInputIndicatorsFunctionality() {
-  String styleHTML = "";
+
   styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   styleHTML += ".indicator.green { background-color: green; }";
   styleHTML += ".indicator.red { background-color: red; }";
@@ -157,9 +156,8 @@ String updateInputIndicatorsFunctionality() {
   return script;
 }
 
-// 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
-  String styleHTML = "";
+  
   styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
   styleHTML += "#buttonsSection { margin-top: 20px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
@@ -167,11 +165,10 @@ String refreshOutputs_dataHTML() {
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";
 
-  String onloadHTML = "onloadHTML += \"refreshOutputs_data();\";";
+  onloadHTML = "onloadHTML += \"refreshOutputs_data();\";";
 
-  String setIntervalHTML = "setIntervalHTML += \"setInterval(refreshOutputs_data, 250);\";";
+  setIntervalHTML = "setIntervalHTML += \"setInterval(refreshOutputs_data, 250);\";";
 
-  String bodyDivHTML = "";
   bodyDivHTML += "<div id='outputsSection'>";
   bodyDivHTML += "<h3>Outputs: <span id='outputs'></span></h3>";
   bodyDivHTML += "<div id='led-matrix'>";
@@ -312,13 +309,11 @@ String refreshNavigationButtons_dataHTML(String form) {
   
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
-  if (form != "ADMIN") {
-    navHTML += globalHyperlinks.adminButtonHTML;
-  } 
-  
+    
   if (form != "HOME") {
     navHTML += globalHyperlinks.homeButtonHTML;
-  }
+  } else { navHTML += globalHyperlinks.adminButtonHTML; }
+
   navHTML += "</div>";
 
   return navHTML;

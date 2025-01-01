@@ -7,55 +7,6 @@ String bodyDivHTML;
 String scriptHTML;
 String navButtonHTML;
 
-String generatePage() {
-
-  styleHTML = "";
-  onloadHTML = "";
-  setIntervalHTML = "";
-  bodyDivHTML = "";
-  scriptHTML = "";
-  navButtonHTML = "";
-
-  // style
-  styleHTML += getStyle_headerHTML();
-  styleHTML += getStyle_body_backgroundBlack(true);
-  styleHTML += getStyle_headings();
-
-  // body
-  bodyDivHTML += getBody_headerHTML();
-  bodyDivHTML += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
-  bodyDivHTML += getBody_TitleHTML();
-
-  // script
-  scriptHTML += getScript_headerHTML();        
-  if (NUM_INPUTS >= 1) {
-    scriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
-    scriptHTML += updateInputIndicatorsFunctionality();
-  }
-  if (NUM_OUTPUTS >= 1) {
-    scriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
-  }
-  scriptHTML += onloadHTML;                
-  scriptHTML += setIntervalHTML;   
-
- 
-  bodyDivHTML += refreshNavigationButtons_dataHTML("HOME");
-
-  // assemble page
-  String page = getHTML_headerHTML();
-  page += getHead_headerHTML();
-
-  styleHTML += getStyle_footerHTML();
-  page += styleHTML;
-  scriptHTML += getScript_footerHTML();
-  page += scriptHTML;         
-  page += getHead_footerHTML(); 
-  bodyDivHTML += getBody_footerHTML();     
-  page += bodyDivHTML;
-  page += getHTML_footerHTML();        
-  return page;
-}
-
 String generateADMINPage(String script) {
 
   styleHTML = "";
@@ -79,8 +30,18 @@ String generateADMINPage(String script) {
     newScriptHTML = refreshNodeRed_dataHTML();
   } else if (script == "WIFI") {  // Fixed this line
     newScriptHTML = refreshWiFi_dataHTML();
+  } else if (script == "HOME") {
+    if (NUM_INPUTS >= 1) {
+        newScriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
+        newScriptHTML += updateInputIndicatorsFunctionality();
+    }
+    if (NUM_OUTPUTS >= 1) {
+        newScriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
+    }
   }
-  navButtonHTML = refreshNavigationButtons_dataHTML("ADMIN");
+  
+  
+  navButtonHTML = refreshNavigationButtons_dataHTML(script);
 
   page += styleHTML;
   page += getStyle_footerHTML();
@@ -118,7 +79,7 @@ String generateOutputsPayload() {
 
   String outputStatus = "[";
   for (int i = 0; i < NUM_OUTPUTS; i++) {
-    outputStatus += (digitalRead(outputPins[i]) == HIGH) ? "'red'" : "'green'"; // Output state (red/green)
+    outputStatus += (digitalRead(outputPins[i]) == HIGH) ? "'red'" : "'green'";
     if (i < NUM_OUTPUTS - 1) outputStatus += ", ";  // Formatting between items
   }
   outputStatus += "]";
