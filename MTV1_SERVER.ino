@@ -31,7 +31,7 @@ String generatePage() {
   if (NUM_OUTPUTS >= 1) {
     scriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
   }
-  page += refreshNavigationButtons_dataHTML();
+  bodyDivHTML += refreshNavigationButtons_dataHTML();
 
   page += styleHTML;
   page += getStyle_footer();
