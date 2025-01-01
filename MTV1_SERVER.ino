@@ -25,6 +25,11 @@ String generatePage() {
   styleHTML += getStyle_body_backgroundBlack(true);
   styleHTML += getStyle_headings();
 
+  // body
+  bodyDivHTML += getBody_headerHTML();
+  bodyDivHTML += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
+  bodyDivHTML += getBody_TitleHTML();
+
   // script
   scriptHTML += getScript_headerHTML();        
   if (NUM_INPUTS >= 1) {
@@ -37,10 +42,7 @@ String generatePage() {
   scriptHTML += onloadHTML;                
   scriptHTML += setIntervalHTML;   
 
-  // body
-  bodyDivHTML += getBody_headerHTML();
-  bodyDivHTML += "<header><h1>" + String(PUZZLE_NAME) + "</h1></header>";
-  bodyDivHTML += getBody_TitleHTML();
+  
   bodyDivHTML += refreshNavigationButtons_dataHTML();
 
   // assemble page
