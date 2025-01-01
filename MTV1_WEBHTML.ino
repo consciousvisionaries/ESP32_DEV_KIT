@@ -1,27 +1,37 @@
 #define WEBHTML_VERSION V1.1
 
-String getStyle_header() {
+String getStyle_body_backgroundBlack(bool black) {
+  if (!black) {
+    return "body { background-color: white; color: black; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
+  } else {
+    return "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
+  }
+}
 
-  String style = "<style>";
-  style += "body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; margin: 20px; padding: 10px; }";
-  style += "h1 { font-size: 36px; margin-bottom: 20px; }";
+String getStyle_header() {
+  return "<style>";
+}
+
+String getStyle_headings() {
+  String style = "h1 { font-size: 36px; margin-bottom: 20px; }";
   style += "h2 { font-size: 28px; font-weight: bold; margin-bottom: 15px; }";
   style += "h3 { font-size: 20px; font-weight: bold; margin-bottom: 15px; }";
-
   return style;
+}
+
+String getStyle_buttons(String backgroundColor, String color) {
+    
+   String style = "button { background-color: " + backgroundColor + "; color: " + color + "; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
+   style += "button:hover { background-color: #45a049; }";
+   return style;
 }
 
 String getStyle_footer() {
-  String style = "";
-  
-  //style += "@media (max-width: 600px) { body { font-size: 16px; } .input, .output { font-size: 20px; } #led-matrix-container { max-width: 100%; } button { font-size: 18px; } }";
-  style += "</style>";
-  return style;
+   return "</style>";
 }
 
 // 5. refreshInputs_dataHTML() Function
-String refreshInputs_dataHTML() {
-
+String refreshInputs_dataHTML_retScript() {
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
@@ -116,14 +126,13 @@ String refreshOutputs_dataHTML() {
 
 String refreshAdmin_dataHTML() {
 
-    styleHTML += "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
-    styleHTML += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
-    styleHTML += "h3 { color: #333; margin-top: 20px; }";
+    styleHTML += getStyle_body_backgroundBlack(false);
+    styleHTML += getStyle_headings();
+    styleHTML += getStyle_buttons("#4CAF50", "white");
+
     styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
     styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
-    styleHTML += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
-    styleHTML += "button:hover { background-color: #45a049; }";
-
+   
     bodyDivHTML += "<h1>Admin Panel</h1>";
 
     // Module Information
@@ -167,20 +176,13 @@ String refreshNavigationButtons_dataHTML() {
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
   styleHTML += "#navMenu a {";
-  styleHTML += "  padding: 10px 20px;"; // Increased size by 50%
-  styleHTML += "  font-size: 20px;"; // Increased font size by 50%
-  styleHTML += "  color: white;";
-  styleHTML += "  background-color: blue;";
-  styleHTML += "  border: 2px solid white;";
-  styleHTML += "  border-radius: 8px;"; // Increased border-radius for rounded corners
-  styleHTML += "  cursor: pointer;";
-  styleHTML += "  margin: 15px;"; // Increased margin for better spacing
+  styleHTML += "  background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
   styleHTML += "  transition: background-color 0.3s ease, transform 0.2s ease;";
   styleHTML += "  text-decoration: none;"; // Remove underline
   styleHTML += "}";
   styleHTML += "#navMenu a:hover {";
   styleHTML += "  transform: scale(1.1);"; // Hover effect: Increase size
-  styleHTML += "  background-color: #0056b3;"; // Hover background color
+  styleHTML += "  hover { background-color: #45a049; }";
   styleHTML += "}";
   
   // Add HTML for navigation buttons

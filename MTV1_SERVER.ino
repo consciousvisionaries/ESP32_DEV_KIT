@@ -21,13 +21,15 @@ String generatePage() {
   navButtonHTML = "";
 
   String page = "<html><head>";
+
+  styleHTML += getStyle_body_backgroundBlack(true);
+  styleHTML += getStyle_header(); 
+  styleHTML += getStyle_headings();
   
-  styleHTML += getStyle_header(); // Adds CSS style
-  
-  scriptHTML += scriptHeader_HTML();        // Adds JavaScript header
+  scriptHTML += scriptHeader_HTML();        
 
   if (NUM_INPUTS >= 1) {
-    scriptHTML += refreshInputs_dataHTML(); // Refresh inputs
+    scriptHTML += refreshInputs_dataHTML_retScript(); // Refresh inputs
     scriptHTML += updateInputIndicatorsFunctionality();
   }
   if (NUM_OUTPUTS >= 1) {
@@ -61,6 +63,7 @@ String generateAdminPage() {
     String adminScript = refreshAdmin_dataHTML();
     
     navButtonHTML = refreshNavigationButtons_dataHTML();
+    
     page += styleHTML;
 
     page += "</style></head><body>";
