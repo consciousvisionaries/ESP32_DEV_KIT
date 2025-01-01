@@ -36,10 +36,10 @@ struct GlobalSettings {
   String nrTab = "PRESIDENTS BIG MISTAKE";
   String nrGroup = "Stage 1";
 
-  String inputNames[NUM_INPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel",
-                                    "Input 5", "Input 6", "Input 7", "Input 8" };
-  String outputNames[NUM_OUTPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel",
-                                      "Output 5", "Output 6", "Output 7", "Output 8" };
+  String inputNames[NUM_INPUTS] = { "MC Door Mag", "Override Levers Mag", "Override Ball Mag", "Telephone Relay",
+                                    "Ready Self Destruct", "Power Cables", "Override Dials", "Override Self Destruct" };
+  String outputNames[NUM_OUTPUTS] = { "MC Door Mag", "Override Levers Mag", "Override Ball Mag", "Telephone Relay",
+                                    "Ready Self Destruct", "Power Cables", "Override Dials", "Override Self Destruct" };
 };
 
 GlobalSettings globalSettings;
