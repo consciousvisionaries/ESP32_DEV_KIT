@@ -6,9 +6,13 @@ struct WiFiSettings {
   String ssid = "";
   String password = "";
   String storedVersion = "";
+  String ipaddress = "";
   String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
   String bup_password[2] = { "3X3K22832E", "Gary2019" };
 };
+
+WiFiSettings wifiSettings;
+
 
 struct MQTTSettings {
   String mqttUserName = "pro1polaris";
@@ -16,6 +20,9 @@ struct MQTTSettings {
   String mqttServer = "192.168.0.129";
   String mqttStatus = "";
 };
+
+MQTTSettings mqttSettings;
+
 
 struct GlobalSettings {
   String nrTab = "PRESIDENTS BIG MISTAKE";
@@ -25,14 +32,9 @@ struct GlobalSettings {
                             "Input 5", "Input 6", "Input 7", "Input 8" };
   String outputNames[NUM_OUTPUTS] = { "Override Levers", "Override Dials", "Override Doors", "Override Patch Panel", 
                             "Output 5", "Output 6", "Output 7", "Output 8" };
-  String buttonHTML = "<button onclick=\"navigate('/')\">Home</button>"
-                      "<button onclick=\"navigate('/admin')\">Admin</button>";
-                      
-
+  String buttonHTML = "<button onclick=\"navigate('" + wifiSettings.ipaddress + "/')\">Home</button><button onclick=\"navigate('" + wifiSettings.ipaddress + "/admin')\">Admin</button>";               
 };
 
-WiFiSettings wifiSettings;
-MQTTSettings mqttSettings;
 GlobalSettings globalSettings;
 
 // Function to save WiFi credentials, version, and expanded settings to Preferences
@@ -48,6 +50,7 @@ void saveWiFiCredentials(const String& newSSID, const String& newPassword, const
   preferences.putString("ssid", newSSID);
   preferences.putString("password", newPassword);
   preferences.putString("versiontxt", newtxtVersion);
+  preferences.putString("ipaddress", wifiSettings.ipaddress);
   preferences.end(); // Close namespace
 
   Serial.println("Saved:     ssid " + newSSID);
@@ -144,7 +147,6 @@ void loadGlobalSettings() {
 // Function to load all settings
 void loadAllSettings() {
   
-  loadWiFiCredentials();
   loadMQTTSettings();
   loadGlobalSettings();
   Serial.println("All settings have been loaded.");
