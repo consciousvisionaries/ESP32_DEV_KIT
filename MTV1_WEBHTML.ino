@@ -163,15 +163,16 @@ String refreshAdmin_dataHTML() {
 }
 
 String refreshNavigationButtons_dataHTML() {
+  
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
   styleHTML += "#navMenu a {";
-  styleHTML += "  padding: 15px 15px;"; // Increased size by 50%
-  styleHTML += "  font-size: 18px;"; // Increased font size by 50%
+  styleHTML += "  padding: 10px 20px;"; // Increased size by 50%
+  styleHTML += "  font-size: 20px;"; // Increased font size by 50%
   styleHTML += "  color: white;";
-  styleHTML += "  background-color: #007BFF;";
-  styleHTML += "  border: 2px solid #fff;";
-  styleHTML += "  border-radius: 16px;"; // Increased border-radius for rounded corners
+  styleHTML += "  background-color: blue;";
+  styleHTML += "  border: 2px solid white;";
+  styleHTML += "  border-radius: 8px;"; // Increased border-radius for rounded corners
   styleHTML += "  cursor: pointer;";
   styleHTML += "  margin: 15px;"; // Increased margin for better spacing
   styleHTML += "  transition: background-color 0.3s ease, transform 0.2s ease;";
@@ -181,11 +182,11 @@ String refreshNavigationButtons_dataHTML() {
   styleHTML += "  transform: scale(1.1);"; // Hover effect: Increase size
   styleHTML += "  background-color: #0056b3;"; // Hover background color
   styleHTML += "}";
-
+  
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
   navHTML += globalHyperlinks.adminButtonHTML;
-  navHTML += "<p></p>";
+  navHTML += "<p></p><p></p><p></p>";
   navHTML += globalHyperlinks.homeButtonHTML;
   navHTML += "</div>";
 
