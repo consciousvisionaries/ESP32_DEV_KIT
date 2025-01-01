@@ -41,7 +41,7 @@ void setupDashboard() {
         int outputNumber = outputNumberStr.toInt();
 
         if (outputNumber >= 0 && outputNumber < NUM_OUTPUTS) {
-            bool state = digitalRead(outputPins[outputNumber]) == HIGH;
+            bool state = digitalRead(outputPins[sortOrder[outputNumber]]) == HIGH;
             request->send(200, "text/plain", state ? "high" : "low");
         } else {
             request->send(400, "text/plain", "Invalid output number");
@@ -54,7 +54,7 @@ void setupDashboard() {
         int inputNumber = inputNumberStr.toInt();
 
         if (inputNumber >= 0 && inputNumber < NUM_INPUTS) {
-            int pin = inputPins[inputNumber];
+            int pin = inputPins[sortOrder[inputNumber]];
             String state = getInputStateGPIO(pin);
             request->send(200, "text/plain", state);
         } else {
