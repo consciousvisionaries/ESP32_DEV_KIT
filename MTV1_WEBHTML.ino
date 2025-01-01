@@ -166,8 +166,8 @@ String refreshNavigationButtons_dataHTML() {
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
   styleHTML += "#navMenu a {";
-  styleHTML += "  padding: 15px 30px;"; // Increased size by 50%
-  styleHTML += "  font-size: 27px;"; // Increased font size by 50%
+  styleHTML += "  padding: 15px 15px;"; // Increased size by 50%
+  styleHTML += "  font-size: 18px;"; // Increased font size by 50%
   styleHTML += "  color: white;";
   styleHTML += "  background-color: #007BFF;";
   styleHTML += "  border: 2px solid #fff;";
@@ -185,6 +185,7 @@ String refreshNavigationButtons_dataHTML() {
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
   navHTML += globalHyperlinks.adminButtonHTML;
+  navHTML += "<p></p>";
   navHTML += globalHyperlinks.homeButtonHTML;
   navHTML += "</div>";
 
