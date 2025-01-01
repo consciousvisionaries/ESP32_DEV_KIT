@@ -1,15 +1,51 @@
 #define WEBHTML_VERSION V1.1
 
 String getHTML_headerHTML() {
-  return "<html>";
+  return "<!DOCTYPE html><html lang=\"en\">";
 }
 
 String getHead_headerHTML() {
   return "<head>";
 }
 
+String getHead_metaHTML() {
+   return "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+}
+
 String getStyle_headerHTML() {
   return "<style>";
+}
+
+String getStyle_fullScreenDiv() {
+  String scriptHTML = "";
+  scriptHTML += "function goFullScreen() {";
+  scriptHTML += "var elem = document.getElementById('fullScreenDiv');";
+  scriptHTML += "if (elem.requestFullscreen) {";
+  scriptHTML += "  elem.requestFullscreen();";      
+  scriptHTML += "} else if (elem.mozRequestFullScreen) { // Firefox";
+  scriptHTML += "  elem.mozRequestFullScreen();";
+  scriptHTML += "} else if (elem.webkitRequestFullscreen) { // Chrome, Safari";
+  scriptHTML += "  elem.webkitRequestFullscreen();";
+  scriptHTML += "} else if (elem.msRequestFullscreen) { // IE/Edge";
+  scriptHTML += "elem.msRequestFullscreen();";
+  scriptHTML += "}}";
+
+  scriptHTML += "function exitFullScreen() {";
+  scriptHTML += "      if (document.exitFullscreen) {";
+  scriptHTML += "          document.exitFullscreen();";
+  scriptHTML += "      } else if (document.mozCancelFullScreen) { // Firefox";
+  scriptHTML += "          document.mozCancelFullScreen();";
+  scriptHTML += "      } else if (document.webkitExitFullscreen) { // Chrome, Safari";
+  scriptHTML += "          document.webkitExitFullscreen();";
+  scriptHTML += "      } else if (document.msExitFullscreen) { // IE/Edge";
+  scriptHTML += "          document.msExitFullscreen();";
+  scriptHTML += "      }}";
+  
+  String bodyDivHTML = "<div id=\"fullScreenDiv\">";
+  bodyDivHTML += "<button onclick=\"goFullScreen()\">Go Full Screen</button>";
+  bodyDivHTML += "</div>";
+  
+  return "#fullScreenDiv { width: 300px; height: 200px; background-color: lightblue; margin: 20px; }";
 }
 
 String getStyle_body_backgroundBlack(bool black) {
@@ -44,6 +80,7 @@ String getScript_headerHTML() {
 String getScript_footerHTML () {
   return "</script>";
 }
+
 String getHead_footerHTML() {
   return "</head>";
 }
@@ -56,6 +93,14 @@ String getBody_TitleHTML() {
   return "<h2>" + String(TECH_NAME) + " - " + String(MYSTTECH_MODEL) + "</h2>";
 }
 
+String getBody_ButtonFullscreenHTML() {
+  return "<div id=\"fullScreenDiv\"><button onclick=\"goFullScreen()\">Go Full Screen</button></div>";
+}
+
+String getBody_ButtonExitScreenHTML() {
+  return "<div id=\"fullScreenDiv\"><button onclick=\"exitFullScreen()\">Exit Full Screen</button></div>";
+}
+
 String getBody_footerHTML() {
   return "</body>";
 }
@@ -66,16 +111,17 @@ String getHTML_footerHTML() {
 
 // 5. refreshInputs_dataHTML() Function
 String refreshInputs_dataHTML_retScript() {
+  String styleHTML = "";
   styleHTML += "#inputsSection, #outputsSection { margin: 20px auto; text-align: center; }";
   styleHTML += ".input, .output { font-size: 28px; margin: 10px; padding: 12px; border: 2px solid #fff; border-radius: 12px; transition: background-color 0.3s ease; }";
   styleHTML += ".input:hover, .output:hover { background-color: #333; }";
   styleHTML += "#led-matrix-container { padding: 20px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; transition: border-color 0.3s ease; }";
   styleHTML += "#led-matrix-container:hover { border-color: #4CAF50; }";
 
-  onloadHTML += "refreshInputs_data();";
-  onloadHTML += "updateInputIndicators();";
-  setIntervalHTML += "setInterval(updateInputIndicators, 500);";
+  String onloadHTML = "onloadHTML += \"refreshInputs_data();\";";
+  String setIntervalHTML = "setIntervalHTML += \"setInterval(updateInputIndicators, 500);\";";
 
+  String bodyDivHTML = "";
   bodyDivHTML += "<div id='inputsSection'>";
   bodyDivHTML += "<p>";
   bodyDivHTML += "<h3>" + String(bodyInputTitle) + "</h3>";
@@ -92,11 +138,10 @@ String refreshInputs_dataHTML_retScript() {
 
 // Function to update indicator states (green/red based on input status)
 String updateInputIndicatorsFunctionality() {
-
+  String styleHTML = "";
   styleHTML += ".indicator { display: inline-block; width: 100px; height: 100px; border-radius: 50%; margin: 5px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); transition: background-color 0.3s ease; }";
   styleHTML += ".indicator.green { background-color: green; }";
   styleHTML += ".indicator.red { background-color: red; }";
-  
 
   String script = "function updateInputIndicators() {";
   script += "  const inputs = document.querySelectorAll('[id^=\"inputIndicator\"]');";  // Select all input indicators
@@ -114,7 +159,7 @@ String updateInputIndicatorsFunctionality() {
 
 // 6. refreshOutputs_dataHTML() Function
 String refreshOutputs_dataHTML() {
-
+  String styleHTML = "";
   styleHTML += "#led-matrix { display: flex; flex-direction: column; gap: 8px; align-items: center; }";
   styleHTML += "#buttonsSection { margin-top: 20px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 20px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
@@ -122,39 +167,30 @@ String refreshOutputs_dataHTML() {
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";
 
-  onloadHTML += "refreshOutputs_data();";
+  String onloadHTML = "onloadHTML += \"refreshOutputs_data();\";";
 
-  setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
+  String setIntervalHTML = "setIntervalHTML += \"setInterval(refreshOutputs_data, 250);\";";
 
+  String bodyDivHTML = "";
   bodyDivHTML += "<div id='outputsSection'>";
-  bodyDivHTML += "<p>";
-
-  bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
-  bodyDivHTML += "<div id='outputs'>Waiting for outputs...</div>";
+  bodyDivHTML += "<h3>Outputs: <span id='outputs'></span></h3>";
+  bodyDivHTML += "<div id='led-matrix'>";
+  bodyDivHTML += "<span id='ledOutput1' class='output red'>LED 1</span>";
+  bodyDivHTML += "<span id='ledOutput2' class='output green'>LED 2</span>";
+  bodyDivHTML += "<span id='ledOutput3' class='output red'>LED 3</span>";
+  bodyDivHTML += "</div>";
   bodyDivHTML += "</div>";
 
-  bodyDivHTML += generateOutputButtonsHTML(); // Add buttons section
-
   String script = "function refreshOutputs_data() {";
-  script += "fetch('/refreshOutputs_dataHTML') ";
-  script += ".then(response => response.text()) ";
-  script += ".then(data => { document.getElementById('outputs').innerHTML = data; })";
-  script += ".then(() => { updateButtonColor(outputNumber); });";
+  script += "  fetch('/getOutputs') ";
+  script += "    .then(response => response.json()) ";
+  script += "    .then(data => {";
+  script += "      for (let i = 0; i < data.length; i++) {";
+  script += "        const led = document.getElementById('ledOutput' + (i + 1));";
+  script += "        led.className = data[i] === 'on' ? 'output green' : 'output red';";
+  script += "      }";
+  script += "    });";
   script += "}";
-
-  script += "function toggleOutput(outputNumber) {";
-  script += "fetch('/toggleOutputState?output=' + outputNumber) ";
-  script += ".then(() => { updateButtonColor(outputNumber); })";
-  script += ".catch(error => console.error('Error toggling output:', error));";
-  script += "}";
-
-  script += "function updateButtonColor(outputNumber) {";
-  script += "const button = document.getElementById('outputButton' + outputNumber);";
-  script += "fetch('/getOutputState?output=' + outputNumber)";
-  script += ".then(response => response.text())";
-  script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
-  script += "}";
-
   return script;
 }
 
@@ -205,7 +241,6 @@ String refreshConfig_dataHTML() {
     styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
    
     bodyDivHTML += "<h1>GPIO Configuration Panel</h1>";
-   
    
   return "";
 }
