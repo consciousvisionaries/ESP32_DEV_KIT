@@ -9,7 +9,7 @@ String onloadHTML;
 String setIntervalHTML;
 String bodyDivHTML;
 String scriptHTML;
-String navButton;
+String navButtonHTML;
 
 String generatePage() {
 
@@ -18,7 +18,7 @@ String generatePage() {
   setIntervalHTML = "";
   bodyDivHTML = "";
   scriptHTML = "";
-  navButton = "";
+  navButtonHTML = "";
 
   String page = "<html><head>";
   
@@ -48,6 +48,27 @@ String generatePage() {
   page += "</body></html>";           // Closing HTML tags
     Serial.println(page);
   return page;
+}
+
+String generateAdminPage() {
+
+    styleHTML = "";
+    bodyDivHTML = "";
+    navButtonHTML = "";
+
+    String page = "<html><head><title>Admin Panel</title><style>";
+
+    String adminScript = refreshAdmin_dataHTML();
+    
+    navButtonHTML = refreshNavigationButtons_dataHTML();
+    page += styleHTML;
+
+    page += "</style></head><body>";
+    page += bodyDivHTML;
+    page += navButtonHTML;
+
+    page += "</body></html>";
+    return page;
 }
 
 String generateInputIndicatorsHTML() {
@@ -188,61 +209,8 @@ server.on("/getInputState", HTTP_GET, [](AsyncWebServerRequest *request) {
 });
 
 server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-    // Create HTML content for the /admin page
-    String adminPage = "<html><head><title>Admin Panel</title><style>";
-
-    
-    styleHTML = "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
-    styleHTML += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
-    styleHTML += "h3 { color: #333; margin-top: 20px; }";
-    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
-    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
-    styleHTML += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
-    styleHTML += "button:hover { background-color: #45a049; }";
-
-    navButton = refreshNavigationButtons_dataHTML();
-    adminPage += styleHTML;
-
-    adminPage += "</style></head><body>";
-
-    adminPage += "<h1>Admin Panel</h1>";
-
-    // Module Information
-    adminPage += "<h3>Module Information</h3>";
-    adminPage += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
-    adminPage += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
-    adminPage += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
-    adminPage += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
-    adminPage += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
-
-    // Global Settings Form
-    adminPage += "<h3>Global Settings</h3>";
-    adminPage += "<form action='/saveGlobalSettings' method='POST'>";
-    adminPage += "<label for='nrTab'>Tab:</label>";
-    adminPage += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
-    adminPage += "<label for='nrGroup'>Group:</label>";
-    adminPage += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
-    adminPage += "<label for='storedVersion'>Version:</label>";
-    adminPage += "<input type='text' id='storedVersion' name='storedVersion' value='" + String(wifiSettings.storedVersion) + "'><br><br>";
-    adminPage += "<label for='mqttServer'>MQTT Server:</label>";
-    adminPage += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
-    adminPage += "<button type='submit'>Save Global Settings</button>";
-    adminPage += "</form>";
-
-    // WiFi Settings
-    adminPage += "<h3>WiFi Settings</h3>";
-    adminPage += "<form action='/saveConfig' method='POST'>";
-    adminPage += "<label for='ssid'>SSID:</label>";
-    adminPage += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
-    adminPage += "<label for='password'>Password:</label>";
-    adminPage += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
-    adminPage += "<button type='submit'>Save Changes</button>";
-    adminPage += "</form>";
-
-    adminPage += navButton;
-
-    adminPage += "</body></html>";
-    request->send(200, "text/html", adminPage);
+    String inputData = generateAdminPage();
+    request->send(200, "text/html", inputData);
 });
 
 

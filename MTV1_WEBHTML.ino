@@ -114,6 +114,54 @@ String refreshOutputs_dataHTML() {
   return script;
 }
 
+String refreshAdmin_dataHTML() {
+
+    styleHTML += "body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; text-align: center; }";
+    styleHTML += "h1 { background-color: #4CAF50; color: white; padding: 20px; }";
+    styleHTML += "h3 { color: #333; margin-top: 20px; }";
+    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+    styleHTML += "button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }";
+    styleHTML += "button:hover { background-color: #45a049; }";
+
+    bodyDivHTML += "<h1>Admin Panel</h1>";
+
+    // Module Information
+    bodyDivHTML += "<h3>Module Information</h3>";
+    bodyDivHTML += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
+    bodyDivHTML += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
+    bodyDivHTML += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
+
+    // Global Settings Form
+    bodyDivHTML += "<h3>Global Settings</h3>";
+    bodyDivHTML += "<form action='/saveGlobalSettings' method='POST'>";
+    bodyDivHTML += "<label for='nrTab'>Tab:</label>";
+    bodyDivHTML += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
+    bodyDivHTML += "<label for='nrGroup'>Group:</label>";
+    bodyDivHTML += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
+    bodyDivHTML += "<label for='storedVersion'>Version:</label>";
+    bodyDivHTML += "<input type='text' id='storedVersion' name='storedVersion' value='" + String(wifiSettings.storedVersion) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttServer'>MQTT Server:</label>";
+    bodyDivHTML += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
+    bodyDivHTML += "<button type='submit'>Save Global Settings</button>";
+    bodyDivHTML += "</form>";
+
+    // WiFi Settings
+    bodyDivHTML += "<h3>WiFi Settings</h3>";
+    bodyDivHTML += "<form action='/saveConfig' method='POST'>";
+    bodyDivHTML += "<label for='ssid'>SSID:</label>";
+    bodyDivHTML += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
+    bodyDivHTML += "<label for='password'>Password:</label>";
+    bodyDivHTML += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
+    bodyDivHTML += "<button type='submit'>Save Changes</button>";
+    bodyDivHTML += "</form>";
+    
+    String script = "";
+    return script;
+}
+
 String refreshNavigationButtons_dataHTML() {
   // Add navigation styles to styleHTML
   styleHTML += "#navMenu { margin-top: 20px; text-align: center; }";
