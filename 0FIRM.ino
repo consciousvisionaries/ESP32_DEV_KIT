@@ -5,7 +5,7 @@
 #include <PubSubClient.h>
 #include <esp_task_wdt.h>
 
-#define FIRMWARE_VERSION V1.1
+#define FIRMWARE_VERSION "V1.1"
 
 WiFiClient espClient;
 PubSubClient client(espClient);

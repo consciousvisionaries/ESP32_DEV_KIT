@@ -65,35 +65,40 @@ String generateHTMLPage(String script) {
   scriptHTML = "";
   navButtonHTML = "";
 
-    String page = getHTML_headerHTML();
-    page += getHead_headerHTML();
-    page += getStyle_headerHTML();
-    
-    String newScriptHTML;
-    if (script == "ADMIN") {
-      newScriptHTML = refreshAdmin_dataHTML();
-    } else {
-      newScriptHTML = refreshConfig_dataHTML();
-    }
-    navButtonHTML = refreshNavigationButtons_dataHTML();
-    
-    page += styleHTML;
-    page += getStyle_footerHTML();
-    page += getScript_headerHTML();
-    page += scriptHTML;
-    page += newScriptHTML;
-    page += onloadHTML;
-    page += setIntervalHTML;
-    page += getScript_footerHTML();
-    page += getHead_footerHTML();
-    page += getBody_headerHTML();
-    page += bodyDivHTML;
-    page += navButtonHTML;
+  String page = getHTML_headerHTML();
+  page += getHead_headerHTML();
+  page += getStyle_headerHTML();
 
-    page += getBody_footerHTML();
-    page += getHTML_footerHTML();
-    return page;
+  String newScriptHTML;
+  if (script == "ADMIN") {
+    newScriptHTML = refreshAdmin_dataHTML();
+  } else if (script == "CONFIG") {  // Fixed this line
+    newScriptHTML = refreshConfig_dataHTML();
+  } else if (script == "NODERED") {  // Fixed this line
+    newScriptHTML = refreshNodeRed_dataHTML();
+  } else if (script == "WIFI") {  // Fixed this line
+    newScriptHTML = refreshWiFi_dataHTML();
+  }
+  navButtonHTML = refreshNavigationButtons_dataHTML();
+
+  page += styleHTML;
+  page += getStyle_footerHTML();
+  page += getScript_headerHTML();
+  page += scriptHTML;
+  page += newScriptHTML;
+  page += onloadHTML;
+  page += setIntervalHTML;
+  page += getScript_footerHTML();
+  page += getHead_footerHTML();
+  page += getBody_headerHTML();
+  page += bodyDivHTML;
+  page += navButtonHTML;
+
+  page += getBody_footerHTML();
+  page += getHTML_footerHTML();
+  return page;
 }
+
 
 String generateInputIndicatorsHTML() {
   String indicatorsHTML = "<div id='inputs'>";

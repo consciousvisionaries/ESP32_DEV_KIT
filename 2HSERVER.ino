@@ -1,4 +1,3 @@
-
 #define WEBSERVER_VERSION V1.1
 #include <ESPAsyncWebServer.h>
 
@@ -115,9 +114,10 @@ void setupDashboard() {
         }
     });
 
-    // Admin page route
+    // Edit config route
     server.on("/editConfig", HTTP_POST, [](AsyncWebServerRequest *request) {
-        String inputData = generateHTMLPage("CONFIG");
+        String action = request->getParam("action", true)->value();
+        String inputData = generateHTMLPage(action);
         request->send(200, "text/html", inputData);
     });
 

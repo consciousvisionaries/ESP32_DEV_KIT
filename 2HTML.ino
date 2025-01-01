@@ -180,38 +180,15 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
     bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
-    bodyDivHTML += "<button type='submit'>Edit GPIO Config</button>";
-    bodyDivHTML += "</form>";
-    
-    // MQTT Settings Form
-    bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
+    bodyDivHTML += "<button type='submit' name='action' value='CONFIG'>Edit GPIO Config</button>";
     bodyDivHTML += "<h3>Node-Red Configurations</h3>";
     bodyDivHTML += "<p><strong>MQTT Server:</strong> " + mqttSettings.mqttServer + "</p>";
     bodyDivHTML += "<p><strong>MQTT Username:</strong> " + mqttSettings.mqttUsername + "</p>";
-
-    bodyDivHTML += "<label for='nrTab'>UI Dashboard Tab:</label>";
-    bodyDivHTML += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
-    bodyDivHTML += "<label for='nrGroup'>UI Dashboard Group:</label>";
-    bodyDivHTML += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
-    bodyDivHTML += "<label for='mqttServer'>MQTT Server:</label>";
-    bodyDivHTML += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
-    bodyDivHTML += "<label for='mqttUsername'>MQTT Username:</label>";
-    bodyDivHTML += "<input type='text' id='mqttUsername' name='mqttUsername' value='" + String(mqttSettings.mqttUsername) + "'><br><br>";
-    bodyDivHTML += "<label for='mqttPassword'>MQTT Password:</label>";
-    bodyDivHTML += "<input type='text' id='mqttPassword' name='mqttPassword' value='" + String(mqttSettings.mqttPassword) + "'><br><br>";
-    bodyDivHTML += "<button type='submit'>Save Global Settings</button>";
-    bodyDivHTML += "</form>";
-
-    // WiFi Settings
-    bodyDivHTML += "<form action='/saveWiFi' method='POST'>";
-    bodyDivHTML += "<h3>WiFi Settings</h3>";
+    bodyDivHTML += "<button type='submit' name='action' value='NODERED'>Edit Node-Red Config</button>";
+    bodyDivHTML += "<h3>Network Settings</h3>";
     bodyDivHTML += "<p><strong>WiFi SSID:</strong> " + wifiSettings.ssid + "</p>";
     bodyDivHTML += "<p><strong>WiFi Password:</strong> " + wifiSettings.password + "</p>";
-    bodyDivHTML += "<label for='ssid'>SSID:</label>";
-    bodyDivHTML += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
-    bodyDivHTML += "<label for='password'>Password:</label>";
-    bodyDivHTML += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
-    bodyDivHTML += "<button type='submit'>Save Changes</button>";
+    bodyDivHTML += "<button type='submit' name='action' value='WiFi'>Edit WiFi Config</button>";
     bodyDivHTML += "</form>";
     
     String script = "";
@@ -228,24 +205,60 @@ String refreshConfig_dataHTML() {
     styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
    
     bodyDivHTML += "<h1>GPIO Configuration Panel</h1>";
-    // Module Information
-    bodyDivHTML += "<form action='/editConfig' method='POST'>";
-    bodyDivHTML += "<h3>Module Information</h3>";
-    bodyDivHTML += "<p><strong>Module:</strong> " + String(MODULE) + "</p>";
-    bodyDivHTML += "<p><strong>Puzzle Name:</strong> " + String(PUZZLE_NAME) + "</p>";
-    bodyDivHTML += "<p><strong>Designer:</strong> " + String(DESIGNER_NAME) + "</p>";
-    bodyDivHTML += "<p><strong>Technician:</strong> " + String(TECH_NAME) + "</p>";
-    bodyDivHTML += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
-    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
-    bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
-    bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
-    bodyDivHTML += "<button type='submit'>Edit GPIO Config</button>";
+   
+   
+  return "";
+}
+
+String refreshNodeRed_dataHTML() {
+
+    styleHTML += getStyle_body_backgroundBlack(false);
+    styleHTML += getStyle_headings();
+    styleHTML += getStyle_buttons("#4CAF50", "white");
+
+    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+
+    bodyDivHTML += "<h1>Node-Red Configuration Panel</h1>";
+    bodyDivHTML += "<form action='/saveRedNode' method='POST'>";
+    bodyDivHTML += "<h3>MQTT Network Details</h3>";
+    bodyDivHTML += "<label for='nrTab'>UI Dashboard Tab:</label>";
+    bodyDivHTML += "<input type='text' id='nrTab' name='nrTab' value='" + String(globalSettings.nrTab) + "'><br><br>";
+    bodyDivHTML += "<label for='nrGroup'>UI Dashboard Group:</label>";
+    bodyDivHTML += "<input type='text' id='nrGroup' name='nrGroup' value='" + String(globalSettings.nrGroup) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttServer'>MQTT Server:</label>";
+    bodyDivHTML += "<input type='text' id='mqttServer' name='mqttServer' value='" + String(mqttSettings.mqttServer) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttUsername'>MQTT Username:</label>";
+    bodyDivHTML += "<input type='text' id='mqttUsername' name='mqttUsername' value='" + String(mqttSettings.mqttUsername) + "'><br><br>";
+    bodyDivHTML += "<label for='mqttPassword'>MQTT Password:</label>";
+    bodyDivHTML += "<input type='text' id='mqttPassword' name='mqttPassword' value='" + String(mqttSettings.mqttPassword) + "'><br><br>";
+    bodyDivHTML += "<button type='submit'>Save Red Node Changes</button>";
+    bodyDivHTML += "</form>";
+    return "";
+}
+
+String refreshWiFi_dataHTML() {
+
+    styleHTML += getStyle_body_backgroundBlack(false);
+    styleHTML += getStyle_headings();
+    styleHTML += getStyle_buttons("#4CAF50", "white");
+
+    styleHTML += "form { display: inline-block; text-align: left; background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }";
+    styleHTML += "input[type='text'] { width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }";
+    
+    bodyDivHTML += "<h1>WiFi Configuration Panel</h1>";
+    bodyDivHTML += "<form action='/saveWiFi' method='POST'>";
+    bodyDivHTML += "<h3>Network Settings</h3>";
+    bodyDivHTML += "<p><strong>WiFi SSID:</strong> " + wifiSettings.ssid + "</p>";
+    bodyDivHTML += "<p><strong>WiFi Password:</strong> " + wifiSettings.password + "</p>";
+    bodyDivHTML += "<label for='ssid'>SSID:</label>";
+    bodyDivHTML += "<input type='text' id='ssid' name='ssid' value='" + wifiSettings.ssid + "'><br><br>";
+    bodyDivHTML += "<label for='password'>Password:</label>";
+    bodyDivHTML += "<input type='text' id='password' name='password' value='" + wifiSettings.password + "'><br><br>";
+    bodyDivHTML += "<button type='submit'>Save WiFi Changes</button>";
     bodyDivHTML += "</form>";
     
-  
-
-
-  return "";
+    return "";
 }
 
 String refreshNavigationButtons_dataHTML() {
