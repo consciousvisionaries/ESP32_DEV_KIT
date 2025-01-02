@@ -82,7 +82,7 @@ String generateOutputsPayload() {
 
   String outputStatus = "[";
   for (int i = 0; i < NUM_OUTPUTS; i++) {
-    outputStatus += (digitalRead(outputPins[i]) == HIGH) ? "'red'" : "'green'";
+    outputStatus += (digitalRead(outputPins[i]) == !outputPins_initState[i]) ? "'red'" : "'green'";
     if (i < NUM_OUTPUTS - 1) outputStatus += ", ";  // Formatting between items
   }
   outputStatus += "]";

@@ -133,7 +133,17 @@ void connectWiFi() {
   }
 }
 
-void loopFIRMWARE() {}
+unsigned long lastUpdateCheck = 0; // Global variable to track the last update check time
+const unsigned long updateInterval = 3600000; // 1 hour in milliseconds
+
+void loopFIRMWARE() {
+  // Check if it's time to perform a firmware update check
+  if (millis() - lastUpdateCheck >= updateInterval) {
+    Serial.println("Checking for firmware updates...");
+    checkForUpdates();
+    lastUpdateCheck = millis(); // Reset the timer
+  }
+}
 
 void checkForUpdates() {
   HTTPClient http;
