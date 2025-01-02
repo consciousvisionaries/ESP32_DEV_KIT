@@ -105,9 +105,9 @@ String generateOutputButtonsHTML() {
     buttonsHTML += "<div class='buttonRow'>"; // Start a new row
 
     for (int col = 0; col < numColumns; col++) {
-      int outputIndex = sortOrder[row * numColumns + col];  // Calculate the index of the button
+      int outputIndex = row * numColumns + col;  // Calculate the index of the button
       if (outputIndex < NUM_OUTPUTS) { // Ensure we do not exceed the number of outputs
-        String initialColor = (digitalRead(outputPins[sortOrder[outputIndex]]) == LOW) ? "green" : "red";
+        String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
         
     buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
                        "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";

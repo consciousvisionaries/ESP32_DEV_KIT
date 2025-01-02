@@ -56,8 +56,8 @@ const char* GITHUB_BRANCH = "MYST8_GPIO_Master";
 #define PIN_O4 26
 #define PIN_O5 25
 #define PIN_O6 33
-#define PIN_O7 32
-#define PIN_O8 2
+#define PIN_O7 2
+#define PIN_O8 32
 
 // pins inputs
 #define PIN_B1 4

@@ -36,15 +36,9 @@ struct GlobalSettings {
   String nrTab = "PRESIDENTS BIG MISTAKE";
   String nrGroup = "Stage 1";
 
-  String inputNames[NUM_INPUTS] = { "MC Door Mag", "Override Levers Mag", "Override Ball Mag", "Telephone Relay",
-                                    "Ready Self Destruct", "Power Cables", "Override Dials", "Override Self Destruct" };
-  String outputNames[NUM_OUTPUTS] = { "MC Door Mag", "Override Levers Mag", "Override Ball Mag", "Telephone Relay",
-                                    "Ready Self Destruct", "Power Cables", "Override Dials", "Override Self Destruct" };
-};
-
-const int outputPins[NUM_OUTPUTS] = {PIN_O1, PIN_O2, PIN_O3, PIN_O4, PIN_O5, PIN_O6, PIN_O7, PIN_O8};
-const int inputPins[NUM_INPUTS] = {PIN_B1, PIN_B2, PIN_B3, PIN_B4, PIN_B5, PIN_B6, PIN_B7, PIN_B8};
-const int sortOrder[NUM_OUTPUTS] = {2,7,1,6,3,4,5,8};
+  String inputNames[NUM_INPUTS] = { "LEVERS", "DIALS", "OPEN DOOR", "PATCH PANEL", "BALL & MAG", "TELEPHONE", "READY SELF DISTRUCT", "DISTRUCT MISSLE" };
+  String outputNames[NUM_OUTPUTS] = { "LEVERS", "DIALS", "OPEN DOOR", "PATCH PANEL", "BALL & MAG", "TELEPHONE", "READY SELF DISTRUCT", "DISTRUCT MISSLE" };
+};                                  
 
 GlobalSettings globalSettings;
 
