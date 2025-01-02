@@ -105,8 +105,7 @@ String generateOutputButtonsHTML() {
     buttonsHTML += "<div class='buttonRow'>"; // Start a new row
 
     for (int col = 0; col < numColumns; col++) {
-      int outputIndexGPIO = row * numColumns + col;  // Calculate the index of the button
-      int outputIndex = sortOrder[outputIndexGPIO];
+      int outputIndex = row * numColumns + col;  // Calculate the index of the button
       if (outputIndex < NUM_OUTPUTS) { // Ensure we do not exceed the number of outputs
         String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
         
