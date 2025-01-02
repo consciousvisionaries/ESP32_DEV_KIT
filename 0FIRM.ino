@@ -27,7 +27,7 @@ WiFiSettings wifiSettings;
 struct MQTTSettings {
   String mqttUsername = "pro1polaris";
   String mqttPassword = "CVr819P*!";
-  String mqttServer = "192.168.0.129";
+  String mqttServer = "192.168.0.128";
 };
 
 MQTTSettings mqttSettings;

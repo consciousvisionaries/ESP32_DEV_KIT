@@ -184,7 +184,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     const char* activity = doc["activity"];
     Serial.print("Activity: ");
     Serial.println(activity);
-    if (activity == "getFirmwareUpdate") {
+    if (String(activity) == "getFirmwareUpdate") {
+      Serial.println("Command Accepted!");
       sendFirmwareUpdateMQTTPayload("Firmware Status Request Confirmed from: " + String(PUZZLE_NAME));
     }
     
