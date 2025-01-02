@@ -38,7 +38,7 @@ const char* GITHUB_BRANCH = "MYST8_GPIO_Master";
 
 #define MQTT_TOPIC "/myst/er/bb/president"      // Topic for publish/subscribe
 #define MQTT_BROKER "broker.emqx.io"  // EMQX Public Broker
-#define MQTT_CLIENT_ID "MystTech01" // Replace with a unique client ID
+String MQTT_CLIENT_ID = "MystTech01"; // Replace with a unique client ID
 
 // If you plan to use TLS (secure connection)
 

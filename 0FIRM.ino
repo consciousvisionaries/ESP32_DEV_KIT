@@ -117,6 +117,7 @@ void connectWiFi() {
       Serial.print("IP Address: ");
       Serial.println(WiFi.localIP());
       wifiSettings.ipaddress = WiFi.localIP().toString();
+      MQTT_CLIENT_ID = WiFi.macAddress();
       connected = true;
       break;
     } else {

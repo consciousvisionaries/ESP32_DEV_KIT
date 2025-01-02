@@ -14,7 +14,7 @@ void connectMQTT() {
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID, mqttSettings.mqttUsername.c_str(), mqttSettings.mqttPassword.c_str())) {
+    if (client.connect(MQTT_CLIENT_ID.c_str(), mqttSettings.mqttUsername.c_str(), mqttSettings.mqttPassword.c_str())) {
       Serial.println("Connected to SERVER");
       client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
@@ -45,7 +45,7 @@ void connectBrokerMQTT() {
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID)) {
+    if (client.connect(MQTT_CLIENT_ID.c_str())) {
       Serial.println("Connected to BROKER");
       client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
     } else {
@@ -95,6 +95,37 @@ void publishDataMQTTPayload_Doc(String jsonPayload) {
     }
 }
 
+void sendFirmwareUpdateMQTTPayload(String message) {
+  DynamicJsonDocument doc(512);
+    doc["mac"] = WiFi.macAddress();
+    doc["puzzleName"] = PUZZLE_NAME;
+    doc["designer"] = DESIGNER_NAME;
+    doc["tech"] = TECH_NAME;
+    doc["ip"] = WiFi.localIP().toString();
+    doc["timestamp"] = millis();
+    doc["tab"] = globalSettings.nrTab;
+    doc["group"] = globalSettings.nrGroup;
+
+    DynamicJsonDocument doc1(512);
+    doc1["mac"] = WiFi.macAddress();
+    doc1["puzzleName"] = PUZZLE_NAME;
+    doc1["type"] = NR_TYPE;
+    doc1["version"] = wifiSettings.storedVersion;
+    doc1["message"] = message;
+    
+
+    String jsonPayload;
+    serializeJson(doc, jsonPayload);
+    jsonPublished = jsonPayload;
+    publishDataMQTTPayload_Doc(jsonPayload);
+    delay(50);
+    
+    jsonPayload = "";
+    serializeJson(doc1, jsonPayload);
+    jsonPublished = jsonPayload;
+    publishDataMQTTPayload_Doc(jsonPayload);
+    delay(50);
+}
 
 
 void sendConfigMQTTPayload() {
@@ -153,7 +184,9 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     const char* activity = doc["activity"];
     Serial.print("Activity: ");
     Serial.println(activity);
-
+    if (activity == "getFirmwareUpdate") {
+      sendFirmwareUpdateMQTTPayload("Firmware Status Request Confirmed from: " + String(PUZZLE_NAME));
+    }
     
     
   } else {
