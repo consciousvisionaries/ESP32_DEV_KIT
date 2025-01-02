@@ -4,7 +4,7 @@
 
 const int outputPins[NUM_OUTPUTS] = {PIN_O2, PIN_O7, PIN_O1, PIN_O6, PIN_O3, PIN_O4, PIN_O5, PIN_O8};
 const int inputPins[8] = {PIN_B2, PIN_B7, PIN_B1, PIN_B6, PIN_B3, PIN_B4, PIN_B5, PIN_B8};
-const int outputPins_initState[NUM_OUTPUTS] = {0,0,0,0,1,0,0,0};
+const int outputPins_initState[NUM_OUTPUTS] = {0,0,0,0,0,1,0,0};
 
 String getInputStateGPIO(int inputPin) {
   int state = digitalRead(inputPin);
