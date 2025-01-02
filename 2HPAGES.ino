@@ -101,6 +101,7 @@ String generateOutputButtonsHTML() {
 
   // Ensure even distribution of buttons across rows
   for (int row = 0; row < NUM_OUTPUT_ROWS; row++) {
+    
     buttonsHTML += "<div class='buttonRow'>"; // Start a new row
 
     for (int col = 0; col < numColumns; col++) {
@@ -108,10 +109,12 @@ String generateOutputButtonsHTML() {
       int outputIndex = sortOrder[outputIndexGPIO];
       if (outputIndex < NUM_OUTPUTS) { // Ensure we do not exceed the number of outputs
         String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
-        buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
+        
+    buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
                        "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
       }
     }
+    
     buttonsHTML += "</div><br>"; // End the row and add line break for clarity
   }
 

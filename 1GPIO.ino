@@ -35,16 +35,14 @@ void toggleOutputStateGPIO(int outputNumber) {
 void setupGPIO() {
 
   for (int i = 0; i < NUM_OUTPUTS; i++) {
-    int s = sortOrder[i];
-    pinMode(outputPins[s], OUTPUT);  // Ensure the pin is set to OUTPUT
+    pinMode(outputPins[i], OUTPUT);  // Ensure the pin is set to OUTPUT
     digitalWrite(outputPins[i], HIGH);
   }
   
   Serial.println("Outputs Initialized.");
 
   for (int i = 0; i < NUM_INPUTS; i++) {
-    int s = sortOrder[i];
-    pinMode(inputPins[s], INPUT_PULLUP);  // Ensure the pin is set to OUTPUT
+    pinMode(inputPins[i], INPUT_PULLUP);  // Ensure the pin is set to OUTPUT
   }
   
   Serial.println("Inputs Initialized.");
