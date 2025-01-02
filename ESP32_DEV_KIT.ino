@@ -12,7 +12,7 @@
 
 // digitalGPIO
 
-#define NUM_INPUTS 8
+#define NUM_INPUTS 0
 
 String bodyInputTitle = "Monitoring: FLEXXMAX2 Master";
 String bodyOutputTitle = "OVERRIDE";
@@ -23,7 +23,7 @@ String buttonsHTMLTitle = "Game Master INPUT Control";
 #define NUM_OUTPUT_ROWS 2
 
 // fastled
-#define NUM_LEDS 10 
+#define NUM_LEDS 0 
 #define NUM_CHANNELS 0
 
 // access point

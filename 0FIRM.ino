@@ -36,7 +36,7 @@ struct GlobalSettings {
   String nrTab = "PRESIDENTS BIG MISTAKE";
   String nrGroup = "Stage 1";
 
-  String inputNames[NUM_INPUTS] = { "LEVERS", "DIALS", "OPEN DOOR", "PATCH PANEL", "BALL & MAG", "TELEPHONE", "READY SELF DISTRUCT", "DISTRUCT MISSLE" };
+  String inputNames[8] = { "LEVERS", "DIALS", "OPEN DOOR", "PATCH PANEL", "MAG BALL (SOUND)", "TELEPHONE", "READY SELF DISTRUCT", "DISTRUCT MISSLE" };
   String outputNames[NUM_OUTPUTS] = { "LEVERS", "DIALS", "OPEN DOOR", "PATCH PANEL", "BALL & MAG", "TELEPHONE", "READY SELF DISTRUCT", "DISTRUCT MISSLE" };
 };                                  
 

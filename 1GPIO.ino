@@ -3,9 +3,8 @@
 #define DEBOUNCE_DELAY 500  // Debounce delay in milliseconds
 
 const int outputPins[NUM_OUTPUTS] = {PIN_O2, PIN_O7, PIN_O1, PIN_O6, PIN_O3, PIN_O4, PIN_O5, PIN_O8};
-const int inputPins[NUM_INPUTS] = {PIN_B2, PIN_B7, PIN_B1, PIN_B6, PIN_B3, PIN_B4, PIN_B5, PIN_B8};
-
-
+const int inputPins[8] = {PIN_B2, PIN_B7, PIN_B1, PIN_B6, PIN_B3, PIN_B4, PIN_B5, PIN_B8};
+const int outputPins_initState[NUM_OUTPUTS] = {0,0,0,0,1,0,0,0};
 
 String getInputStateGPIO(int inputPin) {
   int state = digitalRead(inputPin);
@@ -36,7 +35,12 @@ void setupGPIO() {
 
   for (int i = 0; i < NUM_OUTPUTS; i++) {
     pinMode(outputPins[i], OUTPUT);  // Ensure the pin is set to OUTPUT
-    digitalWrite(outputPins[i], HIGH);
+    //custom
+    if (outputPins_initState[i] == LOW) {
+        digitalWrite(outputPins[i], HIGH);
+    } else {
+        digitalWrite(outputPins[i], LOW);
+    }
   }
   
   Serial.println("Outputs Initialized.");
