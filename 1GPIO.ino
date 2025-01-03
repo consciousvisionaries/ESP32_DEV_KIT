@@ -19,11 +19,10 @@ void toggleOutputStateGPIO(int outputNumber) {
     bool newState = (currentState == HIGH) ? LOW : HIGH;  // Toggle state
     digitalWrite(pin, newState);  // Set the new state
 
-    // Confirm the state change
-    Serial.print("Output ");
-    Serial.print(outputNumber);
-    Serial.print(": Toggled to ");
-    Serial.println(newState ? "HIGH" : "LOW");
+    String message = "Output " + String(outputNumber) + ": Toggled to " + (newState ? "HIGH" : "LOW"); 
+    
+    Serial.println(message);
+    sendFirmwareUpdateMQTTPayload(message);
 
   } else {
     Serial.println("Error: Invalid output number.");
