@@ -10,6 +10,7 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+
 String jsonPublished;
 bool allServicesActive = false;
 
@@ -28,6 +29,15 @@ struct MQTTSettings {
   String mqttUsername = "pro1polaris";
   String mqttPassword = "CVr819P*!";
   String mqttServer = "192.168.0.129";
+  String mqttOneUser = "9grsvy8373";
+  String mqttOnePassword = "8bdehprsuz";
+  String mqttOneServer = "b37.mqtt.one";
+  String mqttOneTopic = "/lost";
+  String mqttBrokerServer = "broker.emqx.io";
+  String bup_mqttServer[3] = {"b37.mqtt.one", "192.168.0.129", "broker.emqx.io"};
+  String bup_mqttUser[3] = {"9grsvy8373","pro1polaris",""};
+  String bup_mqttPassword[3] = {"8bdehprsuz","CVr819P*!",""};
+  
 };
 
 MQTTSettings mqttSettings;
@@ -53,8 +63,7 @@ void setup() {
   setupDashboard();
   setupGPIO();
   setupFASTLED();
-
-  prepareLEDMQTTData(1, 1, 1);
+  setupESPTask();
 
   Serial.println("READY.");
 }
@@ -76,9 +85,21 @@ void setupESPTask() {
   esp_task_wdt_add(NULL);
 }
 
-void loopESPTask() {
-  esp_task_wdt_reset();
+void pauseESPTaskWDT() {
+    esp_task_wdt_delete(NULL);  // Remove the current task from WDT monitoring
 }
+
+void resumeESPTaskWDT() {
+    esp_task_wdt_add(NULL);     // Re-add the current task to WDT monitoring
+}
+
+void delayESPTask(int d) {
+  pauseESPTaskWDT();
+  delay(d);
+  resumeESPTaskWDT();
+}
+
+
 
 void setupFirmware() {
   Serial.begin(115200);
@@ -90,6 +111,7 @@ void setupFirmware() {
   
   delay(3000);
   checkForUpdates();
+  updateFASTLED();
 }
 
 void connectWiFi() {

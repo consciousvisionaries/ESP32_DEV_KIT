@@ -3,7 +3,20 @@
 #define MQTT_VERSION V1.2
 
 void connectMQTT() {
-  client.setServer(mqttSettings.mqttServer.c_str(), MQTT_PORT);
+  client.setServer(mqttSettings.mqttOneServer.c_str(), MQTT_PORT);
+  const char* mac = WiFi.macAddress().c_str();
+
+  if (client.connect(mac, mqttSettings.mqttOneUser.c_str(), mqttSettings.mqttOnePassword.c_str())) {
+    // Successfully connected to the MQTT broker
+    Serial.println("Connected to MQTT ONE broker");
+  } else {
+    // Failed to connect
+    Serial.print("Failed to connect, rc=");
+    Serial.print(client.state());
+    Serial.println(" try again in 5 seconds");
+    delay(5000);
+  }
+
   client.setCallback(mqttCallback);  // Set MQTT callback function
   Serial.println("MQTT Callback should be set");
 
@@ -11,21 +24,18 @@ void connectMQTT() {
   const unsigned long retryInterval = 5000;  // Retry interval (in milliseconds)
   const unsigned long timeout = 10000;       // Timeout after 10 seconds
 
-  MQTT_CLIENT_ID = String(WiFi.macAddress());
+  String MQTT_CLIENT_ID = WiFi.macAddress();
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID.c_str(), mqttSettings.mqttUsername.c_str(), mqttSettings.mqttPassword.c_str())) {
-      Serial.println("Connected to SERVER");
-      client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
+    if (client.connect(MQTT_CLIENT_ID.c_str(), mqttSettings.mqttOneUser.c_str(), mqttSettings.mqttOnePassword.c_str())) {
+      Serial.println("Connected to MQTT.ONE > SERVER");
+      client.subscribe((String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)).c_str());
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
       Serial.println("). Retrying in 5 seconds...");
-      unsigned long retryStart = millis();
-      while (millis() - retryStart < retryInterval && !client.connected()) {
-        delay(100);  // Non-blocking alternative, can handle tasks here
-      }
+      delay(retryInterval);
     }
   }
 
@@ -36,7 +46,7 @@ void connectMQTT() {
 }
 
 void connectBrokerMQTT() {
-  client.setServer(MQTT_BROKER, MQTT_PORT);
+  client.setServer(mqttSettings.mqttBrokerServer.c_str(), MQTT_PORT);
   client.setCallback(mqttCallback);  // Set MQTT callback function
   Serial.println("MQTT Callback should be set");
 
@@ -44,19 +54,18 @@ void connectBrokerMQTT() {
   const unsigned long retryInterval = 5000;  // Retry interval (in milliseconds)
   const unsigned long timeout = 30000;       // Timeout after 30 seconds
 
+  String MQTT_CLIENT_ID = WiFi.macAddress();
+
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
     if (client.connect(MQTT_CLIENT_ID.c_str())) {
       Serial.println("Connected to BROKER");
-      client.subscribe(MQTT_TOPIC);  // Subscribe to the topic
+      client.subscribe(mqttSettings.mqttOneTopic.c_str());  // Subscribe to the topic
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
       Serial.println("). Retrying in 5 seconds...");
-      unsigned long retryStart = millis();
-      while (millis() - retryStart < retryInterval && !client.connected()) {
-        delay(100);  // Non-blocking alternative, can handle tasks here
-      }
+      delay(retryInterval);
     }
   }
 
@@ -73,33 +82,28 @@ void clientMQTTConnected() {
 }
 
 void publishDataMQTTPayload_Doc(String jsonPayload) {
-    Serial.print("Payload size: ");
-    Serial.println(jsonPayload.length());
-    Serial.print("MQTT Buffer Size: ");
-    Serial.println(MQTT_MAX_PACKET_SIZE);
+  Serial.print("Payload size: ");
+  Serial.println(jsonPayload.length());
+  Serial.print("MQTT Buffer Size: ");
+  Serial.println(MQTT_MAX_PACKET_SIZE);
 
-    if (jsonPayload.length() > MQTT_MAX_PACKET_SIZE) {
-        Serial.println("Error: Payload size exceeds MQTT buffer size.");
-        return;
-    }
+  if (jsonPayload.length() > MQTT_MAX_PACKET_SIZE) {
+    Serial.println("Error: Payload size exceeds MQTT buffer size.");
+    return;
+  }
 
-    // Send the payload via MQTT
-    if (client.publish(MQTT_TOPIC, jsonPayload.c_str())) {
-        Serial.println("Data sent:");
-        Serial.println(jsonPayload);
-        jsonPublished = jsonPayload;
-    } else {
-        Serial.println("Failed to send data.");
-    }
+  // Send the payload via MQTT
+  if (client.publish((String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)).c_str(), jsonPayload.c_str())) {
+    Serial.println("Data sent topic: " + (String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)));
+    Serial.println(jsonPayload);
+  } else {
+    Serial.println("Failed to send data.");
+  }
 }
 
-
 void sendJsonDocUpdateMQTTPayload(String jsonPayload1) {
-  
-  // Create a new JSON document for the message to send
   DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
 
-  // Add fields to the document
   doc["mac"] = WiFi.macAddress();
   doc["puzzleName"] = PUZZLE_NAME;
   doc["designer"] = DESIGNER_NAME;
@@ -110,41 +114,36 @@ void sendJsonDocUpdateMQTTPayload(String jsonPayload1) {
   doc["group"] = globalSettings.nrGroup;
   doc["type"] = NR_TYPE;
 
-  // Convert the doc to a JSON string and publish
   String jsonPayload;
   serializeJson(doc, jsonPayload);
-  jsonPublished = jsonPayload;
   publishDataMQTTPayload_Doc(jsonPayload);
-  delay(50);  // Delay to ensure message is processed
+  delay(50);
 
   publishDataMQTTPayload_Doc(jsonPayload1);
-  delay(50);  // Delay to ensure message is processed
+  delay(50);
 }
 
 void sendMessageUpdateMQTTPayload(String message) {
-    DynamicJsonDocument doc(512);
-    doc["mac"] = WiFi.macAddress();
-    doc["puzzleName"] = PUZZLE_NAME;
-    doc["message"] = message;
-    
-    // Convert the doc to a JSON string and publish
-    String jsonPayload;
-    serializeJson(doc, jsonPayload);
-    jsonPublished = jsonPayload;
+  DynamicJsonDocument doc(512);
+  doc["mac"] = WiFi.macAddress();
+  doc["puzzleName"] = PUZZLE_NAME;
+  doc["message"] = message;
 
-    sendJsonDocUpdateMQTTPayload(jsonPayload);
+  String jsonPayload;
+  serializeJson(doc, jsonPayload);
+  sendJsonDocUpdateMQTTPayload(jsonPayload);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.println(topic);
 
-  char message[length + 1];
-  memcpy(message, payload, length);
-  message[length] = '\0';
+  String message;
+  for (unsigned int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
 
-  DynamicJsonDocument doc(512);  // Use DynamicJsonDocument with appropriate size
-
+  DynamicJsonDocument doc(512);
   DeserializationError error = deserializeJson(doc, message);
   if (error) {
     Serial.print("JSON parse error: ");
@@ -153,31 +152,24 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   if (doc.containsKey("activity")) {
-    const char* activity = doc["activity"];
+    String activity = doc["activity"].as<String>();
     Serial.print("Activity: ");
     Serial.println(activity);
-    if (String(activity) == "getFirmwareUpdate") {
-      Serial.println("Command Accepted!");
+
+    if (activity == "getFirmwareUpdate") {
       sendMessageUpdateMQTTPayload("Firmware Status Request Confirmed from: " + String(PUZZLE_NAME));
     } else if (activity == (String(NR_GROUP) + " Button Pressed")) { 
-      executeGPIOBatch1();
+      executeGPIOBatchPin1();
     } else if (activity == (String(NR_GROUP) + " Button 2 Pressed")) { 
-      executeGPIOBatch2();
+      executeGPIOBatchPin2();
     } else {
       executeMQTTBatchBelow(activity);
     }
   } else {
     Serial.println("Key 'activity' not found");
   }
-
-  // Debugging: Print the entire JSON message
-  String jsonMessage;
-  serializeJson(doc, jsonMessage);
-  Serial.println("Message contents:");
-  Serial.println(jsonMessage);
 }
 
 void executeMQTTBatchBelow(String activity) {
-
-    Serial.println("Key 'activity' : " + activity);
-    }
+  Serial.println("Key 'activity': " + activity);
+}

@@ -359,6 +359,49 @@ String refreshWiFi_dataHTML() {
     return "";
 }
 
+// Function to dynamically refresh and display output data
+String refreshOutputsSection_dataHTML() {
+    // Style for the outputs section and indicators
+    styleHTML += "#outputsSection { margin: 30px auto; text-align: center; }";
+    styleHTML += ".output { font-size: 18px; padding: 10px; margin: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; }";
+    styleHTML += ".indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; margin-left: 10px; transition: background-color 0.3s ease; }";
+    styleHTML += ".indicator.green { background-color: green; }";
+    styleHTML += ".indicator.red { background-color: red; }";
+
+    // Function to fetch and update the outputs section
+    String script = "function refreshOutputs() {";
+    script += "  fetch('/getOutputsData')";  // API endpoint to fetch outputs data
+    script += "    .then(response => response.json())";
+    script += "    .then(data => {";
+    script += "      const outputsSection = document.getElementById('outputs');";
+    script += "      outputsSection.innerHTML = '';";  // Clear the current content";
+    script += "      data.forEach(output => {";
+    script += "        const div = document.createElement('div');";
+    script += "        div.className = 'output';";
+    script += "        div.innerHTML = `Output ${output.id}`;";
+    script += "        const indicator = document.createElement('span');";
+    script += "        indicator.className = `indicator ${output.state === 'on' ? 'green' : 'red'}`;";
+    script += "        div.appendChild(indicator);";
+    script += "        outputsSection.appendChild(div);";
+    script += "      });";
+    script += "    })";
+    script += "    .catch(error => console.error('Error fetching outputs:', error));";
+    script += "}";
+
+    // Call the refresh function periodically
+    onloadHTML += "refreshOutputs();";
+    setIntervalHTML += "setInterval(refreshOutputs, 2000);";  // Update every 2 seconds
+
+    // Add the outputs section to the body
+    bodyDivHTML += "<div id='outputsSection'>";
+    bodyDivHTML += "<h2>Outputs Status</h2>";
+    bodyDivHTML += "<div id='outputs'>Loading...</div>";
+    bodyDivHTML += "</div>";
+
+    return script;
+}
+
+
 String refreshNavigationButtons_dataHTML(String form) {
   
   // Add navigation styles to styleHTML
