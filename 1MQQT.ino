@@ -3,21 +3,11 @@
 #define MQTT_VERSION V1.2
 
 void connectMQTT() {
-  client.setServer(mqttSettings.mqttOneServer.c_str(), MQTT_PORT);
+  client.setServer(mqttSettings.mqttOneServer, MQTT_PORT);
+  client.setCallback(mqttCallback);  // Set MQTT callback function
+
   const char* mac = WiFi.macAddress().c_str();
 
-  if (client.connect(mac, mqttSettings.mqttOneUser.c_str(), mqttSettings.mqttOnePassword.c_str())) {
-    // Successfully connected to the MQTT broker
-    Serial.println("Connected to MQTT ONE broker");
-  } else {
-    // Failed to connect
-    Serial.print("Failed to connect, rc=");
-    Serial.print(client.state());
-    Serial.println(" try again in 5 seconds");
-    delay(5000);
-  }
-
-  client.setCallback(mqttCallback);  // Set MQTT callback function
   Serial.println("MQTT Callback should be set");
 
   unsigned long startAttemptTime = millis();
@@ -28,9 +18,16 @@ void connectMQTT() {
 
   while (!client.connected() && millis() - startAttemptTime < timeout) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect(MQTT_CLIENT_ID.c_str(), mqttSettings.mqttOneUser.c_str(), mqttSettings.mqttOnePassword.c_str())) {
+    if (client.connect(MQTT_CLIENT_ID.c_str(), mqttSettings.mqttOneUser, mqttSettings.mqttOnePassword)) {
       Serial.println("Connected to MQTT.ONE > SERVER");
-      client.subscribe((String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)).c_str());
+    
+      
+      if (client.subscribe(mqttSettings.mqttOneTopic)) {
+      Serial.println("Successfully subscribed to topic: " + String(mqttSettings.mqttOneTopic));
+      } else {
+      Serial.println("Failed to subscribe to topic.");
+      }
+
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
@@ -60,7 +57,7 @@ void connectBrokerMQTT() {
     Serial.print("Connecting to MQTT...");
     if (client.connect(MQTT_CLIENT_ID.c_str())) {
       Serial.println("Connected to BROKER");
-      client.subscribe(mqttSettings.mqttOneTopic.c_str());  // Subscribe to the topic
+      client.subscribe(mqttSettings.mqttOneTopic);  // Subscribe to the topic
     } else {
       Serial.print("Failed (state=");
       Serial.print(client.state());
@@ -93,8 +90,8 @@ void publishDataMQTTPayload_Doc(String jsonPayload) {
   }
 
   // Send the payload via MQTT
-  if (client.publish((String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)).c_str(), jsonPayload.c_str())) {
-    Serial.println("Data sent topic: " + (String(mqttSettings.mqttOneUser) + String(mqttSettings.mqttOneTopic)));
+  if (client.publish(mqttSettings.mqttOneTopic, jsonPayload.c_str())) {
+    Serial.println("Data sent topic: " + String(mqttSettings.mqttOneTopic));
     Serial.println(jsonPayload);
   } else {
     Serial.println("Failed to send data.");
@@ -135,6 +132,7 @@ void sendMessageUpdateMQTTPayload(String message) {
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  
   Serial.print("Message arrived on topic: ");
   Serial.println(topic);
 

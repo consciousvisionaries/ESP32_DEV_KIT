@@ -16,7 +16,7 @@
 
 // GPIO8 8 Input/8 Output 
 #define NR_TYPE "3D_ROTARY_PULSE"
-#define PULSE_MAX_RANGE 15000 // NR_TYPE "3D_ROTARY_PULSE"
+#define PULSE_MAX_RANGE 20 // NR_TYPE "3D_ROTARY_PULSE"
 
 String bodyInputTitle = "3 DIAL VALVEs";
 String bodyOutputTitle = "OVERRIDE";
@@ -39,4 +39,4 @@ String MQTT_CLIENT_ID = "";           // Replace with MAC Address
 #define NUM_DIGITAL_OUTPUTS 2
 #define NUM_FLED_OUTPUTS 1
 #define NUM_FLED_CHANNELS 3  // 30/3
-#define NUM_FLED_ADDLEDS 30  // Total number of LEDs (10 per dial)
+#define NUM_FLED_ADDLEDS 90  // Total number of LEDs (10 per dial)

@@ -359,22 +359,22 @@ String refreshWiFi_dataHTML() {
     return "";
 }
 
-// Function to dynamically refresh and display output data
-String refreshOutputsSection_dataHTML() {
+String refreshOutputsMatrixSection_dataHTML() {
     // Style for the outputs section and indicators
-    styleHTML += "#outputsSection { margin: 30px auto; text-align: center; }";
+    String styleHTML = "";
+    styleHTML += "#outputsMatrixSection { margin: 30px auto; text-align: center; }";
     styleHTML += ".output { font-size: 18px; padding: 10px; margin: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; }";
     styleHTML += ".indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; margin-left: 10px; transition: background-color 0.3s ease; }";
     styleHTML += ".indicator.green { background-color: green; }";
     styleHTML += ".indicator.red { background-color: red; }";
 
-    // Function to fetch and update the outputs section
-    String script = "function refreshOutputs() {";
-    script += "  fetch('/getOutputsData')";  // API endpoint to fetch outputs data
+    // Script for fetching and updating the outputs section
+    String script = "function refreshIndicators() {";
+    script += "  fetch('/getMatrixData')";  // API endpoint to fetch outputs data
     script += "    .then(response => response.json())";
     script += "    .then(data => {";
-    script += "      const outputsSection = document.getElementById('outputs');";
-    script += "      outputsSection.innerHTML = '';";  // Clear the current content";
+    script += "      const outputsMatrixSection = document.getElementById('indicatorMatrixGroup');";
+    script += "      outputsMatrixSection.innerHTML = '';";  // Clear the current content
     script += "      data.forEach(output => {";
     script += "        const div = document.createElement('div');";
     script += "        div.className = 'output';";
@@ -387,18 +387,19 @@ String refreshOutputsSection_dataHTML() {
     script += "    })";
     script += "    .catch(error => console.error('Error fetching outputs:', error));";
     script += "}";
+    
+    onloadHTML += "  refreshIndicators();";
+    setIntervalHTML += "  setInterval(refreshOutputs, 2000);";
 
-    // Call the refresh function periodically
-    onloadHTML += "refreshOutputs();";
-    setIntervalHTML += "setInterval(refreshOutputs, 2000);";  // Update every 2 seconds
-
-    // Add the outputs section to the body
-    bodyDivHTML += "<div id='outputsSection'>";
+    // HTML structure for the outputs section
+    String bodyDivHTML = "";
+    bodyDivHTML += "<div id='outputsMatrixSection'>";
     bodyDivHTML += "<h2>Outputs Status</h2>";
-    bodyDivHTML += "<div id='outputs'>Loading...</div>";
+    bodyDivHTML += "<div id='indicatorMatrixGroup'>Loading...</div>";
     bodyDivHTML += "</div>";
 
-    return script;
+    // Combine all parts and return
+    return "<style>" + styleHTML + "</style>" + bodyDivHTML + script;
 }
 
 

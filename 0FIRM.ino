@@ -19,7 +19,7 @@ struct WiFiSettings {
   String password = "";
   String storedVersion = "";
   String ipaddress = "";
-  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
+  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Entertainment" };
   String bup_password[2] = { "3X3K22832E", "Gary2019" };
 };
 
@@ -29,10 +29,10 @@ struct MQTTSettings {
   String mqttUsername = "pro1polaris";
   String mqttPassword = "CVr819P*!";
   String mqttServer = "192.168.0.129";
-  String mqttOneUser = "9grsvy8373";
-  String mqttOnePassword = "8bdehprsuz";
-  String mqttOneServer = "b37.mqtt.one";
-  String mqttOneTopic = "/lost";
+  const char* mqttOneUser = "9grsvy8373";
+  const char* mqttOnePassword = "8bdehprsuz";
+  const char* mqttOneServer = "b37.mqtt.one";
+  const char* mqttOneTopic = "9grsvy8373/lost";
   String mqttBrokerServer = "broker.emqx.io";
   String bup_mqttServer[3] = {"b37.mqtt.one", "192.168.0.129", "broker.emqx.io"};
   String bup_mqttUser[3] = {"9grsvy8373","pro1polaris",""};
@@ -62,7 +62,6 @@ void setup() {
   setupFirmware();
   setupDashboard();
   setupGPIO();
-  setupFASTLED();
   setupESPTask();
 
   Serial.println("READY.");
@@ -73,6 +72,10 @@ void loop() {
   loopFIRMWARE();
   loopGPIO();
   loopFASTLED();
+  
+   if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS == 1) {
+        funcRotaryDialPuzzle();
+   }
 }
 
 void setupESPTask() {
@@ -99,11 +102,10 @@ void delayESPTask(int d) {
   resumeESPTaskWDT();
 }
 
-
-
 void setupFirmware() {
   Serial.begin(115200);
   prefLoadAllSettings();
+  generateFUNCRandomSolution();
   loadWiFiCredentials();
   connectWiFi();
   connectMQTT();
@@ -111,7 +113,6 @@ void setupFirmware() {
   
   delay(3000);
   checkForUpdates();
-  updateFASTLED();
 }
 
 void connectWiFi() {

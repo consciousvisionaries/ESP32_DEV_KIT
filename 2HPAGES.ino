@@ -7,7 +7,7 @@ String bodyDivHTML;
 String scriptHTML;
 String navButtonHTML;
 
-String generateHTMLPage(String script) {
+String generateHTMLPage(String scriptname) {
 
   styleHTML = "";
   onloadHTML = "";
@@ -23,15 +23,15 @@ String generateHTMLPage(String script) {
 
   bool blackTrue = false;
   String newScriptHTML;
-  if (script == "ADMIN") {
+  if (scriptname == "ADMIN") {
     newScriptHTML = refreshAdmin_dataHTML();
-  } else if (script == "CONFIG") {  // Fixed this line
+  } else if (scriptname == "CONFIG") {  // Fixed this line
     newScriptHTML = refreshConfig_dataHTML();
-  } else if (script == "NODERED") {  // Fixed this line
+  } else if (scriptname == "NODERED") {  // Fixed this line
     newScriptHTML = refreshNodeRed_dataHTML();
-  } else if (script == "WIFI") {  // Fixed this line
+  } else if (scriptname == "WIFI") {  // Fixed this line
     newScriptHTML = refreshWiFi_dataHTML();
-  } else if (script == "HOME") {
+  } else if (scriptname == "HOME") {
     blackTrue = true;
     if (NUM_DIGITAL_INPUTS >= 1) {
         newScriptHTML += refreshInputs_dataHTML(); // Refresh inputs
@@ -43,9 +43,13 @@ String generateHTMLPage(String script) {
     if (NUM_ANALOG_INPUTS >= 1) {
       newScriptHTML += refreshDialsLEDs_dataHTML(); // example. lost > 3 dials > addressable led
     }
+    if (NUM_FLED_CHANNELS >= 1) {
+      newScriptHTML += refreshOutputsMatrixSection_dataHTML();
+    }
   }
   
-  navButtonHTML = refreshNavigationButtons_dataHTML(script);
+  
+  navButtonHTML = refreshNavigationButtons_dataHTML(scriptname);
 
   page += styleHTML;
   page += getStyle_body_backgroundBlack(blackTrue);
@@ -66,10 +70,30 @@ String generateHTMLPage(String script) {
   return page;
 }
 
+String generateAnalogInputDisplayHTML() {
 
-String generateInputIndicatorsHTML() {
+  for (int i = 0; i < NUM_ANALOG_INPUTPAIRS; i++) {
+    
+  }
+
+  return "";
+}
+
+String generate_inputIndicatorHTML(int channels, int indicators) {
+  String indicatorsHTML = "<div id='indicatorMatrixGroup'>";
+
+  for (int c = 0; c < channels; c++) {
+    for (int i = 0; i < indicators; i++) {
+      indicatorsHTML += "<div id='indicatorDot" + String(c*i) + "' class='indicator red'></div>";
+    }
+  }
+  indicatorsHTML += "</div>";
+  return indicatorsHTML;
+}
+
+String generateInputIndicatorsHTML(int indicators) {
   String indicatorsHTML = "<div id='inputs'>";
-  for (int i = 0; i < NUM_DIGITAL_INPUTS; i++) {
+  for (int i = 0; i < indicators; i++) {
     
     indicatorsHTML += "<div id='inputIndicator" + String(i) + "' class='indicator red'></div>";
   }

@@ -6,7 +6,7 @@ static int lastPulseCount[3] = {0, 0, 0};
 volatile int lastStateAnalogInputs[3] = {LOW, LOW, LOW};
 volatile int pulseCount[3] = {0, 0, 0};
 volatile bool pulseUpdated[3] = {false, false, false};
-
+bool funcGameStart = true;
 bool solutionFound = false;
 bool solutionStable = false;
 unsigned long solutionCheckStart = 0;
@@ -14,6 +14,24 @@ unsigned long solutionCheckStart = 0;
 static unsigned long lastExecutionTime = 0; // Tracks the last execution time
 
 int solutionWin[] = {6, 5, 9};
+
+#include <Arduino.h>
+
+
+
+void generateFUNCRandomSolution() {
+    // Seed the random number generator
+    randomSeed(analogRead(0));
+
+    // Populate the solution array with random values between 0 and 9
+    for (int i = 0; i < 3; i++) {
+        solutionWin[i] = random(5, (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS)); 
+    }
+}
+
+
+
+
 
 void checkForWin() {
     if (solutionFound) {
@@ -34,15 +52,18 @@ void checkForWin() {
 // Function to map pulse counts to the number of LEDs
 int getCount(int maxcount, int analoginputpin) {
     // Ensure pulseCount is within the valid range before using it
-    int clampedPulseCount = constrain(pulseCount[analoginputpin], 0, PULSE_MAX_RANGE);
+    int TOT_RANGE = (PULSE_MAX_RANGE * (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS));
+    int clampedPulseCount = constrain(pulseCount[analoginputpin], 0, TOT_RANGE);
 
     pulseCount[analoginputpin] = clampedPulseCount;
 
     // Return the mapped value to the number of LEDs based on the constrained pulse count
-    return map(clampedPulseCount, 0, PULSE_MAX_RANGE, 0, maxcount);
+    return map(clampedPulseCount, 0, TOT_RANGE, 0, maxcount);
 }
 
+
 void funcRotaryDialPuzzle() {
+  if (funcGameStart) {
     int maxLEDCount = (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS);
 
     // Simulate fetching pulse counts
@@ -68,17 +89,24 @@ void funcRotaryDialPuzzle() {
         lastLedCount[2] = ledCount[2];
 
         updateFLED_clearAll();
+
+        updateFLED_address(solutionWin[0], "orange");
+        updateFLED_address(solutionWin[1] + maxLEDCount, "orange");
+        updateFLED_address(solutionWin[2] + maxLEDCount + maxLEDCount, "orange");
         
         // Update LEDs for each dial
         for (int i = 0; i < ledCount[0]; i++) {
             updateFLED_address(i, "red");
         }
-        for (int i = 10; i < 10 + ledCount[1]; i++) {
+        for (int i = maxLEDCount; i < maxLEDCount + ledCount[1]; i++) {
             updateFLED_address(i, "green");
         }
-        for (int i = 20; i < 20 + ledCount[2]; i++) {
+        for (int i = maxLEDCount + maxLEDCount; i < maxLEDCount + maxLEDCount + ledCount[2]; i++) {
             updateFLED_address(i, "blue");
         }
+
+        
+
 
         updateFLED_show();
 
@@ -89,6 +117,9 @@ void funcRotaryDialPuzzle() {
         Serial.println("LED Strip 2: " + String(ledCount[1]));
         Serial.println("LED Strip 3: " + String(ledCount[2]));
     }
+  } else {
+    Serial.println("Game is over!");
+  }
 }
 
 void send3D_ROTARY_PULSEMQTTData(int count1, int count2, int count3) {

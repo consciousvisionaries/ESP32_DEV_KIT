@@ -1,20 +1,24 @@
-#define WEBSERVER_VERSION V1.1
 #include <ESPAsyncWebServer.h>
 
 AsyncWebServer server(80);
 
 void setupDashboard() {
-    // Initialize the server routes
-
     // Main page route
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String inputData = generateHTMLPage("HOME");
-        request->send(200, "text/html", inputData);    });
+        request->send(200, "text/html", inputData);
+    });
 
     // Route to refresh input indicators
     server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateInputIndicatorsHTML();
+        String inputData = generateInputIndicatorsHTML(NUM_DIGITAL_INPUTS);
         request->send(200, "text/plain", inputData);
+    });
+
+    server.on("/getMatrixData", HTTP_GET, [](AsyncWebServerRequest *request) {
+        int indicators = (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS);
+        String matrixHTML = generate_inputIndicatorHTML(NUM_FLED_CHANNELS, indicators);
+        request->send(200, "application/html", matrixHTML);
     });
 
     // Route to refresh output data
@@ -23,18 +27,17 @@ void setupDashboard() {
         request->send(200, "application/json", outputData);
     });
 
-    
-  server.on("/getAnalogInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String inputs = "<div>";
-    inputs += "<div class='input'>Analog 1: " + String(analogRead(34)) + "</div>";
-    inputs += "<div class='input'>Analog 2: " + String(analogRead(35)) + "</div>";
-    inputs += "</div>";
-    request->send(200, "text/html", inputs);
-  });
+    server.on("/getAnalogInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String inputs = "<div>";
+        inputs += "<div class='input'>Analog 1: " + String(analogRead(34)) + "</div>";
+        inputs += "<div class='input'>Analog 2: " + String(analogRead(35)) + "</div>";
+        inputs += "</div>";
+        request->send(200, "text/html", inputs);
+    });
 
-  server.on("/getLEDMatrix", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", jsonPublished);
-  });
+    server.on("/getLEDMatrix", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", jsonPublished);
+    });
 
     // Route to toggle output state
     server.on("/toggleOutputState", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -83,25 +86,29 @@ void setupDashboard() {
 
     // Route to save WiFi configuration
     server.on("/saveWiFi", HTTP_POST, [](AsyncWebServerRequest *request) {
-        String newSSID = request->getParam("ssid", true)->value();
-        String newPassword = request->getParam("password", true)->value();
+        if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
+            String newSSID = request->getParam("ssid", true)->value();
+            String newPassword = request->getParam("password", true)->value();
 
-        wifiSettings.ssid = newSSID;
-        wifiSettings.password = newPassword;
-        saveWiFiCredentials(newSSID, newPassword, wifiSettings.storedVersion);
+            wifiSettings.ssid = newSSID;
+            wifiSettings.password = newPassword;
+            saveWiFiCredentials(newSSID, newPassword, wifiSettings.storedVersion);
 
-        String confirmationPage = "<html><head><title>Confirmation</title></head><body>";
-        confirmationPage += "<h1>Configuration Saved</h1>";
-        confirmationPage += "<p>New SSID: " + wifiSettings.ssid + "</p>";
-        confirmationPage += "<p>New Password: " + wifiSettings.password + "</p>";
-        confirmationPage += "<a href='/admin'>Back to Admin Panel</a>";
-        confirmationPage += "<p>Restarting...</p>";
-        confirmationPage += "</body></html>";
+            String confirmationPage = "<html><head><title>Confirmation</title></head><body>";
+            confirmationPage += "<h1>Configuration Saved</h1>";
+            confirmationPage += "<p>New SSID: " + wifiSettings.ssid + "</p>";
+            confirmationPage += "<p>New Password: " + wifiSettings.password + "</p>";
+            confirmationPage += "<a href='/admin'>Back to Admin Panel</a>";
+            confirmationPage += "<p>Restarting...</p>";
+            confirmationPage += "</body></html>";
 
-        request->send(200, "text/html", confirmationPage);
+            request->send(200, "text/html", confirmationPage);
 
-        delay(10000);
-        ESP.restart();
+            delay(1000);  // Allow page load before restarting
+            ESP.restart();
+        } else {
+            request->send(400, "text/plain", "Missing parameters.");
+        }
     });
 
     // Route to save RedNode settings
@@ -111,7 +118,7 @@ void setupDashboard() {
             request->hasParam("mqttPassword", true) &&
             request->hasParam("mqttServer", true) &&
             request->hasParam("mqttUsername", true)) {
-            
+
             globalSettings.nrTab = request->getParam("nrTab", true)->value();
             globalSettings.nrGroup = request->getParam("nrGroup", true)->value();
             mqttSettings.mqttUsername = request->getParam("mqttUsername", true)->value();
@@ -121,7 +128,7 @@ void setupDashboard() {
             prefSaveGlobalSettings();
             prefSaveMQTTSettings();
 
-            request->send(200, "text/plain", "Global settings saved successfully. This browser should take you back to administration!");
+            request->send(200, "text/plain", "Global settings saved successfully.");
         } else {
             request->send(400, "text/plain", "Missing parameters.");
         }
@@ -136,4 +143,5 @@ void setupDashboard() {
 
     // Start the server
     server.begin();
+    Serial.println("Server started");
 }

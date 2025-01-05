@@ -3,9 +3,10 @@
 #define DEBOUNCE_DELAY 500  // Debounce delay in milliseconds
 #define FLED_PIN1 12
 
-const int outputPins[8] = {23, 22, 21, 19,18, 13, 12, 2};
+const int outputPins[12] = {23, 22, 21, 19, 18, 13, 32, 33, 26, 27, 14, 2};
 const int inputPins[8] = {4, 5, 14, 27, 26, 25, 33, 32};
-const int outputPins_initState[8] = {0};
+      int inputDigitalPinState[8] = {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH};
+const int outputPins_initState[12] = {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH};
 const int analogInputPinsA[3] = {14, 27, 26};
 const int analogInputPinsB[3] = {25, 33, 32};
 const int fastLEDOutputPins[1] = {FLED_PIN1};
@@ -77,6 +78,23 @@ void IRAM_ATTR handleInterruptC() {
   portEXIT_CRITICAL(&mux);
 }
 
+volatile bool restartFlag = false;
+volatile bool gameStartFlag = false;
+
+// Interrupt service routine
+void IRAM_ATTR handleInterrupt1() {
+    for (int i = 0; i < NUM_DIGITAL_INPUTS; i++) {
+        inputDigitalPinState[i] = digitalRead(inputPins[i]);
+
+        if (i == 0 && inputDigitalPinState[i] == LOW) {
+            restartFlag = true; // Set a flag for restart
+        } else if (i == 1 && inputDigitalPinState[i] == LOW) {
+            gameStartFlag = true; // Set a flag to start the game
+        }
+    }
+}
+
+
 void setupGPIO() {
   Serial.begin(115200);
 
@@ -100,6 +118,7 @@ void setupGPIO() {
     usePin(outputPins[i]); // Check for conflicts
     pinMode(outputPins[i], OUTPUT);
     digitalWrite(outputPins[i], outputPins_initState[i] ? HIGH : LOW);
+    Serial.println("Output " + String(i) + " = " + String(outputPins_initState[i]));
   }
   Serial.println(String(NUM_DIGITAL_INPUTS) + " Outputs Initialized.");
 
@@ -107,6 +126,7 @@ void setupGPIO() {
   for (int i = 0; i < NUM_DIGITAL_OUTPUTS; i++) {
     usePin(inputPins[i]); // Check for conflicts
     pinMode(inputPins[i], INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(inputPins[i]), handleInterrupt1, CHANGE);
   }
   Serial.println(String(NUM_DIGITAL_INPUTS) + " Inputs Initialized.");
 
@@ -121,6 +141,12 @@ void setupGPIO() {
       (i == 0 ? handleInterruptA : (i == 1 ? handleInterruptB : handleInterruptC)), CHANGE);
   }
   Serial.println(String(NUM_ANALOG_INPUTPAIRS) + " Analog Input Pairs Initialized.");
+
+  for (int i = 0; i < NUM_FLED_OUTPUTS; i++) {
+    Serial.print("Initializing FLED addressable outputs");
+    usePin(FLED_PIN1);
+    setupFASTLED_GPIO();
+  }
 }
 
 
@@ -135,7 +161,7 @@ void loopGPIO() {
     pulseUpdated[i] = false;
     portEXIT_CRITICAL(&mux);
 
-    count = constrain(count, 0, 16000);
+    count = constrain(count, 0, (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS));
 
     if (updated) {
       Serial.print("Dial ");
@@ -144,6 +170,24 @@ void loopGPIO() {
       Serial.println(count);
     }
   }
+
+  if (restartFlag) {
+        restartFlag = false; // Clear the flag
+        delay(5000); // Safe to use here
+        ESP.restart();
+    }
+
+    if (gameStartFlag) {
+        gameStartFlag = false; // Clear the flag
+        generateFUNCRandomSolution(); // Perform game setup
+        updateFLED_clearAll();
+        for (int i = 0; i < NUM_FLED_CHANNELS; i++) {
+            ledCount[i] = 0;
+        }
+        updateFLED_show();
+        funcGameStart = true;
+        Serial.println("Start game....");
+    }
 
   esp_task_wdt_reset(); // Feed the watchdog
 }
@@ -156,7 +200,7 @@ void executeGPIOBatchPin1() {
   for (int i = 0; i < 3; i++) {
     pulseCount[i] = 0;
   }
-  updateFASTLED();
+  funcGameStart = false;
   digitalWrite(outputPins[0], HIGH);
 }
 
