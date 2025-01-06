@@ -15,18 +15,19 @@ static unsigned long lastExecutionTime = 0; // Tracks the last execution time
 
 int solutionWin[] = {6, 5, 9};
 
-#include <Arduino.h>
-
-
-
 void generateFUNCRandomSolution() {
+  
     // Seed the random number generator
     randomSeed(analogRead(0));
-
+    Serial.print("Solution: ");
     // Populate the solution array with random values between 0 and 9
     for (int i = 0; i < 3; i++) {
         solutionWin[i] = random(5, (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS)); 
+        Serial.print(solutionWin[i]);
+        Serial.print(", ");
+       
     }
+    Serial.println("<end>");
 }
 
 
@@ -109,6 +110,8 @@ void funcRotaryDialPuzzle() {
 
 
         updateFLED_show();
+
+        Serial.println("Change in last dial detected! MQTT message to follow....");
 
         send3D_ROTARY_PULSEMQTTData(ledCount[0], ledCount[1], ledCount[2]);
 

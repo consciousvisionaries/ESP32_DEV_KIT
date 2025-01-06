@@ -10,7 +10,7 @@ void setupFASTLED_GPIO() {
         FastLED.addLeds<WS2812, FLED_PIN1, RGB>(leds, NUM_FLED_ADDLEDS);
         FastLED.clear();
         FastLED.show();
-        Serial.println("FAST LED Initialized");
+        Serial.println("<end> FAST LED Initialized!");
     }
 }
 

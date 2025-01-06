@@ -120,33 +120,41 @@ void setupGPIO() {
     digitalWrite(outputPins[i], outputPins_initState[i] ? HIGH : LOW);
     Serial.println("Output " + String(i) + " = " + String(outputPins_initState[i]));
   }
-  Serial.println(String(NUM_DIGITAL_INPUTS) + " Outputs Initialized.");
+  Serial.println("<end> " + String(NUM_DIGITAL_OUTPUTS) + " Outputs Initialized.");
 
   // Initialize input pins
-  for (int i = 0; i < NUM_DIGITAL_OUTPUTS; i++) {
+  for (int i = 0; i < NUM_DIGITAL_INPUTS; i++) {
     usePin(inputPins[i]); // Check for conflicts
     pinMode(inputPins[i], INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(inputPins[i]), handleInterrupt1, CHANGE);
+    Serial.println("Input " + String(i) + " = " + String(digitalRead(inputPins[i])));
   }
-  Serial.println(String(NUM_DIGITAL_INPUTS) + " Inputs Initialized.");
+  Serial.println("<end> " + String(NUM_DIGITAL_INPUTS) + " Inputs Initialized.");
 
   for (int i = 0; i < NUM_ANALOG_INPUTPAIRS; i++) {
-    Serial.print("Initializing analog input pair ");
-    Serial.println(i);
+    Serial.print("Initializing analog input pair : ");
+    Serial.print(i);
+    Serial.println("; ");
     usePin(analogInputPinsA[i]); // Check for conflicts
+    Serial.println("InputPinA");
     usePin(analogInputPinsB[i]); // Check for conflicts
+    Serial.println("InputPinB");
+
     pinMode(analogInputPinsA[i], INPUT_PULLUP);
     pinMode(analogInputPinsB[i], INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(analogInputPinsA[i]), 
       (i == 0 ? handleInterruptA : (i == 1 ? handleInterruptB : handleInterruptC)), CHANGE);
   }
-  Serial.println(String(NUM_ANALOG_INPUTPAIRS) + " Analog Input Pairs Initialized.");
+  Serial.println("<end> " + String(NUM_ANALOG_INPUTPAIRS) + " Analog Input Pairs Initialized!");
 
   for (int i = 0; i < NUM_FLED_OUTPUTS; i++) {
-    Serial.print("Initializing FLED addressable outputs");
+    Serial.print("Initializing FLED addressable outputs: ");
     usePin(FLED_PIN1);
+    Serial.println("FLED Pin");
     setupFASTLED_GPIO();
   }
+  Serial.println("<<GPIO Setup Complete>>");
+  Serial.println();
 }
 
 
@@ -211,6 +219,8 @@ void executeGPIOBatchPin2() {
 }
 
 void sendGPIO_MQTTPayload() {
+
+  Serial.println("Prepare to initialize UIDashboard Stage " + globalSettings.nrGroup + " >>>>>");
   
   DynamicJsonDocument doc1(MQTT_MAX_PACKET_SIZE);
     doc1["mac"] = WiFi.macAddress();

@@ -59,12 +59,39 @@ struct GlobalHyperlinks {
 GlobalHyperlinks globalHyperlinks;
 
 void setup() {
-  setupFirmware();
-  setupDashboard();
+  delay(2000);
+  Serial.begin(115200);
+  prefLoadAllSettings();
+  
+  loadWiFiCredentials();
+    Serial.println(".");
+      delay(1000);
+
+  connectWiFi();
+    Serial.println(".");
+      delay(1000);
+
+  connectMQTT();
+    Serial.println(".");
+      delay(1000);
+
+
   setupGPIO();
-  setupESPTask();
+    Serial.println(".");
+      delay(1000);
+
+
+  sendGPIO_MQTTPayload();
+    Serial.println(".");
+    delay(1000);
+    
+  generateFUNCRandomSolution();
+    setupESPTask();
 
   Serial.println("READY.");
+      delay(1000);
+
+  Serial.println(".");
 }
 
 void loop() {
@@ -79,12 +106,13 @@ void loop() {
 }
 
 void setupESPTask() {
-  esp_task_wdt_config_t wdt_config = {
+  
+  esp_task_wdt_config_t wdt_config1 = {
       .timeout_ms = 10000,
       .idle_core_mask = (1 << 0),
       .trigger_panic = true
   };
-  esp_task_wdt_init(&wdt_config);
+  esp_task_wdt_init(&wdt_config1);
   esp_task_wdt_add(NULL);
 }
 
@@ -100,19 +128,6 @@ void delayESPTask(int d) {
   pauseESPTaskWDT();
   delay(d);
   resumeESPTaskWDT();
-}
-
-void setupFirmware() {
-  Serial.begin(115200);
-  prefLoadAllSettings();
-  generateFUNCRandomSolution();
-  loadWiFiCredentials();
-  connectWiFi();
-  connectMQTT();
-  sendGPIO_MQTTPayload();
-  
-  delay(3000);
-  checkForUpdates();
 }
 
 void connectWiFi() {
