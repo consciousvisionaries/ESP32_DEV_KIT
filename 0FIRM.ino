@@ -64,20 +64,23 @@ void setup() {
   prefLoadAllSettings();
   
   loadWiFiCredentials();
-    Serial.println(".");
+    Serial.println(".credentials call completed");
       delay(1000);
 
   connectWiFi();
-    Serial.println(".");
+    Serial.println(".wifi call completed");
       delay(1000);
 
+  checkForUpdates();
+    Serial.println(".firmware update call completed");
+
   connectMQTT();
-    Serial.println(".");
+    Serial.println(".mqqt call completed");
       delay(1000);
 
 
   setupGPIO();
-    Serial.println(".");
+    Serial.println(".gpio call completed");
       delay(1000);
 
 
