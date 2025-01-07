@@ -3,7 +3,6 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <PubSubClient.h>
-#include <esp_task_wdt.h>
 
 #define FIRMWARE_VERSION "V1.1"
 
@@ -13,7 +12,6 @@ PubSubClient client(espClient);
 
 String jsonPublished;
 bool allServicesActive = false;
-
 struct WiFiSettings {
   String ssid = "";
   String password = "";
@@ -58,6 +56,8 @@ struct GlobalHyperlinks {
 
 GlobalHyperlinks globalHyperlinks;
 
+
+
 void setup() {
   delay(2000);
   Serial.begin(115200);
@@ -85,52 +85,39 @@ void setup() {
 
 
   sendGPIO_MQTTPayload();
-    Serial.println(".");
+    Serial.println(".mqqt payload sent");
+    delay(1000);
+
+  setupFASTLED_GPIO();
+    Serial.println(".fled call completed");
     delay(1000);
     
-  generateFUNCRandomSolution();
-    setupESPTask();
-
   Serial.println("READY.");
-      delay(1000);
+      delay(100);
 
   Serial.println(".");
 }
 
 void loop() {
+
+  
+  
   clientMQTTConnected();
   loopFIRMWARE();
   loopGPIO();
   loopFASTLED();
   
-   if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS == 1) {
+   if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS >= 1) {
         funcRotaryDialPuzzle();
    }
+
 }
 
-void setupESPTask() {
-  
-  esp_task_wdt_config_t wdt_config1 = {
-      .timeout_ms = 10000,
-      .idle_core_mask = (1 << 0),
-      .trigger_panic = true
-  };
-  esp_task_wdt_init(&wdt_config1);
-  esp_task_wdt_add(NULL);
-}
 
-void pauseESPTaskWDT() {
-    esp_task_wdt_delete(NULL);  // Remove the current task from WDT monitoring
-}
 
-void resumeESPTaskWDT() {
-    esp_task_wdt_add(NULL);     // Re-add the current task to WDT monitoring
-}
 
 void delayESPTask(int d) {
-  pauseESPTaskWDT();
   delay(d);
-  resumeESPTaskWDT();
 }
 
 void connectWiFi() {

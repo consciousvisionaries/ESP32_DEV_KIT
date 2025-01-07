@@ -2,15 +2,21 @@
 
 #define FASTLED_VERSION V1.1
 
-CRGB leds[NUM_FLED_ADDLEDS];
+CRGB leds[NUM_FLED_ADDLEDS + NUM_FLED_ADDLEDS2];
 
 void setupFASTLED_GPIO() {
   
-    if (NUM_FLED_OUTPUTS == 1) {
+    if (NUM_FLED_OUTPUTS >= 1) {
         FastLED.addLeds<WS2812, FLED_PIN1, RGB>(leds, NUM_FLED_ADDLEDS);
         FastLED.clear();
         FastLED.show();
         Serial.println("<end> FAST LED Initialized!");
+    }
+    if (NUM_FLED_OUTPUTS >=2) {
+        FastLED.addLeds<WS2812, DOUT_PIN4, RGB>(leds, NUM_FLED_ADDLEDS2);
+        FastLED.clear();
+        FastLED.show();
+        Serial.println("<end> FAST LED 2 Initialized!");
     }
 }
 

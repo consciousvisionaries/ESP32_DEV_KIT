@@ -70,8 +70,8 @@ void setupDashboard() {
         int inputNumber = inputNumberStr.toInt();
 
         if (inputNumber >= 0 && inputNumber < NUM_DIGITAL_INPUTS) {
-            int pin = inputPins[inputNumber];
-            String state = getInputStateGPIO(pin);
+            int pin = inputDigitalPins[inputNumber];
+            String state = getDigitalInputStateGPIO(pin) ? "HIGH" : "LOW";
             request->send(200, "text/plain", state);
         } else {
             request->send(400, "text/plain", "Invalid input number");
