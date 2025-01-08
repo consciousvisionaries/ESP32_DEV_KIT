@@ -108,14 +108,18 @@ String generateOutputsPayload() {
 
   String outputStatus = "[";
   for (int i = 0; i < NUM_DIGITAL_OUTPUTS; i++) {
-    outputStatus += (digitalRead(outputPins[i]) == !outputPins_initState[i]) ? "'red'" : "'green'";
+    outputStatus += (digitalRead(outputPins[i]) == !outputPins_initState[i]) ? "'green'" : "'red'";
     if (i < NUM_DIGITAL_OUTPUTS - 1) outputStatus += ", ";  // Formatting between items
   }
   outputStatus += "]";
   doc["outputs"] = outputStatus;
 
+  
+
   String payload;
   serializeJson(doc, payload);       // Serialize JSON to string
+  Serial.println(payload);
+
   return payload;
 }
 

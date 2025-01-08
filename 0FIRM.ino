@@ -91,6 +91,11 @@ void setup() {
   setupFASTLED_GPIO();
     Serial.println(".fled call completed");
     delay(1000);
+
+  setupDashboard();
+    Serial.println(".dashboard call completed");
+    delay(1000);
+
     
   Serial.println("READY.");
       delay(100);

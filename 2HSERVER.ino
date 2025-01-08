@@ -6,31 +6,33 @@ void setupDashboard() {
     // Main page route
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String inputData = generateHTMLPage("HOME");
+        Serial.println(inputData);
         request->send(200, "text/html", inputData);
     });
 
     // Route to refresh input indicators
     server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
         String inputData = generateInputIndicatorsHTML(NUM_DIGITAL_INPUTS);
-        request->send(200, "text/plain", inputData);
+        Serial.println(inputData);
+        request->send(200, "text/html", inputData);
     });
 
     server.on("/getMatrixData", HTTP_GET, [](AsyncWebServerRequest *request) {
         int indicators = (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS);
         String matrixHTML = generate_inputIndicatorHTML(NUM_FLED_CHANNELS, indicators);
-        request->send(200, "application/html", matrixHTML);
+        request->send(200, "text/html", matrixHTML);
     });
 
     // Route to refresh output data
     server.on("/refreshOutputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String outputData = generateOutputsPayload();
-        request->send(200, "application/json", outputData);
+        String payload = generateOutputsPayload();
+        Serial.println(payload);
+        request->send(200, "application/json", payload);
     });
 
     server.on("/getAnalogInputs", HTTP_GET, [](AsyncWebServerRequest *request) {
         String inputs = "<div>";
         inputs += "<div class='input'>Analog 1: " + String(analogRead(34)) + "</div>";
-        inputs += "<div class='input'>Analog 2: " + String(analogRead(35)) + "</div>";
         inputs += "</div>";
         request->send(200, "text/html", inputs);
     });
