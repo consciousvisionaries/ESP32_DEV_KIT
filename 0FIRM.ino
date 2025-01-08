@@ -45,6 +45,8 @@ struct GlobalSettings {
   String nrGroup = "Stage 1";
   String inputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
   String outputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
+  String colorsFLEDChannels[NUM_FLED_CHANNELS] = {"red", "green", "blue"};  
+ 
 };
 
 GlobalSettings globalSettings;
