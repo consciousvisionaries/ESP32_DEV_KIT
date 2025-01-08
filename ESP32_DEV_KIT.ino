@@ -1,4 +1,5 @@
 
+
 // access point
 #define AP_SSID "LOST 3 Dial Puzzle"
 #define AP_PASSWORD "MystTech" // 'localhost:1880/admin'
@@ -11,52 +12,9 @@
 #define NR_TAB "LOST"
 #define NR_GROUP "Stage 1"
 
-bool allServicesActive = false;
+// types include:
 
-struct WiFiSettings {
-  String ssid = "";
-  String password = "";
-  String storedVersion = "";
-  String ipaddress = "";
-  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Entertainment" };
-  String bup_password[2] = { "3X3K22832E", "Gary2019" };
-};
-
-WiFiSettings wifiSettings;
-
-struct MQTTSettings {
-  String mqttUsername = "pro1polaris";
-  String mqttPassword = "CVr819P*!";
-  String mqttServer = "192.168.0.129";
-  const char* mqttOneUser = "9grsvy8373";
-  const char* mqttOnePassword = "8bdehprsuz";
-  const char* mqttOneServer = "b37.mqtt.one";
-  const char* mqttOneTopic = "9grsvy8373/lost";
-  String mqttBrokerServer = "broker.emqx.io";
-  String bup_mqttServer[3] = {"b37.mqtt.one", "192.168.0.129", "broker.emqx.io"};
-  String bup_mqttUser[3] = {"9grsvy8373","pro1polaris",""};
-  String bup_mqttPassword[3] = {"8bdehprsuz","CVr819P*!",""};
-  
-};
-
-MQTTSettings mqttSettings;
-
-struct GlobalSettings {
-  String nrTab = "LOST";
-  String nrGroup = "Stage 1";
-  String inputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-  String outputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-};
-
-GlobalSettings globalSettings;
-
-struct GlobalHyperlinks {
-  String adminButtonHTML = "";
-  String homeButtonHTML = "";
-};
-
-GlobalHyperlinks globalHyperlinks;
-
+// GPIO8 8 Input/8 Output 
 #define NR_TYPE "3D_ROTARY_PULSE"
 #define PULSE_MAX_RANGE 20 // NR_TYPE "3D_ROTARY_PULSE"
 
@@ -64,6 +22,7 @@ String bodyInputTitle = "3 DIAL VALVEs";
 String bodyOutputTitle = "OVERRIDE";
 String buttonsHTMLTitle = "Game Master INPUT Control";
 
+// github
 const char* GITHUB_USER = "consciousvisionaries";
 const char* GITHUB_REPO = "ESP32_DEV_KIT";
 const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32da.bin"; // esp32 wroom

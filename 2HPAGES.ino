@@ -124,7 +124,6 @@ String generateOutputsPayload() {
 }
 
 String generateOutputButtonsHTML() {
-  
   String buttonsHTML = "<div id='buttonsSection'>";
   buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
   #define NUM_OUTPUT_ROWS 2
@@ -140,9 +139,7 @@ String generateOutputButtonsHTML() {
       int outputIndex = row * numColumns + col;  // Calculate the index of the button
       if (outputIndex < NUM_DIGITAL_OUTPUTS) { // Ensure we do not exceed the number of outputs
 
-        String initialColor = (digitalRead(outputPins[outputIndex]) == LOW) ? "green" : "red";
-        
-        Serial.print("...creating outputPins... reading pin states... setting color... ");
+        String initialColor = (digitalRead(outputPins[outputIndex]) == outputPins_initState[outputIndex]) ? "green" : "red";
         
     buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
                        "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
@@ -150,7 +147,6 @@ String generateOutputButtonsHTML() {
     }
     
     buttonsHTML += "</div><br>"; // End the row and add line break for clarity
-            Serial.println(buttonsHTML);
   }
 
   buttonsHTML += "</div>";
