@@ -245,7 +245,6 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   // Further processing if activity is found
   if (doc.containsKey("activity")) {
 
-    
     String activity = doc["activity"].as<String>();
     Serial.print("Activity: ");
     Serial.println(activity);

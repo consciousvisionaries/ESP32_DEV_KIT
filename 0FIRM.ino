@@ -3,6 +3,8 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <PubSubClient.h>
+#include <ESPmDNS.h>   // mDNS library
+
 
 #define FIRMWARE_VERSION "V1.1"
 
@@ -10,59 +12,18 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 
+
 String jsonPublished;
-bool allServicesActive = false;
-struct WiFiSettings {
-  String ssid = "";
-  String password = "";
-  String storedVersion = "";
-  String ipaddress = "";
-  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Entertainment" };
-  String bup_password[2] = { "3X3K22832E", "Gary2019" };
-};
-
-WiFiSettings wifiSettings;
-
-struct MQTTSettings {
-  String mqttUsername = "pro1polaris";
-  String mqttPassword = "CVr819P*!";
-  String mqttServer = "192.168.0.129";
-  const char* mqttOneUser = "9grsvy8373";
-  const char* mqttOnePassword = "8bdehprsuz";
-  const char* mqttOneServer = "b37.mqtt.one";
-  const char* mqttOneTopic = "9grsvy8373/lost";
-  String mqttBrokerServer = "broker.emqx.io";
-  String bup_mqttServer[3] = {"b37.mqtt.one", "192.168.0.129", "broker.emqx.io"};
-  String bup_mqttUser[3] = {"9grsvy8373","pro1polaris",""};
-  String bup_mqttPassword[3] = {"8bdehprsuz","CVr819P*!",""};
-  
-};
-
-MQTTSettings mqttSettings;
-
-struct GlobalSettings {
-  String nrTab = "LOST";
-  String nrGroup = "Stage 1";
-  String inputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-  String outputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-};
-
-GlobalSettings globalSettings;
-
-struct GlobalHyperlinks {
-  String adminButtonHTML = "";
-  String homeButtonHTML = "";
-};
-
-GlobalHyperlinks globalHyperlinks;
-
-
 
 void setup() {
+  
   delay(2000);
   Serial.begin(115200);
-  prefLoadAllSettings();
   
+  setupPREF();
+    Serial.println(".preferences call completed");
+      delay(1000);
+      
   loadWiFiCredentials();
     Serial.println(".credentials call completed");
       delay(1000);
@@ -78,11 +39,9 @@ void setup() {
     Serial.println(".mqqt call completed");
       delay(1000);
 
-
   setupGPIO();
     Serial.println(".gpio call completed");
       delay(1000);
-
 
   sendGPIO_MQTTPayload();
     Serial.println(".mqqt payload sent");
@@ -95,7 +54,6 @@ void setup() {
   setupDashboard();
     Serial.println(".dashboard call completed");
     delay(1000);
-
     
   Serial.println("READY.");
       delay(100);
@@ -105,8 +63,7 @@ void setup() {
 
 void loop() {
 
-  
-  
+ 
   clientMQTTConnected();
   loopFIRMWARE();
   loopGPIO();
@@ -167,6 +124,13 @@ void connectWiFi() {
     Serial.print("Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
   }
+
+  // Set mDNS hostname
+  if (MDNS.begin(MYSTTECH_MODEL)) {
+    Serial.println("mDNS responder started: " + String(MYSTTECH_MODEL));
+  } else {
+    Serial.println("Error starting mDNS");
+  }
 }
 
 unsigned long lastUpdateCheck = 0; // Global variable to track the last update check time
@@ -179,6 +143,8 @@ void loopFIRMWARE() {
     checkForUpdates();
     lastUpdateCheck = millis(); // Reset the timer
   }
+
+
 }
 
 void checkForUpdates() {

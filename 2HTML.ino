@@ -164,8 +164,6 @@ String refreshOutputs_dataHTML() {
   styleHTML += ".green { background-color: green; }";
 
   onloadHTML += "refreshOutputs_data();";
-  onloadHTML += "toggleOutput(outputNumber);";
-  onloadHTML += "updateButtonColor(outputNumber);";
 
   setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
   
@@ -178,7 +176,7 @@ String refreshOutputs_dataHTML() {
 
   String script = "function refreshOutputs_data() {";
   script += "fetch('/refreshOutputs_dataHTML') ";
-  script += ".then(response => response.text()) ";
+  script += ".then(response => response.html()) ";
   script += ".then(data => { document.getElementById('outputs').innerHTML = data; })";
   script += ".then(() => { updateButtonColor(outputNumber); });";
   script += "}";
@@ -204,6 +202,10 @@ String refreshOutputs_dataHTML() {
 String refreshDialsLEDs_dataHTML() {
 
   Serial.print(".refresh dials html called");
+
+  onloadHTML += "refreshOutputs_data();";
+  onloadHTML += "refreshDialsLEDs_dataHTML();";
+
   
   styleHTML += "#led-matrix-container { padding: 15px; border: 2px solid #888; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); max-width: 400px; margin: auto; }";
   styleHTML += "#led-matrix-container h3 { text-align: center; color: #333; font-family: Arial, sans-serif; }";
