@@ -74,9 +74,3 @@ void prefLoadGlobalHyperlinks() {
   globalHyperlinks.homeButtonHTML = "<a href='http://" + String(DNSLOCAL) + + "/'>Home on " + wifiSettings.ipaddress + "</a>";
   globalHyperlinks.adminButtonHTML = "<a href='http://" + String(DNSLOCAL) + + "/admin'>Admin</a>";
 }
-
-void prefLoadAllSettings() {
-  prefLoadMQTTSettings();
-  prefLoadGlobalSettings();
-  prefLoadGlobalHyperlinks();
-}

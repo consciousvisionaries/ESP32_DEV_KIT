@@ -10,6 +10,11 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+void prefLoadAllSettings() {
+  prefLoadMQTTSettings();
+  prefLoadGlobalSettings();
+  prefLoadGlobalHyperlinks();
+}
 
 String jsonPublished;
 bool allServicesActive = false;
@@ -34,9 +39,9 @@ struct MQTTSettings {
   const char* mqttOneTopic = "9grsvy8373/lost";
   String mqttBrokerServer = "broker.emqx.io";
   String bup_mqttServer[3] = {"b37.mqtt.one", "192.168.0.129", "broker.emqx.io"};
-  String bup_mqttUser[3] = {"9grsvy8373","pro1polaris",""};
-  String bup_mqttPassword[3] = {"8bdehprsuz","CVr819P*!",""};
-  
+  String bup_mqttUser[3] = {"9grsvy8373", "pro1polaris", ""};
+  String bup_mqttPassword[3] = {"8bdehprsuz", "CVr819P*!", ""};
+
 };
 
 MQTTSettings mqttSettings;
@@ -46,8 +51,8 @@ struct GlobalSettings {
   String nrGroup = "Stage 1";
   String inputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
   String outputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-  String colorsFLEDChannels[3] = {"red", "green", "blue"};  
- 
+  String colorsFLEDChannels[3] = {"red", "green", "blue"};
+
 };
 
 GlobalSettings globalSettings;
@@ -62,63 +67,63 @@ GlobalHyperlinks globalHyperlinks;
 
 
 void setup() {
-  
+
   delay(2000);
   Serial.begin(115200);
   prefLoadAllSettings();
-  
+
   loadWiFiCredentials();
-    Serial.println(".credentials call completed");
-      delay(1000);
+  Serial.println(".credentials call completed");
+  delay(1000);
 
   connectWiFi();
-    Serial.println(".wifi call completed");
-      delay(1000);
+  Serial.println(".wifi call completed");
+  delay(1000);
 
   checkForUpdates();
-    Serial.println(".firmware update call completed");
+  Serial.println(".firmware update call completed");
 
   connectMQTT();
-    Serial.println(".mqtt call completed");
-      delay(1000);
+  Serial.println(".mqtt call completed");
+  delay(1000);
 
 
   setupGPIO();
-    Serial.println(".gpio call completed");
-      delay(1000);
+  Serial.println(".gpio call completed");
+  delay(1000);
 
 
   sendGPIO_MQTTPayload();
-    Serial.println(".mqqt payload sent");
-    delay(1000);
+  Serial.println(".mqqt payload sent");
+  delay(1000);
 
   setupFASTLED_GPIO();
-    Serial.println(".fled call completed");
-    delay(1000);
+  Serial.println(".fled call completed");
+  delay(1000);
 
   setupDashboard();
-    Serial.println(".dashboard call completed");
-    delay(1000);
+  Serial.println(".dashboard call completed");
+  delay(1000);
 
-    
+
   Serial.println("READY.");
-      delay(100);
+  delay(100);
 
   Serial.println(".");
 }
 
 void loop() {
 
-  
-  
+
+
   clientMQTTConnected();
   loopFIRMWARE();
   loopGPIO();
   loopFASTLED();
-  
-   if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS >= 1) {
-        funcRotaryDialPuzzle();
-   }
+
+  if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS >= 1) {
+    funcRotaryDialPuzzle();
+  }
 
 }
 
@@ -168,11 +173,11 @@ void connectWiFi() {
   if (!connected) {
     Serial.println("No Wi-Fi connection established. Starting Access Point...");
     WiFi.softAP(AP_SSID, AP_PASSWORD);
-      Serial.print("Access Point IP Address: ");
+    Serial.print("Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
   }
 
-  
+
   // Set mDNS hostname
   if (MDNS.begin(MYSTTECH_MODEL)) {
     Serial.println("mDNS responder started: " + String(MYSTTECH_MODEL));

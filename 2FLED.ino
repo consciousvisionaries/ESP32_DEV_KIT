@@ -4,6 +4,18 @@
 
 CRGB leds[NUM_FLED_ADDLEDS + NUM_FLED_ADDLEDS2];
 
+// Function to map pulse counts to the number of LEDs
+int getFLEDCount(int maxcount, int analoginput) {
+    // Ensure pulseCount is within the valid range before using it
+    int TOT_RANGE = (PULSE_MAX_RANGE * (NUM_FLED_ADDLEDS / NUM_FLED_CHANNELS));
+    int clampedPulseCount = constrain(pulseCount[analoginput], 0, TOT_RANGE);
+
+    pulseCount[analoginput] = clampedPulseCount;
+
+    // Return the mapped value to the number of LEDs based on the constrained pulse count
+    return map(clampedPulseCount, 0, TOT_RANGE, 0, maxcount);
+}
+
 void setupFASTLED_GPIO() {
   
     if (NUM_FLED_OUTPUTS >= 1) {

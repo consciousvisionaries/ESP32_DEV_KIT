@@ -15,13 +15,9 @@
 
 // types include:
 
-// GPIO8 8 Input/8 Output 
+// GPIO8 8 Input/8 Output
 #define NR_TYPE "4X4 MATRIX"
 #define PULSE_MAX_RANGE 20 // NR_TYPE "3D_ROTARY_PULSE"
-
-String bodyInputTitle = "4x4 Matrix - Buttons";
-String bodyOutputTitle = "OVERRIDE";
-String buttonsHTMLTitle = "Game Master Output Control";
 
 // github
 const char* GITHUB_USER = "consciousvisionaries";
@@ -35,9 +31,9 @@ String MQTT_CLIENT_ID = "";           // Replace with MAC Address
 #define NUM_DIGITAL_INPUTSB 8
 #define NUM_ANALOG_INPUTPAIRS 0
 #define NUM_DIGITAL_OUTPUTSA 8
-#define NUM_OUTPUT_ROWSA 1
+#define NUM_OUTPUT_ROWSA 2
 #define NUM_DIGITAL_OUTPUTSB 8
-#define NUM_OUTPUT_ROWSB 1
+#define NUM_OUTPUT_ROWSB 2
 #define NUM_FLED_OUTPUTS 0
 #define NUM_FLED_CHANNELS 0  // 30/3
 #define NUM_FLED_ADDLEDS 0  // Total number of LEDs (10 per dial)

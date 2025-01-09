@@ -13,7 +13,6 @@ void setupDashboard() {
     // Route to refresh input indicators
     server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
         String inputData = generateInputIndicatorsHTML(NUM_DIGITAL_INPUTSA);
-        Serial.println(inputData);
         request->send(200, "text/html", inputData);
     });
 
@@ -26,14 +25,12 @@ void setupDashboard() {
     // Route to refresh output data
     server.on("/refreshOutputsA_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
         String payload = generateOutputsA_Payload();
-        Serial.println(payload);
         request->send(200, "application/json", payload);
     });
 
     // Route to refresh output data
     server.on("/refreshOutputsB_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
         String payload = generateOutputsB_Payload();
-        Serial.println(payload);
         request->send(200, "application/json", payload);
     });
 
@@ -78,8 +75,8 @@ void setupDashboard() {
         int outputNumber = outputNumberStr.toInt();
 
         if (outputNumber >= 0 && outputNumber < NUM_DIGITAL_OUTPUTSA) {
-            bool state = digitalRead(outputPinsA[outputNumber]) == HIGH;
-            request->send(200, "text/plain", state ? "high" : "low");
+            bool state = getDigitalInputStateGPIO(outputPinsA[outputNumber]);
+            request->send(200, "text/plain", state ? "HIGH" : "LOW");
         } else {
             request->send(400, "text/plain", "Invalid output number");
         }
@@ -91,8 +88,9 @@ void setupDashboard() {
         int outputNumber = outputNumberStr.toInt();
 
         if (outputNumber >= 0 && outputNumber < NUM_DIGITAL_OUTPUTSB) {
-            bool state = digitalRead(outputPinsB[outputNumber]) == HIGH;
-            request->send(200, "text/plain", state ? "high" : "low");
+            bool state = getDigitalInputStateGPIO(outputPinsB[outputNumber]);
+
+            request->send(200, "text/plain", state ? "HIGH" : "LOW");
         } else {
             request->send(400, "text/plain", "Invalid output number");
         }
