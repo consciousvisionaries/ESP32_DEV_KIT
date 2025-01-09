@@ -155,43 +155,86 @@ String updateInputIndicatorsFunctionality() {
 }
 
 // 6. refreshOutputs_dataHTML() Function
-String refreshOutputs_dataHTML() {
+String refreshOutputsA_dataHTML() {
 
-  styleHTML += "#buttonsSection { margin-top: 80px; }";
+  styleHTML += "#buttonsSectionA { margin-top: 80px; }";
   styleHTML += "button { padding: 10px 20px; font-size: 15px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
   styleHTML += "button:hover { transform: scale(1.1); }";
   styleHTML += ".red { background-color: red; }";
   styleHTML += ".green { background-color: green; }";
 
-  onloadHTML += "refreshOutputs_data();";
-  onloadHTML += "toggleOutput(outputNumber);";
-  onloadHTML += "updateButtonColor(outputNumber);";
-
-  setIntervalHTML += "setInterval(refreshOutputs_data, 250);";
+  onloadHTML += "refreshOutputsA_data();";
   
-  bodyDivHTML += "<div id='outputsSection'>";
+  setIntervalHTML += "setInterval(refreshOutputsA_data, 250);";
+  
+  bodyDivHTML += "<div id='outputsSectionA'>";
   bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
-  bodyDivHTML += "<div id='outputs'>Waiting for outputs...</div>";
+  bodyDivHTML += "<div id='outputsA'>Waiting for outputs...</div>";
   bodyDivHTML += "</div>";
 
-  bodyDivHTML += generateOutputButtonsHTML(); // Add buttons section
+  bodyDivHTML += generateOutputButtonsAHTML(); // Add buttons section
 
-  String script = "function refreshOutputs_data() {";
-  script += "fetch('/refreshOutputs_dataHTML') ";
+  String script = "function refreshOutputsA_data() {";
+  script += "fetch('/refreshOutputsA_dataHTML') ";
   script += ".then(response => response.text()) ";
-  script += ".then(data => { document.getElementById('outputs').innerHTML = data; })";
+  script += ".then(data => { document.getElementById('outputsA').innerHTML = data; })";
   script += ".then(() => { updateButtonColor(outputNumber); });";
   script += "}";
 
-  script += "function toggleOutput(outputNumber) {";
-  script += "fetch('/toggleOutputState?output=' + outputNumber) ";
-  script += ".then(() => { updateButtonColor(outputNumber); })";
+  script += "function toggleOutputA(outputNumber) {";
+  script += "fetch('/toggleOutputAState?output=' + outputNumber) ";
+  script += ".then(() => { updateButtonColorA(outputNumber); })";
   script += ".catch(error => console.error('Error toggling output:', error));";
   script += "}";
 
-  script += "function updateButtonColor(outputNumber) {";
-  script += "const button = document.getElementById('outputButton' + outputNumber);";
-  script += "fetch('/getOutputState?output=' + outputNumber)";
+  script += "function updateButtonColorA(outputNumber) {";
+  script += "const button = document.getElementById('outputButtonA' + outputNumber);";
+  script += "fetch('/getOutputAState?output=' + outputNumber)";
+  script += ".then(response => response.text())";
+  script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
+  script += "}";
+
+  Serial.println(script);
+
+  return script;
+}
+
+// 6. refreshOutputs_dataHTML() Function
+String refreshOutputsB_dataHTML() {
+
+  styleHTML += "#buttonsSectionB { margin-top: 80px; }";
+  styleHTML += "button { padding: 10px 20px; font-size: 15px; color: white; background-color: red; border: 2px solid #fff; border-radius: 8px; cursor: pointer; margin: 10px; transition: background-color 0.3s ease, transform 0.2s ease; }";
+  styleHTML += "button:hover { transform: scale(1.1); }";
+  styleHTML += ".red { background-color: red; }";
+  styleHTML += ".green { background-color: green; }";
+
+  onloadHTML += "refreshOutputsB_data();";
+
+  setIntervalHTML += "setInterval(refreshOutputsB_data, 250);";
+  
+  bodyDivHTML += "<div id='outputsSectionB'>";
+  bodyDivHTML += "<h2>" + String(bodyOutputTitle) + "</h2>";
+  bodyDivHTML += "<div id='outputsB'>Waiting for outputs...</div>";
+  bodyDivHTML += "</div>";
+
+  bodyDivHTML += generateOutputButtonsBHTML(); // Add buttons section
+
+  String script = "function refreshOutputsB_data() {";
+  script += "fetch('/refreshOutputsB_dataHTML') ";
+  script += ".then(response => response.text()) ";
+  script += ".then(data => { document.getElementById('outputsB').innerHTML = data; })";
+  script += ".then(() => { updateButtonColor(outputNumber); });";
+  script += "}";
+
+  script += "function toggleOutputB(outputNumber) {";
+  script += "fetch('/toggleOutputBState?output=' + outputNumber) ";
+  script += ".then(() => { updateButtonColorB(outputNumber); })";
+  script += ".catch(error => console.error('Error toggling output:', error));";
+  script += "}";
+
+  script += "function updateButtonColorB(outputNumber) {";
+  script += "const button = document.getElementById('outputButtonB' + outputNumber);";
+  script += "fetch('/getOutputBState?output=' + outputNumber)";
   script += ".then(response => response.text())";
   script += ".then(state => { button.className = (state === 'low') ? 'green' : 'red'; });";
   script += "}";
@@ -427,7 +470,7 @@ String refreshNavigationButtons_dataHTML(String form) {
   // Add HTML for navigation buttons
   String navHTML = "<div id='navMenu'>";
     
-  if (form != "HOME") {
+  if (form != "/home") {
     navHTML += globalHyperlinks.homeButtonHTML;
   } else { navHTML += globalHyperlinks.adminButtonHTML; }
 

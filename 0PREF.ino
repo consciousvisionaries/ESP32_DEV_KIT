@@ -71,8 +71,8 @@ void prefLoadGlobalSettings() {
 }
 
 void prefLoadGlobalHyperlinks() {
-  globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/'>Home on " + wifiSettings.ipaddress + "</a>";
-  globalHyperlinks.adminButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/admin'>Admin</a>";
+  globalHyperlinks.homeButtonHTML = "<a href='http://" + String(DNSLOCAL) + + "/'>Home on " + wifiSettings.ipaddress + "</a>";
+  globalHyperlinks.adminButtonHTML = "<a href='http://" + String(DNSLOCAL) + + "/admin'>Admin</a>";
 }
 
 void prefLoadAllSettings() {

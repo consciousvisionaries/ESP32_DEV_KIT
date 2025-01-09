@@ -3,6 +3,7 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <PubSubClient.h>
+#include <ESPmDNS.h>   // mDNS library
 
 #define FIRMWARE_VERSION "V1.1"
 
@@ -45,7 +46,7 @@ struct GlobalSettings {
   String nrGroup = "Stage 1";
   String inputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
   String outputNames[8] = { "Dial 1a", "Dial 1b", "Dial 2a", "Dial 2b", "Dial 3a", "Dial 3b", "not used", "not used" };
-  String colorsFLEDChannels[NUM_FLED_CHANNELS] = {"red", "green", "blue"};  
+  String colorsFLEDChannels[3] = {"red", "green", "blue"};  
  
 };
 
@@ -61,6 +62,7 @@ GlobalHyperlinks globalHyperlinks;
 
 
 void setup() {
+  
   delay(2000);
   Serial.begin(115200);
   prefLoadAllSettings();
@@ -77,7 +79,7 @@ void setup() {
     Serial.println(".firmware update call completed");
 
   connectMQTT();
-    Serial.println(".mqqt call completed");
+    Serial.println(".mqtt call completed");
       delay(1000);
 
 
@@ -166,8 +168,16 @@ void connectWiFi() {
   if (!connected) {
     Serial.println("No Wi-Fi connection established. Starting Access Point...");
     WiFi.softAP(AP_SSID, AP_PASSWORD);
-    Serial.print("Access Point IP Address: ");
+      Serial.print("Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
+  }
+
+  
+  // Set mDNS hostname
+  if (MDNS.begin(MYSTTECH_MODEL)) {
+    Serial.println("mDNS responder started: " + String(MYSTTECH_MODEL));
+  } else {
+    Serial.println("Error starting mDNS");
   }
 }
 

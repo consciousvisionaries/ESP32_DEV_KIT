@@ -23,25 +23,33 @@ String generateHTMLPage(String scriptname) {
 
   bool blackTrue = false;
   String newScriptHTML;
-  if (scriptname == "ADMIN") {
+  if (scriptname == "/admin") {
     newScriptHTML = refreshAdmin_dataHTML();
-  } else if (scriptname == "CONFIG") {  // Fixed this line
+  } else if (scriptname == "/config") {  // Fixed this line
     newScriptHTML = refreshConfig_dataHTML();
-  } else if (scriptname == "NODERED") {  // Fixed this line
+  } else if (scriptname == "/nodered") {  // Fixed this line
     newScriptHTML = refreshNodeRed_dataHTML();
-  } else if (scriptname == "WIFI") {  // Fixed this line
+  } else if (scriptname == "/wifi") {  // Fixed this line
     newScriptHTML = refreshWiFi_dataHTML();
-  } else if (scriptname == "HOME") {
+  } else if (scriptname == "/home") {
     blackTrue = true;
-    if (NUM_DIGITAL_INPUTS >= 1) {
+
+    if (NUM_ANALOG_INPUTPAIRS >= 1) {
+      newScriptHTML += refreshDialsLEDs_dataHTML(); // example. lost > 3 dials > addressable led
+    } 
+    if (NUM_DIGITAL_INPUTSA >= 1) {
         newScriptHTML += refreshInputs_dataHTML(); // Refresh inputs
         newScriptHTML += updateInputIndicatorsFunctionality();
     }
-    if (NUM_DIGITAL_OUTPUTS >= 1) {
-        newScriptHTML += refreshOutputs_dataHTML(); // Refresh outputs
+    if (NUM_DIGITAL_INPUTSB >= 1) {
+        newScriptHTML += refreshInputs_dataHTML(); // Refresh inputs
+        newScriptHTML += updateInputIndicatorsFunctionality();
     }
-    if (NUM_ANALOG_INPUTS >= 1) {
-      newScriptHTML += refreshDialsLEDs_dataHTML(); // example. lost > 3 dials > addressable led
+    if (NUM_DIGITAL_OUTPUTSA >= 1) {
+        newScriptHTML += refreshOutputsA_dataHTML(); // Refresh outputs
+    }
+    if (NUM_DIGITAL_OUTPUTSB >= 1) {
+        newScriptHTML += refreshOutputsB_dataHTML(); // Refresh outputs
     }
     if (NUM_FLED_CHANNELS >= 1) {
       newScriptHTML += refreshOutputsMatrixSection_dataHTML();
@@ -101,15 +109,15 @@ String generateInputIndicatorsHTML(int indicators) {
   return indicatorsHTML;
 }
 
-String generateOutputsPayload() {
+String generateOutputsA_Payload() {
   StaticJsonDocument<200> doc;
   doc["puzzleName"] = PUZZLE_NAME;    // Example
   doc["mac"] = WiFi.macAddress();     // MAC address of the ESP32
 
   String outputStatus = "[";
-  for (int i = 0; i < NUM_DIGITAL_OUTPUTS; i++) {
-    outputStatus += (digitalRead(outputPins[i]) == !outputPins_initState[i]) ? "'green'" : "'red'";
-    if (i < NUM_DIGITAL_OUTPUTS - 1) outputStatus += ", ";  // Formatting between items
+  for (int i = 0; i < NUM_DIGITAL_OUTPUTSA; i++) {
+    outputStatus += (digitalRead(outputPinsA[i]) != outputPins_initStateA[i]) ? "'green'" : "'red'";
+    if (i < NUM_DIGITAL_OUTPUTSA - 1) outputStatus += ", ";  // Formatting between items
   }
   outputStatus += "]";
   doc["outputs"] = outputStatus;
@@ -123,26 +131,76 @@ String generateOutputsPayload() {
   return payload;
 }
 
-String generateOutputButtonsHTML() {
-  String buttonsHTML = "<div id='buttonsSection'>";
-  buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
-  #define NUM_OUTPUT_ROWS 2
+String generateOutputsB_Payload() {
+  StaticJsonDocument<200> doc;
+  doc["puzzleName"] = PUZZLE_NAME;    // Example
+  doc["mac"] = WiFi.macAddress();     // MAC address of the ESP32
 
-  int numColumns = NUM_DIGITAL_OUTPUTS / NUM_OUTPUT_ROWS;  // Calculate number of columns based on rows
+  String outputStatus = "[";
+  for (int i = 0; i < NUM_DIGITAL_OUTPUTSB; i++) {
+    outputStatus += (digitalRead(outputPinsB[i]) != outputPins_initStateB[i]) ? "'green'" : "'red'";
+    if (i < NUM_DIGITAL_OUTPUTSB - 1) outputStatus += ", ";  // Formatting between items
+  }
+  outputStatus += "]";
+  doc["outputs"] = outputStatus;
+
+  
+
+  String payload;
+  serializeJson(doc, payload);       // Serialize JSON to string
+  Serial.println(payload);
+
+  return payload;
+}
+
+String generateOutputButtonsAHTML() {
+  String buttonsHTML = "<div id='buttonsSectionA'>";
+  buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
+
+  int numColumns = NUM_DIGITAL_OUTPUTSA / NUM_OUTPUT_ROWSA;  // Calculate number of columns based on rows
 
   // Ensure even distribution of buttons across rows
-  for (int row = 0; row < NUM_OUTPUT_ROWS; row++) {
+  for (int row = 0; row < NUM_OUTPUT_ROWSA; row++) {
     
     buttonsHTML += "<div class='buttonRow'>"; // Start a new row
 
     for (int col = 0; col < numColumns; col++) {
       int outputIndex = row * numColumns + col;  // Calculate the index of the button
-      if (outputIndex < NUM_DIGITAL_OUTPUTS) { // Ensure we do not exceed the number of outputs
+      if (outputIndex < NUM_DIGITAL_OUTPUTSA) { // Ensure we do not exceed the number of outputs
 
-        String initialColor = (digitalRead(outputPins[outputIndex]) == outputPins_initState[outputIndex]) ? "green" : "red";
+        String initialColor = (digitalRead(outputPinsA[outputIndex]) == outputPins_initStateA[outputIndex]) ? "red" : "green";
         
-    buttonsHTML += "<button id='outputButton" + String(outputIndex) + "' class='" + initialColor +
-                       "' onclick='toggleOutput(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
+    buttonsHTML += "<button id='outputButtonA" + String(outputIndex) + "' class='" + initialColor +
+                       "' onclick='toggleOutputA(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
+      }
+    }
+    
+    buttonsHTML += "</div><br>"; // End the row and add line break for clarity
+  }
+
+  buttonsHTML += "</div>";
+  return buttonsHTML;
+}
+
+String generateOutputButtonsBHTML() {
+  String buttonsHTML = "<div id='buttonsSectionB'>";
+  buttonsHTML += "<h3>" + String(buttonsHTMLTitle) + "</h3>";
+
+  int numColumns = NUM_DIGITAL_OUTPUTSB / NUM_OUTPUT_ROWSB;  // Calculate number of columns based on rows
+
+  // Ensure even distribution of buttons across rows
+  for (int row = 0; row < NUM_OUTPUT_ROWSB; row++) {
+    
+    buttonsHTML += "<div class='buttonRow'>"; // Start a new row
+
+    for (int col = 0; col < numColumns; col++) {
+      int outputIndex = row * numColumns + col;  // Calculate the index of the button
+      if (outputIndex < NUM_DIGITAL_OUTPUTSB) { // Ensure we do not exceed the number of outputs
+
+        String initialColor = (digitalRead(outputPinsB[outputIndex]) == outputPins_initStateB[outputIndex]) ? "red" : "green";
+        
+    buttonsHTML += "<button id='outputButtonB" + String(outputIndex) + "' class='" + initialColor +
+                       "' onclick='toggleOutputB(" + String(outputIndex) + ")'>" + globalSettings.outputNames[outputIndex] + "</button>";
       }
     }
     

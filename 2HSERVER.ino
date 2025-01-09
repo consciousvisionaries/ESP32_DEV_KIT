@@ -5,14 +5,14 @@ AsyncWebServer server(80);
 void setupDashboard() {
     // Main page route
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateHTMLPage("HOME");
+        String inputData = generateHTMLPage("/home");
         Serial.println(inputData);
         request->send(200, "text/html", inputData);
     });
 
     // Route to refresh input indicators
     server.on("/refreshInputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateInputIndicatorsHTML(NUM_DIGITAL_INPUTS);
+        String inputData = generateInputIndicatorsHTML(NUM_DIGITAL_INPUTSA);
         Serial.println(inputData);
         request->send(200, "text/html", inputData);
     });
@@ -24,8 +24,15 @@ void setupDashboard() {
     });
 
     // Route to refresh output data
-    server.on("/refreshOutputs_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String payload = generateOutputsPayload();
+    server.on("/refreshOutputsA_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String payload = generateOutputsA_Payload();
+        Serial.println(payload);
+        request->send(200, "application/json", payload);
+    });
+
+    // Route to refresh output data
+    server.on("/refreshOutputsB_dataHTML", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String payload = generateOutputsB_Payload();
         Serial.println(payload);
         request->send(200, "application/json", payload);
     });
@@ -42,24 +49,49 @@ void setupDashboard() {
     });
 
     // Route to toggle output state
-    server.on("/toggleOutputState", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/toggleOutputAState", HTTP_GET, [](AsyncWebServerRequest *request) {
         String outputNumberStr = request->getParam("output")->value();
         int outputNumber = outputNumberStr.toInt();
 
         Serial.print("Toggle Output: ");
         Serial.println(outputNumber);
 
-        toggleOutputStateGPIO(outputNumber);
+        toggleOutputStateGPIOA(outputNumber);
+        request->send(200, "text/plain", "Output toggled");
+    });
+
+     // Route to toggle output state
+    server.on("/toggleOutputBState", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String outputNumberStr = request->getParam("output")->value();
+        int outputNumber = outputNumberStr.toInt();
+
+        Serial.print("Toggle Output: ");
+        Serial.println(outputNumber);
+
+        toggleOutputStateGPIOB(outputNumber);
         request->send(200, "text/plain", "Output toggled");
     });
 
     // Route to get output state
-    server.on("/getOutputState", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/getOutputAState", HTTP_GET, [](AsyncWebServerRequest *request) {
         String outputNumberStr = request->getParam("output")->value();
         int outputNumber = outputNumberStr.toInt();
 
-        if (outputNumber >= 0 && outputNumber < NUM_DIGITAL_OUTPUTS) {
-            bool state = digitalRead(outputPins[outputNumber]) == HIGH;
+        if (outputNumber >= 0 && outputNumber < NUM_DIGITAL_OUTPUTSA) {
+            bool state = digitalRead(outputPinsA[outputNumber]) == HIGH;
+            request->send(200, "text/plain", state ? "high" : "low");
+        } else {
+            request->send(400, "text/plain", "Invalid output number");
+        }
+    });
+
+     // Route to get output state
+    server.on("/getOutputBState", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String outputNumberStr = request->getParam("output")->value();
+        int outputNumber = outputNumberStr.toInt();
+
+        if (outputNumber >= 0 && outputNumber < NUM_DIGITAL_OUTPUTSB) {
+            bool state = digitalRead(outputPinsB[outputNumber]) == HIGH;
             request->send(200, "text/plain", state ? "high" : "low");
         } else {
             request->send(400, "text/plain", "Invalid output number");
@@ -71,8 +103,8 @@ void setupDashboard() {
         String inputNumberStr = request->getParam("input")->value();
         int inputNumber = inputNumberStr.toInt();
 
-        if (inputNumber >= 0 && inputNumber < NUM_DIGITAL_INPUTS) {
-            int pin = inputDigitalPins[inputNumber];
+        if (inputNumber >= 0 && inputNumber < NUM_DIGITAL_INPUTSA) {
+            int pin = inputDigitalPinsB[inputNumber];
             String state = getDigitalInputStateGPIO(pin) ? "HIGH" : "LOW";
             request->send(200, "text/plain", state);
         } else {
@@ -82,7 +114,7 @@ void setupDashboard() {
 
     // Admin page route
     server.on("/admin", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String inputData = generateHTMLPage("ADMIN");
+        String inputData = generateHTMLPage("/admin");
         request->send(200, "text/html", inputData);
     });
 

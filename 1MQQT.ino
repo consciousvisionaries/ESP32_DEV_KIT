@@ -253,11 +253,11 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     if (activity == "getFirmwareUpdate") {
       sendMessageUpdateMQTTPayload("Firmware Status Request Confirmed from: " + String(PUZZLE_NAME));
     } else if (activity == (String(NR_GROUP) + " Button Pressed")) { 
-      executeFUNCBatchGPIOPin1();
+      executeFUNCBatchGPIOPin1(ADLED_PIN1);
     } else if (activity == (String(NR_GROUP) + " Button 2 Pressed")) { 
-      executeFUNCBatchGPIOPin2();
+      executeFUNCBatchGPIOPin2(-1);
     } else if (activity == (String(NR_GROUP) + " Button 3 Pressed")) {
-      executeFUNCBatchGPIOPin3();
+      executeFUNCBatchGPIOPin3(-1);
     } else {
       executeFUNCBatchMQTT(activity);
     }
