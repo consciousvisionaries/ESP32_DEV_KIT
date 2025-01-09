@@ -3,6 +3,7 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <PubSubClient.h>
+#include <ESPmDNS.h>
 
 #define FIRMWARE_VERSION "V1.1"
 
@@ -168,6 +169,13 @@ void connectWiFi() {
     WiFi.softAP(AP_SSID, AP_PASSWORD);
     Serial.print("Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
+  }
+
+  // Set mDNS hostname
+  if (MDNS.begin(MYSTTECH_MODEL)) {
+    Serial.println("mDNS responder started: " + String(MYSTTECH_MODEL));
+  } else {
+    Serial.println("Error starting mDNS");
   }
 }
 
