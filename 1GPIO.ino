@@ -3,11 +3,11 @@
 #define DEBOUNCE_DELAY 500  // Debounce delay in milliseconds
 #define FLED_PIN1 12
 
-const int outputPins[8] = {23, 22, 21, 19,18, 13, 12, 2};
-const int inputPins[8] = {4, 5, 14, 27, 26, 25, 33, 32};
-const int outputPins_initState[8] = {0};
-const int analogInputPinsA[3] = {14, 27, 26};
-const int analogInputPinsB[3] = {25, 33, 32};
+const int outputPins[2] = {18, 19};
+const int inputPins[2] = {22, 21};
+const int outputPins_initState[8] = {1, 1, 1, 1, 1, 1, 1, 1};
+const int analogInputPinsA[3] = {14, 26, 33};
+const int analogInputPinsB[3] = {27, 25, 32};
 const int fastLEDOutputPins[1] = {FLED_PIN1};
 const int RXTX_Pins[2] = {17, 16};
 
@@ -35,10 +35,14 @@ void toggleOutputStateGPIO(int outputNumber) {
   } else {
     Serial.println("Error: Invalid output number.");
   }
+
+
 }
+volatile int interruptCounter = 0;
 
 // Interrupt service routines for each analog input pair
 void IRAM_ATTR handleInterruptA() {
+  interruptCounter++;
   int stateA = digitalRead(analogInputPinsA[0]);
   int stateB = digitalRead(analogInputPinsB[0]);
 
@@ -52,6 +56,7 @@ void IRAM_ATTR handleInterruptA() {
 }
 
 void IRAM_ATTR handleInterruptB() {
+  interruptCounter++;
   int stateA = digitalRead(analogInputPinsA[1]);
   int stateB = digitalRead(analogInputPinsB[1]);
 
@@ -65,6 +70,7 @@ void IRAM_ATTR handleInterruptB() {
 }
 
 void IRAM_ATTR handleInterruptC() {
+  interruptCounter++;
   int stateA = digitalRead(analogInputPinsA[2]);
   int stateB = digitalRead(analogInputPinsB[2]);
 
@@ -112,40 +118,47 @@ void setupGPIO() {
 
   for (int i = 0; i < NUM_ANALOG_INPUTPAIRS; i++) {
     Serial.print("Initializing analog input pair ");
-    Serial.println(i);
+    Serial.print(i);
     usePin(analogInputPinsA[i]); // Check for conflicts
     usePin(analogInputPinsB[i]); // Check for conflicts
     pinMode(analogInputPinsA[i], INPUT_PULLUP);
     pinMode(analogInputPinsB[i], INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(analogInputPinsA[i]), 
-      (i == 0 ? handleInterruptA : (i == 1 ? handleInterruptB : handleInterruptC)), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(analogInputPinsA[i]),
+                    (i == 0 ? handleInterruptA : (i == 1 ? handleInterruptB : handleInterruptC)), CHANGE);
   }
   Serial.println(String(NUM_ANALOG_INPUTPAIRS) + " Analog Input Pairs Initialized.");
 }
 
 
 void loopGPIO() {
-  
-  unsigned long currentTime = millis();
 
-  for (int i = 0; i < 3; i++) {
-    portENTER_CRITICAL(&mux);
-    int count = pulseCount[i];
-    bool updated = pulseUpdated[i];
-    pulseUpdated[i] = false;
-    portEXIT_CRITICAL(&mux);
-
-    count = constrain(count, 0, 16000);
-
-    if (updated) {
-      Serial.print("Dial ");
-      Serial.print(i + 1);
-      Serial.print(" Count: ");
-      Serial.println(count);
-    }
+  static unsigned long lastPrint = 0;
+  if (lastPrint != interruptCounter) {
+    Serial.print("Interrupt A,B or C fired: ");
+    Serial.println(interruptCounter);
+    lastPrint = interruptCounter;
   }
+  
+unsigned long currentTime = millis();
 
-  esp_task_wdt_reset(); // Feed the watchdog
+for (int i = 0; i < 3; i++) {
+  portENTER_CRITICAL(&mux);
+  int count = pulseCount[i];
+  bool updated = pulseUpdated[i];
+  pulseUpdated[i] = false;
+  portEXIT_CRITICAL(&mux);
+
+  count = constrain(count, 0, PULSE_MAX_RANGE);
+
+  if (updated) {
+    Serial.print("Dial ");
+    Serial.print(i + 1);
+    Serial.print(" Count: ");
+    Serial.println(count);
+  }
+}
+
+esp_task_wdt_reset(); // Feed the watchdog
 }
 
 // Batch operation functions
@@ -167,17 +180,17 @@ void executeGPIOBatchPin2() {
 }
 
 void sendGPIO_MQTTPayload() {
-  
-  DynamicJsonDocument doc1(MQTT_MAX_PACKET_SIZE);
-    doc1["mac"] = WiFi.macAddress();
-    doc1["puzzleName"] = PUZZLE_NAME;
-    doc1["leds"] = NUM_FLED_ADDLEDS;
-    doc1["chan"] = NUM_FLED_CHANNELS;
-    doc1["inputs"] = NUM_DIGITAL_INPUTS;
-    doc1["outputs"] = NUM_DIGITAL_OUTPUTS;
-    doc1["analogspairs"] = NUM_ANALOG_INPUTPAIRS;
 
-    // Convert the doc to a JSON string and publish
+  DynamicJsonDocument doc1(MQTT_MAX_PACKET_SIZE);
+  doc1["mac"] = WiFi.macAddress();
+  doc1["puzzleName"] = PUZZLE_NAME;
+  doc1["leds"] = NUM_FLED_ADDLEDS;
+  doc1["chan"] = NUM_FLED_CHANNELS;
+  doc1["inputs"] = NUM_DIGITAL_INPUTS;
+  doc1["outputs"] = NUM_DIGITAL_OUTPUTS;
+  doc1["analogspairs"] = NUM_ANALOG_INPUTPAIRS;
+
+  // Convert the doc to a JSON string and publish
   String jsonPayload;
   serializeJson(doc1, jsonPayload);
 

@@ -19,7 +19,7 @@ struct WiFiSettings {
   String password = "";
   String storedVersion = "";
   String ipaddress = "";
-  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
+  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Entertainment" };
   String bup_password[2] = { "3X3K22832E", "Gary2019" };
 };
 
@@ -64,7 +64,7 @@ void setup() {
   setupGPIO();
   setupFASTLED();
   setupESPTask();
-
+  testFLED();
   Serial.println("READY.");
 }
 

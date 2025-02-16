@@ -14,6 +14,18 @@ void setupFASTLED() {
     }
 }
 
+void testFLED() {
+
+  for (int x = 0; x < NUM_FLED_ADDLEDS; x++) {
+    updateFLED_address(x, "red");    
+    delay(50);
+            FastLED.show();
+  }
+  delay(1000);
+  updateFLED_clearAll();
+  FastLED.show();
+}
+
 void updateFASTLED() {
   
    if (String(NR_TYPE) == "3D_ROTARY_PULSE" && NUM_FLED_OUTPUTS == 1) {
