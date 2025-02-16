@@ -13,7 +13,7 @@ unsigned long solutionCheckStart = 0;
 
 static unsigned long lastExecutionTime = 0; // Tracks the last execution time
 
-int solutionWin[] = {6, 5, 9};
+int solutionWin[] = {4, 8, 12};
 
 void checkForWin() {
   if (solutionFound) {
@@ -34,12 +34,12 @@ void checkForWin() {
 // Function to map pulse counts to the number of LEDs
 int getCount(int maxcount, int analoginputpin) {
   // Ensure pulseCount is within the valid range before using it
-  int clampedPulseCount = constrain(pulseCount[analoginputpin], 0, PULSE_MAX_RANGE);
+  int clampedPulseCount = constrain(pulseCount[analoginputpin], 0, PULSE_MAX_RANGE[analoginputpin]);
 
   pulseCount[analoginputpin] = clampedPulseCount;
 
   // Return the mapped value to the number of LEDs based on the constrained pulse count
-  return map(clampedPulseCount, 0, PULSE_MAX_RANGE, 0, maxcount);
+  return map(clampedPulseCount, 0, PULSE_MAX_RANGE[analoginputpin], 0, maxcount);
 }
 
 void funcRotaryDialPuzzle() {

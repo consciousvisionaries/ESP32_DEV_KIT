@@ -123,10 +123,16 @@ void setupGPIO() {
     usePin(analogInputPinsB[i]); // Check for conflicts
     pinMode(analogInputPinsA[i], INPUT_PULLUP);
     pinMode(analogInputPinsB[i], INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(analogInputPinsA[i]),
-                    (i == 0 ? handleInterruptA : (i == 1 ? handleInterruptB : handleInterruptC)), CHANGE);
   }
+  
+  attachInterrupt(digitalPinToInterrupt(analogInputPinsA[0]), handleInterruptA, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(analogInputPinsB[0]), handleInterruptA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(analogInputPinsA[1]), handleInterruptB, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(analogInputPinsB[1]), handleInterruptB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(analogInputPinsA[2]), handleInterruptC, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(analogInputPinsB[2]), handleInterruptC, CHANGE);
   Serial.println(String(NUM_ANALOG_INPUTPAIRS) + " Analog Input Pairs Initialized.");
+
 }
 
 
@@ -138,27 +144,27 @@ void loopGPIO() {
     Serial.println(interruptCounter);
     lastPrint = interruptCounter;
   }
-  
-unsigned long currentTime = millis();
 
-for (int i = 0; i < 3; i++) {
-  portENTER_CRITICAL(&mux);
-  int count = pulseCount[i];
-  bool updated = pulseUpdated[i];
-  pulseUpdated[i] = false;
-  portEXIT_CRITICAL(&mux);
+  unsigned long currentTime = millis();
 
-  count = constrain(count, 0, PULSE_MAX_RANGE);
+  for (int i = 0; i < 3; i++) {
+    portENTER_CRITICAL(&mux);
+    int count = pulseCount[i];
+    bool updated = pulseUpdated[i];
+    pulseUpdated[i] = false;
+    portEXIT_CRITICAL(&mux);
 
-  if (updated) {
-    Serial.print("Dial ");
-    Serial.print(i + 1);
-    Serial.print(" Count: ");
-    Serial.println(count);
+    count = constrain(count, 0, PULSE_MAX_RANGE[i]);
+
+    if (updated) {
+      Serial.print("Dial ");
+      Serial.print(i + 1);
+      Serial.print(" Count: ");
+      Serial.println(count);
+    }
   }
-}
 
-esp_task_wdt_reset(); // Feed the watchdog
+  esp_task_wdt_reset(); // Feed the watchdog
 }
 
 // Batch operation functions

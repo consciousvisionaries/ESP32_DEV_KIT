@@ -16,7 +16,7 @@
 
 // GPIO8 8 Input,8 Output 
 #define NR_TYPE "3D_ROTARY_PULSE"
-#define PULSE_MAX_RANGE 16000 // NR_TYPE "3D_ROTARY_PULSE"
+const int PULSE_MAX_RANGE[] = { 16000, 16000, 160 };
 
 String bodyInputTitle = "3 DIAL VALVEs";
 String bodyOutputTitle = "OVERRIDE";
