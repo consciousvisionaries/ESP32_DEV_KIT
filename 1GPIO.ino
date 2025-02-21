@@ -107,12 +107,12 @@ void setupGPIO() {
     pinMode(outputPins[i], OUTPUT);
     digitalWrite(outputPins[i], outputPins_initState[i] ? HIGH : LOW);
   }
-  Serial.println(String(NUM_DIGITAL_INPUTS) + " Outputs Initialized.");
+  Serial.println(String(NUM_DIGITAL_OUTPUTS) + " Outputs Initialized.");
 
   // Initialize input pins
-  for (int i = 0; i < NUM_DIGITAL_OUTPUTS; i++) {
+  for (int i = 0; i < NUM_DIGITAL_INPUTS; i++) {
     usePin(inputPins[i]); // Check for conflicts
-    pinMode(inputPins[i], INPUT_PULLUP);
+    pinMode(inputPins[i], INPUT);
   }
   Serial.println(String(NUM_DIGITAL_INPUTS) + " Inputs Initialized.");
 
