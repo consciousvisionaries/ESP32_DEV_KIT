@@ -4,7 +4,7 @@
 
 // puzzle details
 #define PUZZLE_NAME "President's Big Mistake"
-#define DESIGNER_NAME "Beyond Belief Entertainment"
+#define DESIGNER_NAME "Beyond Entertainment"
 #define TECH_NAME "MYSTTECH Creations"
 #define MYSTTECH_MODEL "MYST8 GPIO MASTER"
 #define NR_TYPE "8_OUTPUT" 
@@ -32,7 +32,7 @@ String buttonsHTMLTitle = "Game Master INPUT Control";
 
 // github
 const char* GITHUB_USER = "consciousvisionaries";
-const char* GITHUB_REPO = "ESP32_DEV_KIT";
+const char* GITHUB_REPO = "ESP32_DEV_KIT_test";
 const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32da.bin"; // esp32 wroom
 const char* GITHUB_BRANCH = "MYST8_GPIO_Master";
 
