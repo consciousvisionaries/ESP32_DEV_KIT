@@ -12,7 +12,7 @@
 
 // digitalGPIO
 
-#define NUM_INPUTS 0
+#define NUM_INPUTS 8
 
 String bodyInputTitle = "Monitoring: FLEXXMAX2 Master";
 String bodyOutputTitle = "OVERRIDE";
@@ -23,7 +23,7 @@ String buttonsHTMLTitle = "Game Master INPUT Control";
 #define NUM_OUTPUT_ROWS 2
 
 // fastled
-#define NUM_LEDS 0 
+#define NUM_LEDS 0
 #define NUM_CHANNELS 0
 
 // access point
@@ -43,28 +43,28 @@ String MQTT_CLIENT_ID = "MystTech01"; // Replace with a unique client ID
 // If you plan to use TLS (secure connection)
 
 // pins fastled
-#define LED_PIN 34  // Pin for LEDs
+#define LED_PIN 12  // Pin for LEDs
 
 // pins uart 2 MP3
 #define PIN_MP3_RX 17 
 #define PIN_MP3_TX 16 
 
 // pins outputs
-#define PIN_O1 13
-#define PIN_O2 14
-#define PIN_O3 27
-#define PIN_O4 26
-#define PIN_O5 25
-#define PIN_O6 33
-#define PIN_O7 2
-#define PIN_O8 32
+#define PIN_O1 23
+#define PIN_O2 22
+#define PIN_O3 21
+#define PIN_O4 5
+#define PIN_O5 17
+#define PIN_O6 16
+#define PIN_O7 4
+#define PIN_O8 15
 
 // pins inputs
-#define PIN_B1 4
-#define PIN_B2 5
-#define PIN_B3 18
-#define PIN_B4 19
-#define PIN_B5 21
-#define PIN_B6 22
-#define PIN_B7 12
-#define PIN_B8 23
+#define PIN_B1 32
+#define PIN_B2 33
+#define PIN_B3 25
+#define PIN_B4 26
+#define PIN_B5 27
+#define PIN_B6 14
+#define PIN_B7 18
+#define PIN_B8 19
