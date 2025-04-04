@@ -88,9 +88,10 @@ void setupFirmware() {
   delay(3000);
   checkForUpdates();
 }
+  bool connected = false;
 
 void connectWiFi() {
-  bool connected = false;
+   connected = false;
 
   for (int i = -1; i < 3; i++) {
     Serial.println("Attempting WIFI Loop #: " + String(i));

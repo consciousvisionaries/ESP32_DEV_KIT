@@ -28,11 +28,11 @@ String buttonsHTMLTitle = "Game Master INPUT Control";
 
 // access point
 #define AP_SSID "MystTech 8GPIO"
-#define AP_PASSWORD "MystTech" // 'localhost:1880/admin'
+#define AP_PASSWORD "Mysttech" // 'localhost:1880/admin'
 
 // github
 const char* GITHUB_USER = "consciousvisionaries";
-const char* GITHUB_REPO = "ESP32_DEV_KIT_test";
+const char* GITHUB_REPO = "ESP32_DEV_KIT";
 const char* GITHUB_BIN = "ESP32_DEV_KIT.ino.esp32da.bin"; // esp32 wroom
 const char* GITHUB_BRANCH = "MYST8_GPIO_Master";
 
@@ -54,8 +54,8 @@ String MQTT_CLIENT_ID = "MystTech01"; // Replace with a unique client ID
 #define PIN_O2 22
 #define PIN_O3 21
 #define PIN_O4 5
-#define PIN_O5 17
-#define PIN_O6 16
+#define PIN_O5 19
+#define PIN_O6 18
 #define PIN_O7 4
 #define PIN_O8 15
 
@@ -66,5 +66,5 @@ String MQTT_CLIENT_ID = "MystTech01"; // Replace with a unique client ID
 #define PIN_B4 26
 #define PIN_B5 27
 #define PIN_B6 14
-#define PIN_B7 18
-#define PIN_B8 19
+#define PIN_B7 34
+#define PIN_B8 35
