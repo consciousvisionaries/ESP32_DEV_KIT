@@ -18,8 +18,8 @@ struct WiFiSettings {
   String password = "";
   String storedVersion = "";
   String ipaddress = "";
-  String bup_ssid[2] = { "TELUSDE0875_2.4G", "Beyond Entertainment" };
-  String bup_password[2] = { "3X3K22832E", "Gary2019" };
+  String bup_ssid[1] = { "Beyond Belief - Private" };
+  String bup_password[1] = { "Gary2019" };
 };
 
 WiFiSettings wifiSettings;
