@@ -41,8 +41,8 @@ String outputNames[NUM_OUTPUTS] = {
 #define NUM_CHANNELS 0
 
 // wifi
-String bup_ssid[] = { "TELUSDE0875_2.4G", "Beyond Belief Entertainment" };
-String bup_password[] = { "3X3K22832E", "Gary2019" };
+String bup_ssid[] = { "Beyond Belief - Private" };
+String bup_password[] = { "Gary2019" };
 
 // access point
 #define AP_SSID "MystTech 8IO"
