@@ -73,8 +73,16 @@ void prefLoadGlobalSettings() {
 }
 
 void prefLoadGlobalHyperlinks() {
-  globalHyperlinks.homeButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/'>Home on " + wifiSettings.ipaddress + "</a>";
-  globalHyperlinks.adminButtonHTML = "<a href='http://" + wifiSettings.ipaddress + "/admin'>Admin</a>";
+  String baseUrl = wifiSettings.localUrl;
+  String homeLabel = wifiSettings.localHostname + ".local";
+
+  if (baseUrl == "") {
+    baseUrl = "http://" + wifiSettings.ipaddress;
+    homeLabel = wifiSettings.ipaddress;
+  }
+
+  globalHyperlinks.homeButtonHTML = "<a href='" + baseUrl + "/'>Home on " + homeLabel + "</a>";
+  globalHyperlinks.adminButtonHTML = "<a href='" + baseUrl + "/admin'>Admin</a>";
 }
 
 void prefLoadAllSettings() {

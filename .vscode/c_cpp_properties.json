@@ -1,0 +1,31 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "ESP32 Arduino",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/Users/paulhopkins/Documents/Arduino/libraries/**",
+        "/Users/paulhopkins/Library/Arduino15/packages/esp32/**"
+      ],
+      "defines": [
+        "ESP32",
+        "ARDUINO=10819",
+        "ARDUINO_ARCH_ESP32",
+        "CORE_DEBUG_LEVEL=0"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "macos-clang-arm64",
+      "browse": {
+        "path": [
+          "${workspaceFolder}",
+          "/Users/paulhopkins/Documents/Arduino/libraries",
+          "/Users/paulhopkins/Library/Arduino15/packages/esp32"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ]
+}

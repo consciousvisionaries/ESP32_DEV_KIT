@@ -3,9 +3,11 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <PubSubClient.h>
+#include <ESPmDNS.h>
 #include <esp_task_wdt.h>
 
 #define FIRMWARE_VERSION "V1.1"
+#define LOCAL_HOSTNAME "mysttech-codered-gpio8"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -14,10 +16,12 @@ String jsonPublished;
 bool allServicesActive = false;
 
 struct WiFiSettings {
-  String ssid = "";
-  String password = "";
+  String ssid = "Beyond Belief - Private";
+  String password = "Gary2019";
   String storedVersion = "";
   String ipaddress = "";
+  String localHostname = LOCAL_HOSTNAME;
+  String localUrl = "";
   String bup_ssid[1] = { "Beyond Belief - Private" };
   String bup_password[1] = { "Gary2019" };
 };
@@ -82,6 +86,7 @@ void setupFirmware() {
   Serial.begin(115200);
   loadWiFiCredentials();
   connectWiFi();
+  setupMDNS();
   prefLoadAllSettings();
   connectMQTT();
   sendConfigMQTTPayload();
@@ -89,6 +94,26 @@ void setupFirmware() {
   checkForUpdates();
 }
   bool connected = false;
+
+void setupMDNS() {
+  wifiSettings.localUrl = "";
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("mDNS skipped: WiFi station is not connected.");
+    return;
+  }
+
+  if (!MDNS.begin(wifiSettings.localHostname.c_str())) {
+    Serial.println("Error starting mDNS responder.");
+    return;
+  }
+
+  MDNS.addService("http", "tcp", 80);
+  wifiSettings.localUrl = "http://" + wifiSettings.localHostname + ".local";
+
+  Serial.println("mDNS responder started.");
+  Serial.println("Local URL: " + wifiSettings.localUrl);
+}
 
 void connectWiFi() {
    connected = false;
@@ -130,6 +155,7 @@ void connectWiFi() {
   if (!connected) {
     Serial.println("No Wi-Fi connection established. Starting Access Point...");
     WiFi.softAP(AP_SSID, AP_PASSWORD);
+    wifiSettings.ipaddress = WiFi.softAPIP().toString();
     Serial.print("Access Point IP Address: ");
     Serial.println(WiFi.softAPIP());
   }

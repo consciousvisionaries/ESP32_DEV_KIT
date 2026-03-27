@@ -220,6 +220,7 @@ String refreshAdmin_dataHTML() {
     bodyDivHTML += "<p><strong>Model:</strong> " + String(MYSTTECH_MODEL) + "</p>";
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
     bodyDivHTML += "<p><strong>IP Address:</strong> " + wifiSettings.ipaddress + "</p>";
+    bodyDivHTML += "<p><strong>Local URL:</strong> " + (wifiSettings.localUrl == "" ? String("Unavailable") : wifiSettings.localUrl) + "</p>";
     bodyDivHTML += "<p><strong>Version:</strong> " + wifiSettings.storedVersion + "</p>";
     bodyDivHTML += "<button type='submit' name='action' value='CONFIG'>Edit GPIO Config</button>";
     bodyDivHTML += "<h3>Node-Red Configurations</h3>";
